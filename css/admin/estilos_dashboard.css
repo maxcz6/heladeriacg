@@ -1,0 +1,380 @@
+/* Estilos para el dashboard principal */
+
+/* Variables CSS */
+:root {
+    --primary: #0891b2;
+    --primary-dark: #06788f;
+    --secondary: #10b981;
+    --dark: #1e293b;
+    --darker: #0f172a;
+    --light: #f8fafc;
+    --gray: #64748b;
+    --light-gray: #e2e8f0;
+    --border-radius: 15px;
+    --box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #e0f2fe, #e0f7fa, #f0fdf4);
+    color: var(--dark);
+    min-height: 100vh;
+}
+
+.admin-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Header del administrador */
+.admin-header {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0891b2;
+}
+
+.logo i {
+    margin-right: 10px;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 1.5rem;
+}
+
+nav a {
+    text-decoration: none;
+    color: #1e293b;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+nav a:hover {
+    background: rgba(6, 182, 202, 0.1);
+    color: #0891b2;
+}
+
+.logout-btn {
+    background: linear-gradient(135deg, #ef4444, #f97316);
+    color: white;
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.logout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+/* Main content */
+.admin-main {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.welcome-section h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.welcome-section p {
+    font-size: 1.2rem;
+    color: #475569;
+}
+
+/* Estadísticas generales */
+.stats-section h2 {
+    font-size: 1.8rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 15px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.stat-icon.products { background: linear-gradient(135deg, #06b6d4, #38bdf8); }
+.stat-icon.customers { background: linear-gradient(135deg, #10b981, #34d399); }
+.stat-icon.employees { background: linear-gradient(135deg, #f59e0b, #fcd34d); }
+.stat-icon.sales { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+
+.stat-content h3 {
+    font-size: 2rem;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+}
+
+.stat-content p {
+    font-size: 1rem;
+    color: #475569;
+    margin: 0;
+}
+
+/* Sección del dashboard */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+}
+
+.dashboard-card h3 {
+    color: #1e293b;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Productos más vendidos */
+.product-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.product-item:last-child {
+    border-bottom: none;
+}
+
+.product-name {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.product-qty {
+    color: #059669;
+    font-weight: 500;
+}
+
+/* Lista de ventas recientes */
+.sale-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.sale-item:last-child {
+    border-bottom: none;
+}
+
+.sale-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.sale-id {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.sale-client {
+    font-size: 0.9rem;
+    color: #475569;
+}
+
+.sale-details {
+    text-align: right;
+}
+
+.sale-date {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 0.2rem;
+    display: block;
+}
+
+.sale-amount {
+    font-weight: 600;
+    color: #059669;
+}
+
+/* Productos con bajo stock */
+.stock-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.stock-item:last-child {
+    border-bottom: none;
+}
+
+.product-name {
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.stock-qty {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.no-data {
+    text-align: center;
+    color: #64748b;
+    font-style: italic;
+    padding: 2rem;
+}
+
+/* Actividad reciente */
+.activity-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-add { color: #10b981; }
+.activity-sale { color: #0891b2; }
+.activity-customer { color: #f59e0b; }
+.activity-report { color: #8b5cf6; }
+
+.activity-info p {
+    margin: 0 0 0.2rem 0;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.activity-info span {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .welcome-section h1 {
+        font-size: 2rem;
+    }
+    
+    .welcome-section p {
+        font-size: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .stat-icon {
+        margin: 0 auto 1rem auto;
+    }
+}

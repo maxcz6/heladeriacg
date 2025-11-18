@@ -1,0 +1,1888 @@
+PRÁCTICA CALIFICADA N° 08 Product Backlog pt1 y pt2 sem9 :https://1drv.ms/w/c/edb63f0c2d27e617/EU0ztksq-QFAvhTxVulN0AsBTzQRWc_12eY_xSUDg2TRUQ?e=0H9HpWss 
+
+DAS : https://1drv.ms/w/c/edb63f0c2d27e617/IQDbV4L4zFd2RI-E78jwnwd5AeDk3BGlQdu0RWFyPct0eM4?e=MMUoPe 
+
+TRABAJO GRUPAL PT2 :practica SEM7 act - Copia.docx 
+
+Backlog en ppt :Product-Backlog-Concelato-Gelateria.pptx 
+
+DISEÑO EN FIGMA: https://www.figma.com/make/fi3dzTuRaLwxkiK8ilDREV/Concelato-Gelater%C3%ADa-Interface-Design?fullscreen=1 
+
+EJEMPLO DE DRS   : PRACTICA 5 DRS EFSRT correccion 2 (1).docx 
+
+ NEGOCIO AL CUAL REFERIMOS : Documento 13.docx 
+
+  CHAT GPT DE DONDE SE SACO INFORMACION DEL NEGOCIO : https://chatgpt.com/share/68dbe0c9-ef3c-8003-896b-9952827f8ec1 
+
+Diagrama de secuencia : https://drive.google.com/file/d/1VwNPGuJl9_ZP1sC5ZOq4UFazPHajXcAi/view?usp=sharing 
+
+Draw io:  
+
+Casos de uso:https://drive.google.com/file/d/1x743cHcV5gOEPy7K9fpMYBD7GafP9edw/view?usp=sharing 
+
+Diagrama de clases : https://drive.google.com/file/d/1KRRkuPE9xtk52UtnbZU_K65WimMtebwf/view?usp=sharing 
+
+ 
+
+ 
+
+ 
+
+Proyecto de Software Gestión de ventas de una Heladería 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Documento de Requisitos 
+
+el Sistema 
+
+ 
+
+ 
+
+Versión 1.0 
+
+ 
+
+Fecha: 29/09/2025 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Realizado por MXTEC 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Realizado para Concelato Gelateria 
+
+ 
+
+ 
+
+Huancayo 
+ 
+
+ 
+
+ 
+
+Lista de Cambios 
+
+ 
+
+Nro. 
+
+Fecha 
+
+Descripción 
+
+Autores 
+
+ 
+
+ 
+
+0 
+
+ 
+
+ 
+
+29/09/2025 
+
+ 
+
+ 
+
+Versión 1.0 
+
+ 
+
+Yordy Michael Serpa Quispe 
+
+ 
+
+ 
+
+ 
+
+1 
+
+29/09/2025 
+
+ 
+
+ 
+
+Lucinda Castillon DeLaCruz  
+
+ 
+
+ 
+
+2 
+
+29/09/2025 
+
+ 
+
+Actualización final DRS Heladería 
+
+Paucar Ramos Max 
+
+ 
+
+ 
+
+3 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+4 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+5 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+6 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+7 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+8 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+9 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Índice 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Lista de Participantes del Proyecto 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Analista 
+
+ 
+
+ 
+
+Paucar Ramos Max  
+
+ 
+
+ 
+
+ 
+
+ 
+
+Usuarios 
+
+Personal administrativo , general  y publico  de Concelato Gelateria  
+
+ 
+
+ 
+
+ 
+
+ 
+
+Cliente 
+
+Concelato Gelateria 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Descripción del Sistema Actual 
+
+Concelato Gelateria depende hoy de la atención presencial y de la promoción en redes sociales. Carece de un sistema unificado de gestión (ventas, inventario, clientes, sucursales). Esto genera limitaciones como: 
+
+Dificultad para controlar inventarios en tiempo real. 
+
+Falta de reportes unificados de ventas por local. 
+
+Nula base de datos de clientes (no hay fidelización). 
+
+Pérdida de oportunidades de venta  
+
+ 
+
+Objetivos del sistema 
+
+ 
+
+Desarrollar un sistema web en local para la heladería que permita administrar los datos de clientes, productos, ventas, promociones y sucursales, optimizando la gestión operativa y mejorando la experiencia del cliente. 
+
+ 
+
+OBJ-01 
+
+Gestión de clientes 
+
+Descripción 
+
+El sistema permitirá registrar y administrar la información de los clientes: datos personales, historial de compras, preferencias de sabores y métodos de pago, para personalizar promociones y mejorar la atención. 
+ 
+
+Estabilidad 
+
+Alta 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+ 
+
+OBJ-02 
+
+Gestión de productos 
+
+Descripción 
+
+El sistema permitirá registrar y gestionar los productos de la heladería: sabores de helado, paletas, postres y complementos, incluyendo precio, ingredientes, stock, descripción e imágenes 
+
+Estabilidad 
+
+Alta 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+ 
+
+OBJ-03 
+
+Gestión de ventas 
+
+Descripción 
+
+El sistema permitirá registrar las ventas realizadas tanto en tienda como en pedidos online, detallando productos, cantidades, precios, promociones aplicadas y método de pago. 
+
+Estabilidad 
+
+Alta 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+OBJ-04 
+
+Gestión de promociones y cupones 
+ 
+
+Descripción 
+
+El sistema permitirá crear, actualizar y eliminar promociones , así como generar cupones de descuento que puedan ser utilizados por los clientes. 
+
+Estabilidad 
+
+Alta 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+OBJ-05 
+
+Gestión de sucursales 
+
+Descripción 
+
+El sistema permitirá registrar y administrar las sucursales de la heladería: dirección, horarios, personal asignado, stock de productos y capacidad de atención. 
+
+Estabilidad 
+
+Alta 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+OBJ-06 
+
+Reportes y estadísticas 
+
+Descripción 
+
+El sistema generará reportes de ventas, productos más vendidos, promociones más efectivas y flujo de clientes por sucursal, permitiendo a la gerencia tomar decisiones estratégicas. 
+
+Estabilidad 
+
+Alta 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+OBJ-07 
+
+Integración con pedidos 
+
+Descripción 
+
+El sistema permitirá a los clientes realizar pedidos desde local, seleccionando productos, aplicando promociones y eligiendo su pedido. 
+
+Estabilidad 
+
+Alta 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+Catálogo del sistema 
+
+ 
+
+3.1.  Requisitos de información 
+
+ 
+
+Especificación de los Requisitos de Información 
+
+ 
+
+IRQ-01 
+
+Información sobre los clientes 
+
+Objetivos asociados 
+
+OBJ–01 Gestión de clientes 
+
+Requisitos asociados 
+
+UC–01 Registrar cliente 
+
+Descripción 
+
+El sistema deberá almacenar y administrar información de los clientes para fidelización y personalización. 
+
+Datos específicos 
+
+DNI / ID cliente 
+
+Apellidos y Nombres 
+
+Teléfono 
+
+Email 
+
+Preferencias de sabores 
+
+Historial de compras 
+
+Métodos de pago frecuentes 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+IRQ-02 
+
+Información sobre los productos 
+
+Objetivos asociados 
+
+OBJ-02 Gestión de productos 
+
+Requisitos asociados 
+
+UC–02 Registrar producto 
+
+Descripción 
+
+El sistema deberá registrar y gestionar todos los productos de la heladería. 
+
+Datos específicos 
+
+ID producto 
+
+Nombre 
+
+Tipo (helado, paleta, postre, complemento) 
+
+Ingredientes 
+
+Precio 
+
+Stock 
+
+Imagen 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+IRQ-03 
+
+Información sobre las ventas 
+
+Objetivos asociados 
+
+OBJ-03 Gestión de ventas 
+
+Requisitos asociados 
+
+UC–03 Registrar venta 
+
+ 
+
+Descripción 
+
+El sistema deberá almacenar la información de cada transacción realizada en tienda o en pedidos online. 
+
+Datos específicos 
+
+ID venta 
+
+Cliente asociado 
+
+Productos vendidos (detalle con cantidad y precio) 
+
+Promociones aplicadas 
+
+Método de pago 
+
+Fecha y hora 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+ 
+
+IRQ-04 
+
+información sobre promociones y cupones 
+
+Objetivos asociados 
+
+Permite generar y administrar cupones y promociones 
+
+Requisitos asociados 
+
+UC–04 Gestion de promociones y cupones 
+
+Descripción 
+
+El sistema deberá almacenar la información correspondiente 
+
+Datos específicos 
+
+A qué módulo pertenece  
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+IRQ-05 
+
+Información sobre sucursales 
+
+ 
+
+Objetivos asociados 
+
+OBJ-05 Gestión de sucursales 
+
+ 
+
+Requisitos asociados 
+
+UC–5 Registrar sucursal 
+
+ 
+
+Descripción 
+
+El sistema deberá almacenar información de cada sucursal de la heladería. 
+
+Datos específicos 
+
+ID sucursal 
+
+Dirección 
+
+Teléfono 
+
+Horario de atención 
+
+Personal asignado 
+
+Stock disponible 
+
+Capacidad de atención 
+
+ 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+IRQ-06 
+
+Información para reportes y estadísticas 
+
+ 
+
+ 
+
+Objetivos asociados 
+
+OBJ-06 Reportes y estadísticas 
+
+Requisitos asociados 
+
+UC–06: Generar reportes y estadísticas 
+
+ 
+
+ 
+
+Descripción 
+
+El sistema generará reportes consolidados para la toma de decisiones estratégicas. 
+
+Datos específicos 
+
+Ventas por sucursal 
+
+Ventas por producto 
+
+Promociones más utilizadas 
+
+Flujo de clientes 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+IRQ-07 
+
+Información sobre pedidos  
+
+Objetivos asociados 
+
+OBJ-07 Integración con pedidos  
+
+Requisitos asociados 
+
+UC–07: Registrar pedido  
+
+Descripción 
+
+El sistema permitirá a los clientes realizar pedidos en línea. 
+
+ 
+
+Datos específicos 
+
+ID pedido 
+
+Cliente 
+
+Productos seleccionados 
+
+Promociones aplicadas 
+
+Método de entrega (recojo / delivery) 
+
+Dirección de envío (si aplica) 
+
+Estado del pedido 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+3.2.  Requisitos funcionales 
+
+3.2.1.	Diagramas de casos de uso 
+
+ 
+
+ 
+
+ 
+
+ 
+
+3.2.2. Definición de Actores 
+
+ 
+
+Módulo de Actores del Sistema 
+
+ 
+
+Especificación de Actores del Sistema 
+
+ 
+
+ACT-01 
+
+cliente 
+
+Descripción 
+
+Este actor representa a los clientes que compran en los locales 
+
+Comentarios 
+
+Ninguno 
+
+  
+
+ACT-02 
+
+administrador 
+
+Descripción 
+
+Este actor representa al administrador responsable  
+
+Comentarios 
+
+Ninguno 
+
+  
+
+ACT-03 
+
+empleado 
+
+Descripción 
+
+Este actor representa a los empleados del local que utuilizan el sitema 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+ 
+
+3.2.3. Casos de uso del Sistema 
+
+Especificación UC–01: Registrarse / Iniciar Sesión 
+
+UC–01 
+
+Registrarse / Iniciar Sesión 
+
+Objetivos 
+
+asociados 
+
+OBJ–01 Gestión de clientes 
+
+Requisitos 
+
+asociados 
+
+IRQ–07 Información de usuarios 
+
+Descripción 
+
+El sistema deberá permitir que clientes, empleados o administradores puedan registrarse e iniciar sesión para acceder a las funcionalidades según su rol. 
+
+Precondición 
+
+- El usuario debe estar registrado para poder iniciar sesión. O ya debe estar iniciada la secion 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+El usuario o empleado da clic en la opción “Iniciar sesión”. 
+
+2 
+
+Ingresa su nombre de usuario y contraseña. O crea  
+
+ 
+
+3 
+
+El sistema valida las credenciales. o las guarda 
+
+4 
+
+Si son correctas o se guardan, redirige al menú correspondiente según su rol. 
+
+5 
+
+ 
+
+Postcondición 
+
+El usuario accede al sistema con los permisos de su rol. 
+
+Excepciones 
+
+Paso  
+
+Acción: Si el usuario o contraseña son incorrectos, el sistema mostrará un mensaje de error y pedirá reintentar. 
+
+2 
+
+Si el usuario o contraseña son incorrectos, el sistema mostrará un mensaje de error y pedirá reintentar. 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+           Especificación UC–02: Ver Menú de Productos 
+
+ 
+
+UC–02 
+
+Ver Menú de Productos 
+
+Objetivos 
+
+asociados 
+
+OBJ–02 Gestión de productos 
+
+ 
+
+Requisitos 
+
+asociados 
+
+IRQ–02 Información sobre los productos 
+
+Descripción 
+
+El sistema deberá mostrar un catálogo de productos (helados, paletas, postres y complementos) con sus precios e imágenes. 
+
+Precondición 
+
+El cliente debe haber iniciado sesión. 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+El cliente selecciona la opción “Ver menú”. 
+
+2 
+
+ 
+
+El sistema muestra la lista de productos disponibles. 
+
+ 
+
+3 
+
+El cliente puede visualizar detalles e ingredientes. 
+
+Postcondición 
+
+El sistema registra la visualización para estadísticas de interés del cliente. 
+
+Excepciones 
+
+Paso 
+
+Acción 
+
+ 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+ 
+
+Especificación UC–03: Realizar Pedido 
+
+ 
+
+UC–03 
+
+Registrar Supervisión de EFSRT 
+
+Objetivos 
+
+asociados 
+
+OBJ–03 Gestión de ventas y pedidos 
+
+Requisitos 
+
+asociados 
+
+IRQ–03 Información sobre las ventas 
+
+Descripción 
+
+El sistema permitirá a los clientes seleccionar productos del menú, aplicar promociones y generar pedidos para delivery o recojo en tienda 
+
+Precondición 
+
+El cliente debe haber iniciado sesión. 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+ 
+
+El cliente selecciona productos del menú. 
+
+ 
+
+2 
+
+Ingresa cantidad y aplica cupón si corresponde. 
+
+3 
+
+Se le informa el tiempo de pedido 
+
+ 
+
+4 
+
+Selecciona método de pago. 
+
+5 
+
+Selecciona método de pago. 
+
+Postcondición 
+
+El sistema registra el pedido y muestra un código de seguimiento. 
+
+Excepciones 
+
+Paso 
+
+Acción 
+
+2 
+
+ 
+
+Si el cupón es inválido o vencido, el sistema mostrará un mensaje de error. 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+ 
+
+Especificación UC–04: Actualizar Estado del Pedido 
+
+ 
+
+UC–04 
+
+Actualizar Estado del Pedido 
+
+ 
+
+Objetivos 
+
+asociados 
+
+OBJ–03 Gestión de ventas y pedidos 
+
+Requisitos 
+
+asociados 
+
+IRQ–03 Información sobre las ventas 
+
+Descripción 
+
+El sistema permitirá al empleado actualizar el estado de los pedidos (pendiente, en preparación, entregado). 
+
+Precondición 
+
+El empleado debe haber iniciado sesión. 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+ 
+
+El empleado accede al módulo “Pedidos recibidos”. 
+
+ 
+
+2 
+
+ 
+
+Selecciona el pedido correspondiente. 
+
+ 
+
+ 
+
+3 
+
+Actualiza el estado según el progreso. 
+
+4 
+
+ 
+
+El sistema notifica al cliente automáticamente. 
+
+ 
+
+Postcondición 
+
+El pedido cambia de estado y se actualiza en la base de datos. 
+
+Excepciones 
+
+Paso 
+
+Acción 
+
+2 
+
+Si el pedido no existe o ya fue cerrado, el sistema muestra un mensaje de advertencia. 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+ 
+
+          Especificación UC–05: Ver Pedidos Recibidos 
+
+ 
+
+UC–05 
+
+Ver Pedidos Recibidos 
+
+Objetivos 
+
+asociados 
+
+OBJ–03 Gestión de ventas y pedidos 
+
+Requisitos 
+
+asociados 
+
+IRQ–03 Información sobre ventas 
+
+Descripción 
+
+El sistema mostrará al empleado o administrador todos los pedidos ingresados, con datos de cliente, fecha, monto y estado. 
+
+Precondición 
+
+Debe haber pedidos registrados. 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+ 
+
+El empleado o administrador ingresa al módulo “Pedidos recibidos”. 
+
+ 
+
+2 
+
+ 
+
+El sistema lista los pedidos ordenados por fecha. 
+
+ 
+
+3 
+
+El usuario puede filtrar o buscar por cliente o estado. 
+
+Postcondición 
+
+Se visualiza correctamente la lista de pedidos actualizada. 
+
+Excepciones 
+
+Paso 
+
+Acción 
+
+ 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Especificación UC–06: Aplicar Cupón 
+
+ 
+
+UC–06 
+
+Aplicar Cupón 
+
+Objetivos 
+
+asociados 
+
+OBJ–04 Gestión de promociones y cupones 
+
+Requisitos 
+
+asociados 
+
+IRQ–04 Información sobre promociones 
+
+Descripción 
+
+El sistema permitirá que el cliente ingrese un código de cupón válido para obtener descuentos o promociones especiales. 
+
+Precondición 
+
+Debe existir una promoción o cupón vigente. 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+ 
+
+El cliente ingresa el código del cupón. 
+
+ 
+
+2 
+
+ 
+
+El sistema verifica su validez y vigencia. 
+
+ 
+
+3 
+
+Si es correcto, aplica el descuento al total del pedido. 
+
+Postcondición 
+
+El total del pedido se actualiza con el descuento aplicado. 
+
+Excepciones 
+
+Paso 
+
+Acción 
+
+2 
+
+Si el cupón no es válido o expiró, el sistema mostrará un mensaje de error. 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+Especificación UC–07: Controlar Stock Disponible 
+
+UC–07 
+
+Controlar Stock Disponible 
+
+Objetivos 
+
+asociados 
+
+OBJ–02 Gestión de productos 
+
+Requisitos 
+
+asociados 
+
+IRQ–02 Información sobre productos 
+
+Descripción 
+
+El sistema permitirá a los empleados o al administrador visualizar y modificar el stock de productos según las ventas o reposiciones. 
+
+Precondición 
+
+El usuario debe haber iniciado sesión con rol autorizado. 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+El usuario accede al módulo “Inventario”. 
+
+2 
+
+Visualiza la lista de productos y su stock actual. 
+
+3 
+
+Actualiza las cantidades según movimientos. 
+
+4 
+
+ 
+
+Guarda los cambios. 
+
+ 
+
+Postcondición 
+
+El stock queda actualizado en la base de datos. 
+
+Excepciones 
+
+Paso 
+
+Acción 
+
+ 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+Especificación UC–08: Actualizar Productos 
+
+UC–08 
+
+Especificación UC–08: Actualizar Productos 
+
+Objetivos 
+
+asociados 
+
+OBJ–02 Gestión de productos 
+
+Requisitos 
+
+asociados 
+
+IRQ–02 Información sobre productos 
+
+Descripción 
+
+El sistema permitirá al administrador agregar, modificar o eliminar productos del catálogo. 
+
+Precondición 
+
+El administrador o empleado debe haber iniciado sesión. 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+El administrador ingresa al módulo “Productos”. 
+
+2 
+
+Selecciona “Agregar” o “Editar producto”. 
+
+3 
+
+Ingresa o actualiza la información del producto (nombre, tipo, precio, stock, imagen). 
+
+4 
+
+Da clic en “Guardar”. 
+
+Postcondición 
+
+El producto se guarda o actualiza en la base de datos. 
+
+Excepciones 
+
+Paso 
+
+Acción 
+
+2 
+
+ 
+
+Si los campos están incompletos, el sistema mostrará un mensaje de validación. 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+Especificación UC–09: Ver / Actualizar Ubicaciones de Tiendas 
+
+UC–09 
+
+Actualizar Ubicaciones de Tiendas 
+
+Objetivos 
+
+asociados 
+
+OBJ–05 Gestión de sucursales 
+
+Requisitos 
+
+asociados 
+
+IRQ–05 Información sobre sucursales 
+
+ 
+
+Descripción 
+
+El sistema permitirá al administrador registrar o actualizar la información de las sucursales de la heladería. 
+
+Precondición 
+
+Debe haber iniciado sesión como administrador. 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+El administrador selecciona el módulo “Sucursales”. 
+
+2 
+
+Agrega o edita la información de la tienda (dirección, horario, teléfono, personal asignado). 
+
+3 
+
+Guarda los cambios. 
+
+Postcondición 
+
+La información de las sucursales se actualiza correctamente. 
+
+Excepciones 
+
+Paso 
+
+Acción 
+
+2 
+
+ 
+
+Si falta información obligatoria, el sistema mostrará un mensaje de error. 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+ 
+
+Especificación UC–10: Ver estado del pedido 
+
+UC–10 
+
+Ver estado del pedido 
+
+Objetivos 
+
+asociados 
+
+OBJ–03 Gestión de ventas 
+
+Requisitos 
+
+asociados 
+
+IRQ–03 Información sobre ventas 
+
+Descripción 
+
+El sistema permitirá a los clientes visualizar el estado actual de sus pedidos realizados (por ejemplo: pendiente, en preparación, en reparto, entregado o cancelado). 
+
+Precondición 
+
+Debe existir al menos un pedido registrado en la base de datos asociado al cliente o a la sucursal correspondiente. 
+
+ 
+
+ 
+
+Secuencia 
+
+Normal 
+
+Paso 
+
+Acción 
+
+1 
+
+El usuario inicia sesión y accede al módulo “Mis pedidos” o “Gestión de pedidos”. 
+
+2 
+
+El sistema muestra la lista de pedidos recientes con su respectivo ID, fecha, total y estado 
+
+3 
+
+El usuario selecciona un pedido específico para ver los detalles 
+
+ 
+
+4 
+
+El sistema consulta la base de datos y muestra el estado actual (ej. En preparación, En entrega, Entregado). 
+
+ 
+
+5 
+
+El sistema actualiza automáticamente el estado si hubo cambios desde la última consulta 
+
+ 
+
+6 
+
+El usuario puede cerrar la vista o actualizar manualmente la información 
+
+Postcondición 
+
+El usuario visualiza correctamente el estado actualizado de su pedido. 
+
+Excepciones 
+
+Paso 
+
+Acción 
+
+2 
+
+ 
+
+Si no existen pedidos registrados, el sistema mostrará el mensaje: “No tienes pedidos aún.” 
+
+ 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+3.3.  Requisitos no funcionales 
+
+ 
+
+NFR–01 
+
+Copias de seguridad 
+
+Objetivos asociados 
+
+– 
+
+Requisitos asociados 
+
+– 
+
+Descripción 
+
+El sistema realizará copias de seguridad automáticas de la base de datos MySQL, permitiendo la recuperación de información en caso de fallos o pérdida de datos. 
+
+Comentarios 
+
+ninguno 
+
+ 
+
+NFR–02 
+
+Diseño Responsive 
+
+Objetivos asociados 
+
+– 
+
+Requisitos asociados 
+
+– 
+
+Descripción 
+
+El sistema se desarrollará con un diseño web responsive, adaptable a computadoras, tablets y dispositivos móviles, para mejorar la experiencia del usuario en cualquier plataforma. 
+
+Comentarios 
+
+Ninguno 
+
+ 
+
+NFR–03 
+
+Seguridad y autenticación 
+
+Objetivos asociados 
+
+– 
+
+Requisitos asociados 
+
+– 
+
+Descripción 
+
+El sistema empleará cifrado SHA-256 para las contraseñas y protocolos seguros para proteger la información del cliente y las transacciones. 
+
+Comentarios 
+
+El acceso se controlará por roles (cliente, empleado, administrador). 
+
+ 
+
+NFR–04 
+
+Desempeño y disponibilidad 
+
+Objetivos asociados 
+
+– 
+
+Requisitos asociados 
+
+– 
+
+Descripción 
+
+El sistema garantizará una respuesta rápida (tiempo promedio menor a 3 segundos por acción) y disponibilidad mínima del 95% durante el horario comercial. 
+
+Comentarios 
+
+Aplicable al servidor principal de la heladería 
+
+ 
+
+NFR–05 
+
+Mantenibilidad 
+
+Objetivos asociados 
+
+– 
+
+Requisitos asociados 
+
+– 
+
+Descripción 
+
+El código del sistema se implementará siguiendo buenas prácticas de programación (modularización, comentarios y estandarización de nombres) para facilitar futuras actualizaciones y correcciones. 
+
+Comentarios 
+
+ninguno 
+
+ 
+
+NFR–06 
+
+Usabilidad 
+
+Objetivos asociados 
+
+– 
+
+Requisitos asociados 
+
+– 
+
+Descripción 
+
+El sistema contará con una interfaz intuitiva y estética, utilizando un estilo moderno tipo glassmorphism, con navegación clara y botones identificables. 
+
+Comentarios 
+
+Dirigido a personal administrativo y clientes finales. 
+
+ 
+
+4.	Glosario de Términos 
+
+ 
+
+Sistema: 
+Aplicación web local diseñada para la gestión integral de ventas, pedidos, inventario, promociones y sucursales de la heladería Concelato Gelateria. 
+
+Cliente: 
+Persona que compra productos de la heladería o realiza pedidos en línea a través del sistema web. 
+
+Empleado: 
+Personal encargado de registrar ventas, controlar stock, actualizar pedidos y atender solicitudes de los clientes. 
+
+Administrador: 
+Usuario con permisos totales para gestionar el sistema, registrar productos, configurar promociones, manejar reportes y administrar sucursales. 
+
+Pedido: 
+Operación realizada por un cliente al seleccionar uno o varios productos y confirmar su compra 
+
+Stock: 
+Cantidad disponible de productos (helados, paletas, postres, etc.) en el inventario de la heladería o sucursal. 
+
+Cupón: 
+Código promocional que puede ser ingresado por el cliente para obtener descuentos o beneficios especiales en sus compras. 
+
+Promoción: 
+Oferta especial definida por la heladería (como descuentos, combos o 2x1) que puede aplicarse a ciertos productos o periodos. 
+
+Sucursal: 
+Local físico de la heladería Concelato Gelateria que forma parte de la red de ventas y atención al cliente. 
+
+Usuario: 
+Cualquier persona que accede al sistema, ya sea cliente, empleado o administrador. 
+
+Login / Registro: 
+Proceso mediante el cual un usuario accede al sistema mediante credenciales o crea una nueva cuenta para poder utilizarlo 
+
+Responsive: 
+Diseño adaptable a distintos tamaños de pantalla (PC, tablet o smartphone), manteniendo la funcionalidad y la estética. 
+
+Base de datos: 
+Estructura en MySQL que almacena toda la información del sistema (clientes, productos, ventas, promociones y sucursales). 
+
+Interfaz: 
+Parte visual del sistema que permite la interacción del usuario con las funcionalidades de la aplicación. 
+
+ 
+
+ 

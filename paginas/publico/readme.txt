@@ -1,0 +1,1 @@
+aqui ira la pagina web pincipal y asu costado un boton con login que redirija a iniciar secion y redijira el inicio de cada   rol segun su rol , redijira a , en cada carpeta de cada rol ,crearas un inicio y opciones , que estaran vinculadas
