@@ -8,20 +8,19 @@ header('Content-Type: application/json');
 
 if (isset($_GET['id'])) {
     $id_producto = $_GET['id'];
-    
+
     try {
+        // Consulta basada en el uso real en clientes_db.php
         $stmt = $pdo->prepare("
-            SELECT p.id_producto, p.nombre, p.sabor, p.descripcion, p.precio, p.stock, p.activo, p.fecha_registro, p.id_proveedor,
-                   prv.empresa as proveedor_nombre
-            FROM productos p
-            LEFT JOIN proveedores prv ON p.id_proveedor = prv.id_proveedor
-            WHERE p.id_producto = :id_producto
+            SELECT id_producto, nombre, sabor, descripcion, precio, stock, activo, id_proveedor
+            FROM productos
+            WHERE id_producto = :id_producto
         ");
         $stmt->bindParam(':id_producto', $id_producto);
         $stmt->execute();
-        
+
         $producto = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($producto) {
             echo json_encode([
                 'success' => true,

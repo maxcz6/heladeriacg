@@ -4,6 +4,7 @@ verificarSesion();
 verificarRol('admin');
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
 
+// Manejar operación de creación
 $mensaje = '';
 $tipo_mensaje = '';
 
@@ -14,23 +15,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $precio = $_POST['precio'];
     $stock = $_POST['stock'];
     $id_proveedor = $_POST['id_proveedor'];
-    $activo = isset($_POST['activo']) ? 1 : 0;
     
-    $stmt = $pdo->prepare("INSERT INTO productos (nombre, sabor, descripcion, precio, stock, id_proveedor, activo) VALUES (:nombre, :sabor, :descripcion, :precio, :stock, :id_proveedor, :activo)");
-    $stmt->bindParam(':nombre', $nombre);
-    $stmt->bindParam(':sabor', $sabor);
-    $stmt->bindParam(':descripcion', $descripcion);
-    $stmt->bindParam(':precio', $precio);
-    $stmt->bindParam(':stock', $stock);
-    $stmt->bindParam(':id_proveedor', $id_proveedor);
-    $stmt->bindParam(':activo', $activo);
-    
-    if ($stmt->execute()) {
-        $mensaje = 'Producto creado exitosamente';
-        $tipo_mensaje = 'success';
-    } else {
-        $mensaje = 'Error al crear producto';
+    // Validar datos
+    if (empty($nombre) || empty($sabor) || empty($precio) || empty($stock)) {
+        $mensaje = 'Todos los campos requeridos deben estar completos';
         $tipo_mensaje = 'error';
+    } else {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO productos (nombre, sabor, descripcion, precio, stock, id_proveedor) VALUES (:nombre, :sabor, :descripcion, :precio, :stock, :id_proveedor)");
+            $stmt->bindParam(':nombre', $nombre);
+            $stmt->bindParam(':sabor', $sabor);
+            $stmt->bindParam(':descripcion', $descripcion);
+            $stmt->bindParam(':precio', $precio);
+            $stmt->bindParam(':stock', $stock);
+            $stmt->bindParam(':id_proveedor', $id_proveedor);
+            
+            if ($stmt->execute()) {
+                $mensaje = 'Producto creado exitosamente';
+                $tipo_mensaje = 'success';
+                
+                // Limpiar formulario después de éxito
+                $nombre = $sabor = $descripcion = '';
+                $precio = $stock = '';
+            } else {
+                $mensaje = 'Error al crear producto';
+                $tipo_mensaje = 'error';
+            }
+        } catch(PDOException $e) {
+            $mensaje = 'Error de base de datos: ' . $e->getMessage();
+            $tipo_mensaje = 'error';
+        }
     }
 }
 
@@ -67,6 +81,7 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
                         <li><a href="empleados.php"><i class="fas fa-user-tie"></i> Empleados</a></li>
                         <li><a href="reportes.php"><i class="fas fa-file-alt"></i> Reportes</a></li>
                         <li><a href="promociones.php"><i class="fas fa-percentage"></i> Promociones</a></li>
+                        <li><a href="proveedores.php"><i class="fas fa-truck"></i> Proveedores</a></li>
                     </ul>
                 </nav>
                 <button class="logout-btn" onclick="cerrarSesion()">
@@ -78,7 +93,7 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
         <main class="admin-main">
             <div class="welcome-section">
                 <h1>Agregar Nuevo Producto</h1>
-                <p>Complete los detalles del nuevo producto</p>
+                <p>Completa la información del nuevo producto</p>
             </div>
 
             <?php if ($mensaje): ?>
@@ -88,54 +103,53 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
             <?php endif; ?>
 
             <div class="form-container">
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" class="producto-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nombre">Nombre del Producto</label>
-                            <input type="text" id="nombre" name="nombre" required>
+                            <input type="text" id="nombre" name="nombre" value="<?php echo htmlspecialchars($nombre ?? ''); ?>" required>
                         </div>
                         <div class="form-group">
                             <label for="sabor">Sabor</label>
-                            <input type="text" id="sabor" name="sabor" required>
+                            <input type="text" id="sabor" name="sabor" value="<?php echo htmlspecialchars($sabor ?? ''); ?>" required>
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="precio">Precio (S/.)</label>
-                            <input type="number" id="precio" name="precio" step="0.01" min="0" required>
+                            <input type="number" id="precio" name="precio" step="0.01" min="0" value="<?php echo htmlspecialchars($precio ?? ''); ?>" required>
                         </div>
                         <div class="form-group">
-                            <label for="stock">Stock</label>
-                            <input type="number" id="stock" name="stock" min="0" required>
+                            <label for="stock">Stock (L)</label>
+                            <input type="number" id="stock" name="stock" min="0" value="<?php echo htmlspecialchars($stock ?? ''); ?>" required>
                         </div>
                     </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="id_proveedor">Proveedor</label>
-                            <select id="id_proveedor" name="id_proveedor" required>
-                                <option value="">Seleccione un proveedor</option>
-                                <?php foreach ($proveedores as $proveedor): ?>
-                                <option value="<?php echo $proveedor['id_proveedor']; ?>"><?php echo htmlspecialchars($proveedor['empresa']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="form-group checkbox-group">
-                            <label for="activo">Activo</label>
-                            <input type="checkbox" id="activo" name="activo" value="1" checked>
-                            <label for="activo">¿Producto activo?</label>
-                        </div>
+
+                    <div class="form-group">
+                        <label for="id_proveedor">Proveedor</label>
+                        <select id="id_proveedor" name="id_proveedor" required>
+                            <option value="">Selecciona un proveedor</option>
+                            <?php foreach ($proveedores as $proveedor): ?>
+                            <option value="<?php echo $proveedor['id_proveedor']; ?>" <?php echo (isset($_POST['id_proveedor']) && $_POST['id_proveedor'] == $proveedor['id_proveedor']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($proveedor['empresa']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="descripcion">Descripción</label>
-                        <textarea id="descripcion" name="descripcion" rows="3"></textarea>
+                        <textarea id="descripcion" name="descripcion" rows="4"><?php echo htmlspecialchars($descripcion ?? ''); ?></textarea>
                     </div>
-                    
+
                     <div class="form-actions">
-                        <button type="button" class="btn cancel" onclick="location.href='productos.php'">Cancelar</button>
-                        <button type="submit" class="btn save">Guardar Producto</button>
+                        <a href="productos.php" class="btn cancel">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                        <button type="submit" class="btn save">
+                            <i class="fas fa-save"></i> Guardar Producto
+                        </button>
                     </div>
                 </form>
             </div>

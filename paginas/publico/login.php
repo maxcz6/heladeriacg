@@ -81,13 +81,6 @@ if (isset($_SESSION['logueado']) && $_SESSION['logueado'] === true) {
 
                     <button type="submit" class="submit-btn">Entrar</button>
 
-                    <div class="help-text">
-                        <p>Credenciales de prueba:</p>
-                        <p>Admin: admin / admin</p>
-                        <p>Empleado: empleado / empleado</p>
-                        <p>Cliente: cliente / cliente</p>
-                    </div>
-
                     <div class="login-links">
                         <p><a href="recuperar.php">¿Olvidaste tu contraseña?</a></p>
                     </div>
