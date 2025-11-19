@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-11-2025 a las 02:02:08
+-- Tiempo de generación: 19-11-2025 a las 02:20:57
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -61,7 +61,7 @@ CREATE TABLE `clientes` (
 INSERT INTO `clientes` (`id_cliente`, `nombre`, `dni`, `telefono`, `direccion`, `correo`, `fecha_registro`, `nota`) VALUES
 (1, 'Carlos López', '87654321', '987654321', 'Av. Lima 123', 'carlos@gmail.com', '2025-11-17', 'Cliente frecuente'),
 (2, 'María Torres', '65432198', '912345678', 'Jr. Miraflores 432', 'maria@hotmail.com', '2025-11-17', ''),
-(3, 'Cliente Contado', NULL, NULL, NULL, NULL, '2025-11-17', NULL);
+(3, 'Cliente Contado', 'fb', 'fv', 'fb', 'fb@rcde', '2025-11-17', 'fb');
 
 -- --------------------------------------------------------
 
@@ -91,6 +91,33 @@ INSERT INTO `detalle_ventas` (`id_detalle`, `id_venta`, `id_producto`, `cantidad
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `inventario_sucursal`
+--
+
+CREATE TABLE `inventario_sucursal` (
+  `id_producto` int(11) NOT NULL,
+  `id_sucursal` int(11) NOT NULL,
+  `stock_sucursal` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `inventario_sucursal`
+--
+
+INSERT INTO `inventario_sucursal` (`id_producto`, `id_sucursal`, `stock_sucursal`) VALUES
+(1, 1, 29),
+(1, 2, 29),
+(1, 3, 29),
+(2, 1, 24),
+(2, 2, 24),
+(2, 3, 24),
+(3, 1, 19),
+(3, 2, 19),
+(3, 3, 19);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `productos`
 --
 
@@ -111,9 +138,9 @@ CREATE TABLE `productos` (
 --
 
 INSERT INTO `productos` (`id_producto`, `nombre`, `sabor`, `descripcion`, `precio`, `stock`, `id_proveedor`, `fecha_registro`, `activo`) VALUES
-(1, 'Helado de Fresa', 'Fresa', 'Helado artesanal de fresa', 3.50, 29, 1, '2025-11-17', 0),
-(2, 'Helado de Chocolate', 'Chocolate', 'Chocolate oscuro premium', 3.75, 24, 2, '2025-11-17', 1),
-(3, 'Helado de Vainilla', 'Vainilla', 'Vainilla natural', 3.50, 19, 1, '2025-11-17', 1);
+(1, 'Helado de Fresa', 'Fresa', 'Helado artesanal de fresa', 3.50, 0, 1, '2025-11-17', 0),
+(2, 'Helado de Chocolate', 'Chocolate', 'Chocolate oscuro premium', 3.75, 0, 2, '2025-11-17', 0),
+(3, 'Helado de Vainilla', 'Vainilla', 'Vainilla natural', 3.50, 0, 1, '2025-11-17', 1);
 
 -- --------------------------------------------------------
 
@@ -177,6 +204,31 @@ CREATE TABLE `sesiones` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `sucursales`
+--
+
+CREATE TABLE `sucursales` (
+  `id_sucursal` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `direccion` varchar(200) DEFAULT NULL,
+  `telefono` varchar(30) DEFAULT NULL,
+  `correo` varchar(150) DEFAULT NULL,
+  `horario` varchar(100) DEFAULT NULL,
+  `activa` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `sucursales`
+--
+
+INSERT INTO `sucursales` (`id_sucursal`, `nombre`, `direccion`, `telefono`, `correo`, `horario`, `activa`) VALUES
+(1, 'Sucursal Central', 'Av. Principal 123', '999-888-777', 'central@heladeria.com', '8am - 10pm', 1),
+(2, 'Sucursal Norte', 'Av. Norte 456', '999-888-778', 'norte@heladeria.com', '9am - 9pm', 1),
+(3, 'Sucursal Sur', 'Calle Sur 789', '999-888-779', 'sur@heladeria.com', '10am - 8pm', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `usuarios`
 --
 
@@ -188,19 +240,20 @@ CREATE TABLE `usuarios` (
   `password` varchar(255) NOT NULL,
   `id_role` tinyint(3) UNSIGNED NOT NULL DEFAULT 3,
   `activo` tinyint(1) NOT NULL DEFAULT 1,
-  `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp()
+  `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id_sucursal` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `id_cliente`, `id_vendedor`, `username`, `password`, `id_role`, `activo`, `fecha_registro`) VALUES
-(1, NULL, NULL, 'admin', '$2y$10$zYnd/QjgDMXBIIP1vu5z0upccWtkzNVgXMj73VMJSbM1N0oZ2CYBy', 1, 1, '2025-11-17 22:45:38'),
-(2, NULL, 1, 'empleado', '$2y$10$EXAMPLE_HASH_EMP', 2, 1, '2025-11-17 22:45:38'),
-(3, NULL, NULL, 'cliente', '$2y$10$EXAMPLE_HASH_CLIENT', 3, 1, '2025-11-17 22:45:38'),
-(4, NULL, NULL, 'cliente1', '$2y$10$zYnd/QjgDMXBIIP1vu5z0upccWtkzNVgXMj73VMJSbM1N0oZ2CYBy', 3, 1, '2025-11-17 23:09:19'),
-(5, NULL, NULL, 'empleado1', '$2y$10$up2ZrC.s9mzupTay4oXQ9eG/znyGt9EYkS1LJAOqaMznVKkC5u3mG', 2, 1, '2025-11-17 23:10:57');
+INSERT INTO `usuarios` (`id_usuario`, `id_cliente`, `id_vendedor`, `username`, `password`, `id_role`, `activo`, `fecha_registro`, `id_sucursal`) VALUES
+(1, NULL, NULL, 'admin', '$2y$10$zYnd/QjgDMXBIIP1vu5z0upccWtkzNVgXMj73VMJSbM1N0oZ2CYBy', 1, 1, '2025-11-17 22:45:38', NULL),
+(2, NULL, 1, 'empleado', '$2y$10$zYnd/QjgDMXBIIP1vu5z0upccWtkzNVgXMj73VMJSbM1N0oZ2CYBy', 2, 1, '2025-11-17 22:45:38', NULL),
+(3, NULL, NULL, 'cliente', '$2y$10$zYnd/QjgDMXBIIP1vu5z0upccWtkzNVgXMj73VMJSbM1N0oZ2CYBy', 3, 1, '2025-11-17 22:45:38', NULL),
+(4, NULL, NULL, 'cliente1', '$2y$10$zYnd/QjgDMXBIIP1vu5z0upccWtkzNVgXMj73VMJSbM1N0oZ2CYBy', 3, 1, '2025-11-17 23:09:19', NULL),
+(5, NULL, NULL, 'empleado1', '$2y$10$zYnd/QjgDMXBIIP1vu5z0upccWtkzNVgXMj73VMJSbM1N0oZ2CYBy', 2, 1, '2025-11-17 23:10:57', NULL);
 
 -- --------------------------------------------------------
 
@@ -215,16 +268,17 @@ CREATE TABLE `vendedores` (
   `telefono` varchar(30) DEFAULT NULL,
   `correo` varchar(150) DEFAULT NULL,
   `turno` enum('Mañana','Tarde','Noche') DEFAULT NULL,
-  `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp()
+  `fecha_registro` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id_sucursal` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `vendedores`
 --
 
-INSERT INTO `vendedores` (`id_vendedor`, `nombre`, `dni`, `telefono`, `correo`, `turno`, `fecha_registro`) VALUES
-(1, 'Juan Pérez', '12345678', '999888777', 'juan@correo.com', 'Mañana', '2025-11-17 22:45:38'),
-(2, 'Lucía Ramos', '87654322', '912333444', 'lucia@correo.com', 'Tarde', '2025-11-17 22:45:38');
+INSERT INTO `vendedores` (`id_vendedor`, `nombre`, `dni`, `telefono`, `correo`, `turno`, `fecha_registro`, `id_sucursal`) VALUES
+(1, 'Juan Pérez', '12345678', '999888777', 'juan@correo.com', 'Mañana', '2025-11-17 22:45:38', NULL),
+(2, 'Lucía Ramos', '87654322', '912333444', 'lucia@correo.com', 'Tarde', '2025-11-17 22:45:38', NULL);
 
 -- --------------------------------------------------------
 
@@ -239,16 +293,17 @@ CREATE TABLE `ventas` (
   `id_vendedor` int(11) DEFAULT NULL,
   `total` decimal(10,2) NOT NULL DEFAULT 0.00,
   `estado` enum('Pendiente','Procesada','Anulada') NOT NULL DEFAULT 'Procesada',
-  `nota` text DEFAULT NULL
+  `nota` text DEFAULT NULL,
+  `id_sucursal` int(11) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `ventas`
 --
 
-INSERT INTO `ventas` (`id_venta`, `fecha`, `id_cliente`, `id_vendedor`, `total`, `estado`, `nota`) VALUES
-(1, '2025-11-17 17:45:38', 1, 1, 0.00, 'Procesada', NULL),
-(2, '2025-11-17 18:11:17', 3, NULL, 10.75, 'Procesada', NULL);
+INSERT INTO `ventas` (`id_venta`, `fecha`, `id_cliente`, `id_vendedor`, `total`, `estado`, `nota`, `id_sucursal`) VALUES
+(1, '2025-11-17 17:45:38', 1, 1, 0.00, 'Procesada', NULL, 1),
+(2, '2025-11-17 18:11:17', 3, NULL, 10.75, '', NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -326,6 +381,13 @@ ALTER TABLE `detalle_ventas`
   ADD KEY `idx_id_producto` (`id_producto`);
 
 --
+-- Indices de la tabla `inventario_sucursal`
+--
+ALTER TABLE `inventario_sucursal`
+  ADD PRIMARY KEY (`id_producto`,`id_sucursal`),
+  ADD KEY `id_sucursal` (`id_sucursal`);
+
+--
 -- Indices de la tabla `productos`
 --
 ALTER TABLE `productos`
@@ -355,6 +417,12 @@ ALTER TABLE `sesiones`
   ADD KEY `id_usuario` (`id_usuario`);
 
 --
+-- Indices de la tabla `sucursales`
+--
+ALTER TABLE `sucursales`
+  ADD PRIMARY KEY (`id_sucursal`);
+
+--
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -362,14 +430,16 @@ ALTER TABLE `usuarios`
   ADD UNIQUE KEY `username` (`username`),
   ADD KEY `id_cliente` (`id_cliente`),
   ADD KEY `id_vendedor` (`id_vendedor`),
-  ADD KEY `id_role` (`id_role`);
+  ADD KEY `id_role` (`id_role`),
+  ADD KEY `id_sucursal` (`id_sucursal`);
 
 --
 -- Indices de la tabla `vendedores`
 --
 ALTER TABLE `vendedores`
   ADD PRIMARY KEY (`id_vendedor`),
-  ADD UNIQUE KEY `dni` (`dni`);
+  ADD UNIQUE KEY `dni` (`dni`),
+  ADD KEY `id_sucursal` (`id_sucursal`);
 
 --
 -- Indices de la tabla `ventas`
@@ -378,7 +448,8 @@ ALTER TABLE `ventas`
   ADD PRIMARY KEY (`id_venta`),
   ADD KEY `idx_fecha` (`fecha`),
   ADD KEY `id_cliente` (`id_cliente`),
-  ADD KEY `id_vendedor` (`id_vendedor`);
+  ADD KEY `id_vendedor` (`id_vendedor`),
+  ADD KEY `id_sucursal` (`id_sucursal`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -421,6 +492,12 @@ ALTER TABLE `roles`
   MODIFY `id_role` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT de la tabla `sucursales`
+--
+ALTER TABLE `sucursales`
+  MODIFY `id_sucursal` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -450,6 +527,13 @@ ALTER TABLE `detalle_ventas`
   ADD CONSTRAINT `detalle_ventas_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`);
 
 --
+-- Filtros para la tabla `inventario_sucursal`
+--
+ALTER TABLE `inventario_sucursal`
+  ADD CONSTRAINT `inventario_sucursal_ibfk_1` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `inventario_sucursal_ibfk_2` FOREIGN KEY (`id_sucursal`) REFERENCES `sucursales` (`id_sucursal`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Filtros para la tabla `productos`
 --
 ALTER TABLE `productos`
@@ -467,14 +551,22 @@ ALTER TABLE `sesiones`
 ALTER TABLE `usuarios`
   ADD CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `usuarios_ibfk_2` FOREIGN KEY (`id_vendedor`) REFERENCES `vendedores` (`id_vendedor`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `usuarios_ibfk_3` FOREIGN KEY (`id_role`) REFERENCES `roles` (`id_role`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `usuarios_ibfk_3` FOREIGN KEY (`id_role`) REFERENCES `roles` (`id_role`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `usuarios_ibfk_sucursal` FOREIGN KEY (`id_sucursal`) REFERENCES `sucursales` (`id_sucursal`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `vendedores`
+--
+ALTER TABLE `vendedores`
+  ADD CONSTRAINT `vendedores_ibfk_sucursal` FOREIGN KEY (`id_sucursal`) REFERENCES `sucursales` (`id_sucursal`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `ventas`
 --
 ALTER TABLE `ventas`
   ADD CONSTRAINT `ventas_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `ventas_ibfk_2` FOREIGN KEY (`id_vendedor`) REFERENCES `vendedores` (`id_vendedor`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `ventas_ibfk_2` FOREIGN KEY (`id_vendedor`) REFERENCES `vendedores` (`id_vendedor`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `ventas_ibfk_sucursal` FOREIGN KEY (`id_sucursal`) REFERENCES `sucursales` (`id_sucursal`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

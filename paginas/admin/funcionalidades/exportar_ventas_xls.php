@@ -33,8 +33,8 @@ foreach ($ventas as $venta) {
     echo "<tr>";
     echo "<td>" . $venta['id_venta'] . "</td>";
     echo "<td>" . $venta['fecha'] . "</td>";
-    echo "<td>" . ($venta['cliente_nombre'] ?: 'Desconocido') . "</td>";
-    echo "<td>" . ($venta['vendedor_nombre'] ?: 'Desconocido') . "</td>";
+    echo "<td>" . (isset($venta['cliente_nombre']) && $venta['cliente_nombre'] ? $venta['cliente_nombre'] : 'Desconocido') . "</td>";
+    echo "<td>" . (isset($venta['vendedor_nombre']) && $venta['vendedor_nombre'] ? $venta['vendedor_nombre'] : 'Desconocido') . "</td>";
     echo "<td>" . number_format($venta['total'], 2) . "</td>";
     echo "<td>" . $venta['estado'] . "</td>";
     echo "</tr>";

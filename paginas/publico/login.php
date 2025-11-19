@@ -24,115 +24,198 @@ if (isset($_SESSION['logueado']) && $_SESSION['logueado'] === true) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Concelato Gelateria</title>
-    <link rel="stylesheet" href="/heladeriacg/css/publico/estilos_login.css">
-    <style>
-        .login-links {
-            text-align: center;
-            margin-top: 1rem;
-        }
-
-        .login-links a {
-            color: #0891b2;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .login-links a:hover {
-            color: #06b6d4;
-        }
-    </style>
+    <meta name="description" content="Iniciar sesión - Concelato Gelatería">
+    <title>Iniciar Sesión - Concelato Gelatería</title>
+    <link rel="stylesheet" href="/heladeriacg/css/publico/estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="logo-container">
-                <i class="fas fa-ice-cream logo-icon"></i>
-                <h1>Concelato Gelateria</h1>
-                <p>Sistema de Gestión</p>
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- LOGO SECTION -->
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-ice-cream"></i>
+                </div>
+                <h1>Concelato Gelatería</h1>
+                <p>Sistema de Gestión Integral</p>
             </div>
 
-            <div class="form-container">
-                <div class="form-toggle">
-                    <button id="loginBtn" class="toggle-btn active" onclick="showLogin()">Iniciar Sesión</button>
-                    <button id="registerBtn" class="toggle-btn" onclick="showRegister()">Registrarse</button>
+            <!-- TOGGLE BUTTONS -->
+            <div class="toggle-group">
+                <button type="button" class="toggle-btn active" data-tab="login" onclick="toggleTab('login')">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+                <button type="button" class="toggle-btn" data-tab="register" onclick="toggleTab('register')">
+                    <i class="fas fa-user-plus"></i> Registrarse
+                </button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" action="login_process.php" method="POST" class="auth-form">
+                <?php if (isset($_SESSION['login_error'])): ?>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span><?php echo htmlspecialchars($_SESSION['login_error']); ?></span>
+                </div>
+                <?php unset($_SESSION['login_error']); endif; ?>
+
+                <div class="input-group">
+                    <label for="login-username">Usuario o Email</label>
+                    <input 
+                        type="text" 
+                        id="login-username" 
+                        name="username" 
+                        required 
+                        placeholder="Ingresa tu usuario o email"
+                        autocomplete="username"
+                    >
                 </div>
 
-                <form id="loginForm" class="auth-form" action="login_process.php" method="POST">
-                    <?php if (isset($_SESSION['login_error'])): ?>
-                    <div class="error-message">
-                        <p style="color: #ef4444; text-align: center; margin-bottom: 1rem;"><?php echo $_SESSION['login_error']; ?></p>
-                    </div>
-                    <?php
-                    unset($_SESSION['login_error']);
-                    endif; ?>
-                    <div class="input-group">
-                        <label for="username">Usuario</label>
-                        <input type="text" id="username" name="username" required>
-                    </div>
+                <div class="input-group">
+                    <label for="login-password">Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="login-password" 
+                        name="password" 
+                        required 
+                        placeholder="Ingresa tu contraseña"
+                        autocomplete="current-password"
+                    >
+                </div>
 
-                    <div class="input-group">
-                        <label for="password">Contraseña</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
 
-                    <button type="submit" class="submit-btn">Entrar</button>
+                <div class="guest-login">
+                    <p>¿Quieres probar sin registrarte?</p>
+                    <button type="button" class="btn-guest" onclick="loginAsGuest()">
+                        <i class="fas fa-user"></i> Ingresar como Invitado
+                    </button>
+                </div>
 
-                    <div class="login-links">
-                        <p><a href="recuperar.php">¿Olvidaste tu contraseña?</a></p>
-                    </div>
-                </form>
+                <div class="auth-link">
+                    <p><a href="recuperar.php"><i class="fas fa-lock"></i> ¿Olvidaste tu contraseña?</a></p>
+                </div>
+            </form>
 
-                <form id="registerForm" class="auth-form" style="display: none;" action="register_process.php" method="POST">
-                    <div class="input-group">
-                        <label for="new-username">Usuario</label>
-                        <input type="text" id="new-username" name="username" required>
-                    </div>
+            <!-- REGISTER FORM -->
+            <form id="registerForm" action="register_process.php" method="POST" class="auth-form" style="display: none;">
+                <?php if (isset($_SESSION['register_error'])): ?>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span><?php echo htmlspecialchars($_SESSION['register_error']); ?></span>
+                </div>
+                <?php unset($_SESSION['register_error']); endif; ?>
 
-                    <div class="input-group">
-                        <label for="new-password">Contraseña</label>
-                        <input type="password" id="new-password" name="password" required>
-                    </div>
+                <div class="input-group">
+                    <label for="reg-username">Usuario</label>
+                    <input 
+                        type="text" 
+                        id="reg-username" 
+                        name="username" 
+                        required 
+                        placeholder="Elige un nombre de usuario"
+                        autocomplete="username"
+                    >
+                </div>
 
-                    <div class="input-group">
-                        <label for="confirm-password">Confirmar Contraseña</label>
-                        <input type="password" id="confirm-password" name="confirm_password" required>
-                    </div>
+                <div class="input-group">
+                    <label for="reg-email">Email</label>
+                    <input 
+                        type="email" 
+                        id="reg-email" 
+                        name="email" 
+                        required 
+                        placeholder="Ingresa tu email"
+                        autocomplete="email"
+                    >
+                </div>
 
-                    <div class="input-group">
-                        <label for="rol">Tipo de Usuario</label>
-                        <select id="rol" name="rol" required>
-                            <option value="cliente">Cliente</option>
-                            <option value="empleado">Empleado</option>
-                        </select>
-                    </div>
+                <div class="input-group">
+                    <label for="reg-password">Contraseña</label>
+                    <input
+                        type="password"
+                        id="reg-password"
+                        name="password"
+                        required
+                        placeholder="Ingresa tu contraseña"
+                        autocomplete="new-password"
+                    >
+                </div>
 
-                    <button type="submit" class="submit-btn">Registrarse</button>
+                <div class="input-group">
+                    <label for="reg-confirm">Confirmar Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="reg-confirm" 
+                        name="password_confirm" 
+                        required 
+                        placeholder="Confirma tu contraseña"
+                        autocomplete="new-password"
+                    >
+                </div>
 
-                    <div class="login-links">
-                        <p><a href="#" onclick="showLogin()">¿Ya tienes cuenta? Inicia sesión</a></p>
-                    </div>
-                </form>
-            </div>
+                <div class="input-group">
+                    <label for="reg-role">Tipo de Usuario</label>
+                    <select id="reg-role" name="rol" required>
+                        <option value="">Selecciona tu rol</option>
+                        <option value="cliente">Cliente - Comprar Helados</option>
+                        <option value="empleado">Empleado - Gestionar Inventario</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-user-plus"></i> Crear Cuenta
+                </button>
+
+                <div class="auth-link">
+                    <p>¿Ya tienes cuenta? <a href="#" onclick="toggleTab('login'); return false;">Inicia sesión</a></p>
+                </div>
+            </form>
         </div>
     </div>
 
+    <script src="/heladeriacg/js/publico/script.js"></script>
     <script>
-        function showLogin() {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
-            document.getElementById('loginBtn').classList.add('active');
-            document.getElementById('registerBtn').classList.remove('active');
+        // Toggle between login and register forms
+        function toggleTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+
+            toggleButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tab) {
+                    btn.classList.add('active');
+                }
+            });
+
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                // Clear register form
+                registerForm.reset();
+            } else {
+                registerForm.style.display = 'block';
+                loginForm.style.display = 'none';
+                // Clear login form
+                loginForm.reset();
+            }
         }
 
-        function showRegister() {
-            document.getElementById('registerForm').style.display = 'block';
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerBtn').classList.add('active');
-            document.getElementById('loginBtn').classList.remove('active');
+        // Handle tab from URL parameter
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab') || 'login';
+            toggleTab(tab);
+        });
+
+        // Function to login as guest (redirects to guest area)
+        function loginAsGuest() {
+            window.location.href = '../cliente/invitado.php';
         }
     </script>
 </body>

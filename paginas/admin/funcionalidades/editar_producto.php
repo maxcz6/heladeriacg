@@ -104,14 +104,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <nav>
                     <ul>
-                        <li><a href="../admin/index.php"><i class="fas fa-home"></i> Inicio</a></li>
+                        <li><a href="index.php"><i class="fas fa-home"></i> Dashboard</a></li>
                         <li><a href="productos.php"><i class="fas fa-box"></i> Productos</a></li>
-                        <li><a href="clientes.php"><i class="fas fa-users"></i> Clientes</a></li>
-                        <li><a href="ventas.php"><i class="fas fa-chart-line"></i> Ventas</a></li>
-                        <li><a href="empleados.php"><i class="fas fa-user-tie"></i> Empleados</a></li>
-                        <li><a href="reportes.php"><i class="fas fa-file-alt"></i> Reportes</a></li>
-                        <li><a href="promociones.php"><i class="fas fa-percentage"></i> Promociones</a></li>
+                        <li><a href="ventas.php"><i class="fas fa-shopping-cart"></i> Ventas</a></li>
+                        <li><a href="empleados.php"><i class="fas fa-users"></i> Empleados</a></li>
+                        <li><a href="clientes.php"><i class="fas fa-user-friends"></i> Clientes</a></li>
                         <li><a href="proveedores.php"><i class="fas fa-truck"></i> Proveedores</a></li>
+                        <li><a href="usuarios.php"><i class="fas fa-user-cog"></i> Usuarios</a></li>
+                        <li><a href="reportes.php"><i class="fas fa-chart-bar"></i> Reportes</a></li>
+                        <li><a href="promociones.php"><i class="fas fa-percentage"></i> Promociones</a></li>
+                        <li><a href="sucursales.php"><i class="fas fa-store"></i> Sucursales</a></li>
+                        <li><a href="operaciones_lote.php"><i class="fas fa-layer-group"></i> Operaciones por Lote</a></li>
+                        <li><a href="configuracion.php"><i class="fas fa-cog"></i> Configuración</a></li>
                     </ul>
                 </nav>
                 <button class="logout-btn" onclick="cerrarSesion()">

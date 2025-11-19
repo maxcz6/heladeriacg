@@ -212,7 +212,7 @@ $ventas_semana = $stmt_ventas_semana->fetchAll(PDO::FETCH_ASSOC);
                 <p>Empleados</p>
             </div>
             <div class="stat-card">
-                <h3>S/. <?php echo number_format($ventas_mes['total_ventas'] ?: 0, 2); ?></h3>
+                <h3>S/. <?php echo number_format(isset($ventas_mes['total_ventas']) ? $ventas_mes['total_ventas'] : 0, 2); ?></h3>
                 <p>Ventas del Mes</p>
             </div>
         </div>
@@ -222,19 +222,19 @@ $ventas_semana = $stmt_ventas_semana->fetchAll(PDO::FETCH_ASSOC);
         <h2>Estadísticas de Ventas</h2>
         <div class="stats-grid">
             <div class="stat-card">
-                <h3>S/. <?php echo number_format($ventas_hoy['total_ventas'] ?: 0, 2); ?></h3>
+                <h3>S/. <?php echo number_format(isset($ventas_hoy['total_ventas']) ? $ventas_hoy['total_ventas'] : 0, 2); ?></h3>
                 <p>Ventas Hoy</p>
             </div>
             <div class="stat-card">
-                <h3><?php echo $ventas_hoy['num_ventas'] ?: 0; ?></h3>
+                <h3><?php echo isset($ventas_hoy['num_ventas']) ? $ventas_hoy['num_ventas'] : 0; ?></h3>
                 <p>Operaciones Hoy</p>
             </div>
             <div class="stat-card">
-                <h3>S/. <?php echo number_format($ventas_mes['total_ventas'] ?: 0, 2); ?></h3>
+                <h3>S/. <?php echo number_format(isset($ventas_mes['total_ventas']) ? $ventas_mes['total_ventas'] : 0, 2); ?></h3>
                 <p>Ventas del Mes</p>
             </div>
             <div class="stat-card">
-                <h3><?php echo $ventas_mes['num_ventas'] ?: 0; ?></h3>
+                <h3><?php echo isset($ventas_mes['num_ventas']) ? $ventas_mes['num_ventas'] : 0; ?></h3>
                 <p>Operaciones del Mes</p>
             </div>
         </div>
@@ -265,7 +265,7 @@ $ventas_semana = $stmt_ventas_semana->fetchAll(PDO::FETCH_ASSOC);
                 <div class="chart-bar">
                     <div class="bar-label"><?php echo substr($venta['dia'], 0, 3); ?></div>
                     <div class="bar-container">
-                        <div class="bar-fill" style="height: <?php echo min(100, ($venta['total'] / max(array_column($ventas_semana, 'total')) * 100)) ?: 10; ?>%; background: #0891b2;"></div>
+                        <div class="bar-fill" style="height: <?php echo isset($venta['total']) && is_numeric($venta['total']) && count($ventas_semana) > 0 ? min(100, ($venta['total'] / max(array_column($ventas_semana, 'total')) * 100)) : 10; ?>%; background: #0891b2;"></div>
                     </div>
                     <div class="bar-value">S/. <?php echo number_format($venta['total'], 2); ?></div>
                 </div>

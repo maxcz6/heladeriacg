@@ -31,8 +31,8 @@ foreach ($ventas as $venta) {
     fputcsv($output, array(
         $venta['id_venta'],
         $venta['fecha'],
-        $venta['cliente_nombre'] ?: 'Desconocido',
-        $venta['vendedor_nombre'] ?: 'Desconocido',
+        isset($venta['cliente_nombre']) && $venta['cliente_nombre'] ? $venta['cliente_nombre'] : 'Desconocido',
+        isset($venta['vendedor_nombre']) && $venta['vendedor_nombre'] ? $venta['vendedor_nombre'] : 'Desconocido',
         number_format($venta['total'], 2),
         $venta['estado']
     ));

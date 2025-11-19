@@ -4,7 +4,6 @@ verificarSesion();
 verificarRol('admin');
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
 
-// Manejar operaciones CRUD
 $mensaje = '';
 $tipo_mensaje = '';
 
@@ -12,18 +11,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['accion'])) {
         switch ($_POST['accion']) {
             case 'crear':
-                // Crear nuevo proveedor
                 $empresa = trim($_POST['empresa']);
                 $contacto = trim($_POST['contacto']);
+                $email = trim($_POST['email']);
                 $telefono = trim($_POST['telefono']);
-                $correo = trim($_POST['correo']);
                 $direccion = trim($_POST['direccion']);
                 
-                $stmt = $pdo->prepare("INSERT INTO proveedores (empresa, contacto, telefono, correo, direccion) VALUES (:empresa, :contacto, :telefono, :correo, :direccion)");
+                $stmt = $pdo->prepare("INSERT INTO proveedores (empresa, contacto, correo, telefono, direccion) VALUES (:empresa, :contacto, :correo, :telefono, :direccion)");
                 $stmt->bindParam(':empresa', $empresa);
                 $stmt->bindParam(':contacto', $contacto);
+                $stmt->bindParam(':correo', $email);
                 $stmt->bindParam(':telefono', $telefono);
-                $stmt->bindParam(':correo', $correo);
                 $stmt->bindParam(':direccion', $direccion);
                 
                 if ($stmt->execute()) {
@@ -36,19 +34,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
                 
             case 'editar':
-                // Editar proveedor existente
                 $id_proveedor = $_POST['id_proveedor'];
                 $empresa = trim($_POST['empresa']);
                 $contacto = trim($_POST['contacto']);
+                $email = trim($_POST['email']);
                 $telefono = trim($_POST['telefono']);
-                $correo = trim($_POST['correo']);
                 $direccion = trim($_POST['direccion']);
                 
-                $stmt = $pdo->prepare("UPDATE proveedores SET empresa = :empresa, contacto = :contacto, telefono = :telefono, correo = :correo, direccion = :direccion WHERE id_proveedor = :id_proveedor");
+                $stmt = $pdo->prepare("UPDATE proveedores SET empresa = :empresa, contacto = :contacto, correo = :correo, telefono = :telefono, direccion = :direccion WHERE id_proveedor = :id_proveedor");
                 $stmt->bindParam(':empresa', $empresa);
                 $stmt->bindParam(':contacto', $contacto);
+                $stmt->bindParam(':correo', $email);
                 $stmt->bindParam(':telefono', $telefono);
-                $stmt->bindParam(':correo', $correo);
                 $stmt->bindParam(':direccion', $direccion);
                 $stmt->bindParam(':id_proveedor', $id_proveedor);
                 
@@ -62,9 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
                 
             case 'eliminar':
-                // Eliminar proveedor
                 $id_proveedor = $_POST['id_proveedor'];
-                
                 $stmt = $pdo->prepare("DELETE FROM proveedores WHERE id_proveedor = :id_proveedor");
                 $stmt->bindParam(':id_proveedor', $id_proveedor);
                 
@@ -84,16 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt_proveedores = $pdo->prepare("SELECT * FROM proveedores ORDER BY empresa");
 $stmt_proveedores->execute();
 $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
-
-// Si se está editando un proveedor
-$proveedor_editar = null;
-if (isset($_GET['editar'])) {
-    $id_editar = $_GET['editar'];
-    $stmt_editar = $pdo->prepare("SELECT * FROM proveedores WHERE id_proveedor = :id_proveedor");
-    $stmt_editar->bindParam(':id_proveedor', $id_editar);
-    $stmt_editar->execute();
-    $proveedor_editar = $stmt_editar->fetch(PDO::FETCH_ASSOC);
-}
 ?>
 
 <!DOCTYPE html>
@@ -107,204 +92,298 @@ if (isset($_GET['editar'])) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="admin-container">
-        <header class="admin-header">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-ice-cream"></i>
-                    Concelato Gelateria - Proveedores
+    <!-- Header con navegación -->
+    <header class="admin-header">
+        <div>
+            <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <i class="fas fa-ice-cream"></i>
+                <span>Concelato Admin</span>
+            </div>
+            <nav id="admin-nav">
+                <a href="index.php">
+                    <i class="fas fa-chart-line"></i> <span>Dashboard</span>
+                </a>
+                <a href="productos.php">
+                    <i class="fas fa-box"></i> <span>Productos</span>
+                </a>
+                <a href="ventas.php">
+                    <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
+                </a>
+                <a href="empleados.php">
+                    <i class="fas fa-users"></i> <span>Empleados</span>
+                </a>
+                <a href="clientes.php">
+                    <i class="fas fa-user-friends"></i> <span>Clientes</span>
+                </a>
+                <a href="proveedores.php" class="active">
+                    <i class="fas fa-truck"></i> <span>Proveedores</span>
+                </a>
+                <a href="usuarios.php">
+                    <i class="fas fa-user-cog"></i> <span>Usuarios</span>
+                </a>
+                <a href="promociones.php">
+                    <i class="fas fa-tag"></i> <span>Promociones</span>
+                </a>
+                <a href="sucursales.php">
+                    <i class="fas fa-store"></i> <span>Sucursales</span>
+                </a>
+                <a href="configuracion.php">
+                    <i class="fas fa-cog"></i> <span>Configuración</span>
+                </a>
+                <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="admin-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Gestión de Proveedores</h1>
+            <p>Administra los proveedores de productos para la heladería</p>
+        </div>
+
+        <!-- Alert messages -->
+        <?php if ($mensaje): ?>
+        <div class="alert alert-<?php echo $tipo_mensaje; ?>" role="status" aria-live="polite">
+            <i class="fas fa-<?php echo $tipo_mensaje === 'success' ? 'check-circle' : 'exclamation-circle'; ?>"></i>
+            <span><?php echo htmlspecialchars($mensaje); ?></span>
+        </div>
+        <?php endif; ?>
+
+        <!-- Search and Actions Card -->
+        <div class="card">
+            <div class="card-body">
+                <div class="empleados-actions">
+                    <button class="action-btn primary" data-action="create" onclick="openModal('modalProveedor')">
+                        <i class="fas fa-plus"></i> Nuevo Proveedor
+                    </button>
+                    <div class="search-filter">
+                        <input 
+                            type="search" 
+                            id="searchProveedor"
+                            class="search-input"
+                            placeholder="Buscar por empresa o contacto..."
+                            aria-label="Buscar proveedores"
+                            data-filter-table="tablaProveedores">
+                    </div>
                 </div>
-                <nav>
-                    <ul>
-                        <li><a href="index.php"><i class="fas fa-home"></i> Inicio</a></li>
-                        <li><a href="productos.php"><i class="fas fa-box"></i> Productos</a></li>
-                        <li><a href="clientes.php"><i class="fas fa-users"></i> Clientes</a></li>
-                        <li><a href="ventas.php"><i class="fas fa-chart-line"></i> Ventas</a></li>
-                        <li><a href="empleados.php"><i class="fas fa-user-tie"></i> Empleados</a></li>
-                        <li><a href="reportes.php"><i class="fas fa-file-alt"></i> Reportes</a></li>
-                        <li><a href="promociones.php"><i class="fas fa-percentage"></i> Promociones</a></li>
-                    </ul>
-                </nav>
-                <button class="logout-btn" onclick="cerrarSesion()">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="tablaProveedores" class="tabla-admin" role="table">
+                        <thead>
+                            <tr role="row">
+                                <th role="columnheader" aria-sort="none" onclick="TableSorter.sortTable(this)">
+                                    <i class="fas fa-arrows-alt-v"></i> Empresa
+                                </th>
+                                <th role="columnheader" aria-sort="none">Contacto</th>
+                                <th role="columnheader" aria-sort="none">Email</th>
+                                <th role="columnheader" aria-sort="none">Teléfono</th>
+                                <th role="columnheader" aria-sort="none">Dirección</th>
+                                <th role="columnheader" aria-label="Acciones">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($proveedores as $proveedor): ?>
+                            <tr role="row" tabindex="0">
+                                <td><strong><?php echo htmlspecialchars($proveedor['empresa']); ?></strong></td>
+                                <td><?php echo htmlspecialchars($proveedor['contacto'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($proveedor['correo'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($proveedor['telefono'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($proveedor['direccion'] ?? 'N/A'); ?></td>
+                                <td>
+                                    <button 
+                                        class="action-btn edit" 
+                                        onclick="editarProveedor(<?php echo $proveedor['id_proveedor']; ?>)"
+                                        aria-label="Editar proveedor <?php echo htmlspecialchars($proveedor['empresa']); ?>">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button 
+                                        class="action-btn delete" 
+                                        onclick="deleteItem(<?php echo $proveedor['id_proveedor']; ?>, 'proveedor', '<?php echo htmlspecialchars($proveedor['empresa']); ?>')"
+                                        aria-label="Eliminar proveedor <?php echo htmlspecialchars($proveedor['empresa']); ?>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <?php if (empty($proveedores)): ?>
+                    <div class="empty-state">
+                        <p>No hay proveedores registrados. <a href="#" onclick="openModal('modalProveedor')">Crear uno</a></p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Crear/Editar Proveedor -->
+    <div id="modalProveedor" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalProveedorTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalProveedorTitle">Nuevo Proveedor</h2>
+                <button class="modal-close" aria-label="Cerrar diálogo" onclick="closeModal('modalProveedor')">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
-        </header>
-
-        <main class="admin-main">
-            <div class="welcome-section">
-                <h1>Gestión de Proveedores</h1>
-                <p>Aquí puedes administrar los proveedores de la heladería</p>
-            </div>
-
-            <?php if ($mensaje): ?>
-            <div class="mensaje <?php echo $tipo_mensaje; ?>">
-                <?php echo htmlspecialchars($mensaje); ?>
-            </div>
-            <?php endif; ?>
-
-            <div class="proveedores-actions">
-                <button class="action-btn primary" onclick="showForm('crear')">
-                    <i class="fas fa-plus"></i> Agregar Proveedor
-                </button>
-                <div class="search-filter">
-                    <input type="text" id="searchProveedor" placeholder="Buscar proveedor..." onkeyup="searchProveedores()">
-                </div>
-            </div>
-
-            <!-- Formulario para crear/editar proveedor -->
-            <div id="proveedorForm" class="form-container" style="display: none;">
-                <h2 id="formTitle">Agregar Proveedor</h2>
-                <form id="proveedorFormulario" method="POST">
+            <div class="modal-body">
+                <form id="formProveedor" method="POST">
                     <input type="hidden" name="accion" id="accionForm" value="crear">
                     <input type="hidden" name="id_proveedor" id="id_proveedor" value="">
-                    
+
                     <div class="form-group">
-                        <label for="empresa">Nombre de la Empresa</label>
-                        <input type="text" id="empresa" name="empresa" required>
+                        <label for="empresa">Nombre de Empresa <span aria-label="requerido">*</span></label>
+                        <input 
+                            type="text" 
+                            id="empresa" 
+                            name="empresa" 
+                            required
+                            aria-required="true"
+                            placeholder="Ej: Distribuidora XYZ">
                     </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="contacto">Persona de Contacto</label>
-                            <input type="text" id="contacto" name="contacto" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="telefono">Teléfono</label>
-                            <input type="text" id="telefono" name="telefono" required>
-                        </div>
+
+                    <div class="form-group">
+                        <label for="contacto">Persona de Contacto <span aria-label="requerido">*</span></label>
+                        <input 
+                            type="text" 
+                            id="contacto" 
+                            name="contacto" 
+                            required
+                            aria-required="true"
+                            placeholder="Ej: Juan Pérez">
                     </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="correo">Correo Electrónico</label>
-                            <input type="email" id="correo" name="correo">
-                        </div>
-                        <div class="form-group">
-                            <label for="direccion">Dirección</label>
-                            <input type="text" id="direccion" name="direccion">
-                        </div>
+
+                    <div class="form-group">
+                        <label for="email">Email <span aria-label="requerido">*</span></label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            required
+                            aria-required="true"
+                            placeholder="correo@empresa.com">
                     </div>
-                    
-                    <div class="form-actions">
-                        <button type="button" class="btn cancel" onclick="hideForm()">Cancelar</button>
-                        <button type="submit" class="btn save">Guardar Proveedor</button>
+
+                    <div class="form-group">
+                        <label for="telefono">Teléfono <span aria-label="requerido">*</span></label>
+                        <input 
+                            type="tel" 
+                            id="telefono" 
+                            name="telefono"
+                            required
+                            aria-required="true"
+                            placeholder="+51 999 999 999">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="direccion">Dirección</label>
+                        <input 
+                            type="text" 
+                            id="direccion" 
+                            name="direccion"
+                            placeholder="Calle Principal 456">
                     </div>
                 </form>
             </div>
-
-            <!-- Tabla de proveedores -->
-            <div class="table-container">
-                <table class="proveedores-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Empresa</th>
-                            <th>Contacto</th>
-                            <th>Teléfono</th>
-                            <th>Correo</th>
-                            <th>Dirección</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="proveedoresTable">
-                        <?php foreach ($proveedores as $proveedor): ?>
-                        <tr>
-                            <td><?php echo $proveedor['id_proveedor']; ?></td>
-                            <td><?php echo htmlspecialchars($proveedor['empresa']); ?></td>
-                            <td><?php echo htmlspecialchars($proveedor['contacto']); ?></td>
-                            <td><?php echo htmlspecialchars($proveedor['telefono']); ?></td>
-                            <td><?php echo htmlspecialchars($proveedor['correo']); ?></td>
-                            <td><?php echo htmlspecialchars($proveedor['direccion']); ?></td>
-                            <td>
-                                <button class="action-btn edit" onclick="editarProveedor(<?php echo $proveedor['id_proveedor']; ?>)">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="action-btn delete" onclick="confirmarEliminar(<?php echo $proveedor['id_proveedor']; ?>, '<?php echo addslashes(htmlspecialchars($proveedor['empresa'])); ?>')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+            <div class="modal-footer">
+                <button type="button" class="btn cancel" onclick="closeModal('modalProveedor')">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="submit" form="formProveedor" class="btn save">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
             </div>
-        </main>
+        </div>
     </div>
 
+    <!-- Modal: Confirmar Eliminación -->
+    <div id="modalDeleteProveedor" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalDeleteTitle">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <h2 id="modalDeleteTitle">Confirmar Eliminación</h2>
+                <button class="modal-close" aria-label="Cerrar diálogo" onclick="closeModal('modalDeleteProveedor')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteMessage">¿Está seguro de que desea eliminar este proveedor?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn cancel" onclick="closeModal('modalDeleteProveedor')">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <form id="formDelete" method="POST" style="display: inline;">
+                    <input type="hidden" name="accion" value="eliminar">
+                    <input type="hidden" name="id_proveedor" id="deleteProveedorId">
+                    <button type="submit" class="btn delete">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/heladeriacg/js/admin/script.js"></script>
     <script>
-        function showForm(accion) {
-            document.getElementById('accionForm').value = accion;
-            document.getElementById('formTitle').textContent = accion === 'crear' ? 'Agregar Proveedor' : 'Editar Proveedor';
-            
-            // Limpiar formulario
-            if (accion === 'crear') {
-                document.getElementById('proveedorFormulario').reset();
-                document.getElementById('id_proveedor').value = '';
-            }
-            
-            document.getElementById('proveedorForm').style.display = 'block';
-        }
-        
-        function hideForm() {
-            document.getElementById('proveedorForm').style.display = 'none';
-        }
-        
         function editarProveedor(id) {
-            // En una implementación real, se obtendrían los datos del proveedor
-            // Por ahora, simplemente se muestra el formulario de edición
-            alert('Funcionalidad de edición de proveedor. En una implementación real, se cargarían los datos desde el servidor.');
-            showForm('editar');
-            document.getElementById('id_proveedor').value = id;
+            fetch(`funcionalidades/obtener_proveedor.php?id=${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const prov = data.proveedor;
+                        document.getElementById('accionForm').value = 'editar';
+                        document.getElementById('id_proveedor').value = prov.id_proveedor;
+                        document.getElementById('empresa').value = prov.empresa || '';
+                        document.getElementById('contacto').value = prov.contacto || '';
+                        document.getElementById('email').value = prov.correo || '';
+                        document.getElementById('telefono').value = prov.telefono || '';
+                        document.getElementById('direccion').value = prov.direccion || '';
+                        document.getElementById('modalProveedorTitle').textContent = 'Editar Proveedor';
+                        openModal('modalProveedor');
+                    } else {
+                        showNotification('Error al obtener proveedor', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error de conexión', 'error');
+                });
         }
-        
-        function confirmarEliminar(id, empresa) {
-            if (confirm(`¿Estás seguro de que deseas eliminar al proveedor "${empresa}"?`)) {
-                // Enviar formulario para eliminar
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.style.display = 'none';
-                
-                const accionInput = document.createElement('input');
-                accionInput.type = 'hidden';
-                accionInput.name = 'accion';
-                accionInput.value = 'eliminar';
-                form.appendChild(accionInput);
-                
-                const idInput = document.createElement('input');
-                idInput.type = 'hidden';
-                idInput.name = 'id_proveedor';
-                idInput.value = id;
-                form.appendChild(idInput);
-                
-                document.body.appendChild(form);
-                form.submit();
-            }
+
+        function deleteItem(id, type, name) {
+            document.getElementById('deleteProveedorId').value = id;
+            document.getElementById('deleteMessage').textContent = 
+                `¿Está seguro de que desea eliminar al proveedor "${name}"? Esta acción no se puede deshacer.`;
+            openModal('modalDeleteProveedor');
         }
-        
-        function searchProveedores() {
-            const input = document.getElementById('searchProveedor');
-            const filter = input.value.toLowerCase();
-            const rows = document.querySelectorAll('#proveedoresTable tr');
-            
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                const empresaCell = row.cells[1].textContent.toLowerCase(); // Empresa
-                const contactoCell = row.cells[2].textContent.toLowerCase(); // Contacto
-                
-                if (empresaCell.includes(filter) || contactoCell.includes(filter)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
+
+        // Reset form on modal open
+        document.getElementById('modalProveedor').addEventListener('click', function(e) {
+            if (e.target === this || (e.target.closest('.modal-close'))) {
+                if (document.getElementById('accionForm').value === 'crear') {
+                    document.getElementById('formProveedor').reset();
+                    document.getElementById('modalProveedorTitle').textContent = 'Nuevo Proveedor';
                 }
             }
-        }
-        
-        function cerrarSesion() {
-            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-                window.location.href = '../../conexion/cerrar_sesion.php';
-            }
-        }
+        });
+
+        // Form submission
+        document.getElementById('formProveedor').addEventListener('submit', function(e) {
+            e.preventDefault();
+            this.submit();
+        });
     </script>
 </body>
 </html>

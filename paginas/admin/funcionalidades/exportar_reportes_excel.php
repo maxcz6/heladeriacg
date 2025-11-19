@@ -46,16 +46,16 @@ echo "<tr><th>Métrica</th><th>Valor</th></tr>";
 echo "<tr><td>Productos Activos</td><td>{$productos_count}</td></tr>";
 echo "<tr><td>Total de Clientes</td><td>{$clientes_count}</td></tr>";
 echo "<tr><td>Empleados</td><td>{$empleados_count}</td></tr>";
-echo "<tr><td>Ventas del Mes</td><td>S/. " . number_format($ventas_mes['total_ventas'] ?: 0, 2) . "</td></tr>";
+echo "<tr><td>Ventas del Mes</td><td>S/. " . number_format(isset($ventas_mes['total_ventas']) ? $ventas_mes['total_ventas'] : 0, 2) . "</td></tr>";
 echo "</table>";
 
 echo "<h3>Estadísticas de Ventas</h3>";
 echo "<table border='1'>";
 echo "<tr><th>Métrica</th><th>Valor</th></tr>";
-echo "<tr><td>Ventas Hoy</td><td>S/. " . number_format($ventas_hoy['total_ventas'] ?: 0, 2) . "</td></tr>";
-echo "<tr><td>Operaciones Hoy</td><td>" . ($ventas_hoy['num_ventas'] ?: 0) . "</td></tr>";
-echo "<tr><td>Ventas del Mes</td><td>S/. " . number_format($ventas_mes['total_ventas'] ?: 0, 2) . "</td></tr>";
-echo "<tr><td>Operaciones del Mes</td><td>" . ($ventas_mes['num_ventas'] ?: 0) . "</td></tr>";
+echo "<tr><td>Ventas Hoy</td><td>S/. " . number_format(isset($ventas_hoy['total_ventas']) ? $ventas_hoy['total_ventas'] : 0, 2) . "</td></tr>";
+echo "<tr><td>Operaciones Hoy</td><td>" . (isset($ventas_hoy['num_ventas']) ? $ventas_hoy['num_ventas'] : 0) . "</td></tr>";
+echo "<tr><td>Ventas del Mes</td><td>S/. " . number_format(isset($ventas_mes['total_ventas']) ? $ventas_mes['total_ventas'] : 0, 2) . "</td></tr>";
+echo "<tr><td>Operaciones del Mes</td><td>" . (isset($ventas_mes['num_ventas']) ? $ventas_mes['num_ventas'] : 0) . "</td></tr>";
 echo "</table>";
 
 // Productos más vendidos

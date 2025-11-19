@@ -1,6 +1,8 @@
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/admin_functions.php');
 
+// Funciones para clientes (manteniendo las existentes)
 function obtenerPedidosCliente($id_cliente) {
     global $pdo;
 
@@ -31,12 +33,6 @@ function crearPedido($id_cliente, $productos, $metodo_entrega) {
 
     try {
         $pdo->beginTransaction();
-
-        // Obtener información del cliente para la venta
-        $stmt_cliente = $pdo->prepare("SELECT id_vendedor FROM clientes WHERE id_cliente = :id_cliente");
-        $stmt_cliente->bindParam(':id_cliente', $id_cliente);
-        $stmt_cliente->execute();
-        $cliente = $stmt_cliente->fetch();
 
         // Para este ejemplo, usaremos un vendedor por defecto
         $id_vendedor = 1; // Juan Pérez

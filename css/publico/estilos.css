@@ -1,0 +1,476 @@
+/* ============================================
+   PUBLIC PAGES - MINIMALISTA
+   Login, Register, Recovery, Landing
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+:root {
+    --color-primary: #06b6d4;
+    --color-secondary: #0891b2;
+    --color-accent: #f97316;
+    --color-dark: #1f2937;
+    --color-light: #f9fafb;
+    --color-white: #ffffff;
+    --color-error: #ef4444;
+    --color-success: #10b981;
+}
+
+body {
+    background: linear-gradient(135deg, #f0f9ff 0%, #f3f4f6 50%, #f9fafb 100%);
+    color: var(--color-dark);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ============================================
+   FORM CONTAINERS
+   ============================================ */
+.auth-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 1rem;
+    margin: 2rem auto;
+}
+
+.auth-card {
+    background: var(--color-white);
+    border: 1px solid rgba(229, 231, 235, 0.8);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.logo-section {
+    margin-bottom: 2rem;
+}
+
+.logo-icon {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    color: var(--color-secondary);
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.logo-section h1 {
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    color: var(--color-dark);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.logo-section p {
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+/* ============================================
+   FORM STRUCTURE
+   ============================================ */
+form {
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+.input-group {
+    margin-bottom: 1.2rem;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-dark);
+    font-size: 0.9rem;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(229, 231, 235, 0.8);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    background: var(--color-light);
+    color: var(--color-dark);
+    font-family: inherit;
+}
+
+.input-group input::placeholder,
+.input-group textarea::placeholder {
+    color: #9ca3af;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: var(--color-white);
+    box-shadow: 0 0 0 3px rgba(6, 182, 202, 0.1);
+}
+
+.input-group select {
+    cursor: pointer;
+}
+
+.input-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-submit {
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 1.5rem 0 1rem 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 182, 202, 0.3);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--color-secondary);
+    border: 2px solid var(--color-secondary);
+    margin-top: 0.5rem;
+}
+
+.btn-secondary:hover {
+    background: var(--color-light);
+}
+
+/* ============================================
+   TOGGLE BUTTONS
+   ============================================ */
+.toggle-group {
+    display: flex;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 2rem;
+    gap: 4px;
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: 0.7rem;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    color: #6b7280;
+}
+
+.toggle-btn.active {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: white;
+}
+
+/* ============================================
+   MESSAGES & ALERTS
+   ============================================ */
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    border-left: 3px solid;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    word-break: break-word;
+}
+
+.alert-error {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #16a34a;
+    border-color: #16a34a;
+}
+
+.alert-warning {
+    background: #fef3c7;
+    color: #d97706;
+    border-color: #d97706;
+}
+
+.alert-info {
+    background: #dbeafe;
+    color: #2563eb;
+    border-color: #2563eb;
+}
+
+/* ============================================
+   LINKS & TEXT
+   ============================================ */
+.auth-link {
+    text-align: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.auth-link p {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-link a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.auth-link a:hover {
+    color: var(--color-secondary);
+    text-decoration: underline;
+}
+
+.help-text {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+    border-left: 3px solid var(--color-primary);
+}
+
+.help-text p {
+    margin: 0.3rem 0;
+}
+
+.help-text ol {
+    margin-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.help-text li {
+    margin-bottom: 0.3rem;
+}
+
+/* ============================================
+   FORM VALIDATION FEEDBACK
+   ============================================ */
+.input-group.error input,
+.input-group.error select,
+.input-group.error textarea {
+    border-color: var(--color-error);
+    background: #fef2f2;
+}
+
+.input-group.error input:focus,
+.input-group.error select:focus,
+.input-group.error textarea:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.error-text {
+    color: var(--color-error);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.input-group.success input,
+.input-group.success select {
+    border-color: var(--color-success);
+}
+
+.input-group.success input:focus,
+.input-group.success select:focus {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* ============================================
+   LOADING & DISABLED STATES
+   ============================================ */
+.btn-submit:disabled,
+.btn-submit[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-submit[aria-busy="true"] {
+    position: relative;
+    color: transparent;
+}
+
+.btn-submit[aria-busy="true"]::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+
+    .auth-card {
+        padding: 1.5rem;
+    }
+
+    .logo-icon {
+        font-size: 2.5rem;
+    }
+
+    .logo-section h1 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0.5rem;
+    }
+
+    .auth-container {
+        padding: 0.5rem;
+        margin: 1rem auto;
+    }
+
+    .auth-card {
+        padding: 1.25rem;
+    }
+
+    .logo-icon {
+        font-size: 2rem;
+    }
+
+    .logo-section h1 {
+        font-size: 1.1rem;
+    }
+
+    .logo-section p {
+        font-size: 0.85rem;
+    }
+
+    .input-group label {
+        font-size: 0.85rem;
+    }
+
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+        padding: 0.65rem 0.75rem;
+        font-size: 16px;
+    }
+
+    .btn-submit {
+        padding: 0.7rem;
+        font-size: 0.9rem;
+        min-height: 40px;
+    }
+
+    .auth-link p,
+    .auth-link a {
+        font-size: 0.85rem;
+    }
+
+    .toggle-group {
+        flex-direction: column;
+    }
+
+    .toggle-btn {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .auth-card {
+        padding: 1rem;
+    }
+
+    .logo-icon {
+        font-size: 1.8rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .logo-section h1 {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .input-group {
+        margin-bottom: 1rem;
+    }
+
+    .btn-submit {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+}
