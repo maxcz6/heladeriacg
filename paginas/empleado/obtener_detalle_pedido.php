@@ -1,17 +1,28 @@
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
-verificarSesion();
-verificarRol('empleado');
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');
+
+// Check if user is logged in and has employee role
+if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true) {
+    echo json_encode(['success' => false, 'message' => 'No has iniciado sesión']);
+    exit;
+}
+
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'empleado') {
+    echo json_encode(['success' => false, 'message' => 'No tienes permiso para realizar esta acción']);
+    exit;
+}
+
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
 
 header('Content-Type: application/json');
 
 if (isset($_GET['id'])) {
     $id_venta = $_GET['id'];
-    
+
     try {
         $stmt = $pdo->prepare("
-            SELECT v.id_venta, v.fecha, v.total, v.estado, 
+            SELECT v.id_venta, v.fecha, v.total, v.estado,
                    c.nombre as cliente_nombre,
                    GROUP_CONCAT(CONCAT(p.nombre, ' - ', dv.cantidad, ' x S/.', dv.precio_unit) SEPARATOR ', ') as productos
             FROM ventas v
@@ -23,9 +34,9 @@ if (isset($_GET['id'])) {
         ");
         $stmt->bindParam(':id_venta', $id_venta);
         $stmt->execute();
-        
+
         $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($pedido) {
             echo json_encode([
                 'success' => true,

@@ -101,10 +101,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                         <li><a href="pedidos_recibidos.php">
                             <i class="fas fa-list"></i> <span>Pedidos</span>
                         </a></li>
-                        <li><a href="../admin/productos.php">
-                            <i class="fas fa-box"></i> <span>Productos</span>
+                        <li><a href="descuentos.php">
+                            <i class="fas fa-tags"></i> <span>Descuentos</span>
                         </a></li>
-                        <li><a href="../admin/clientes.php">
+                        <li><a href="clientes.php">
                             <i class="fas fa-user-friends"></i> <span>Clientes</span>
                         </a></li>
                     </ul>
@@ -190,7 +190,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
         <!-- Modal para actualizar stock -->
         <div id="modalStock" class="modal-stock">
             <div class="modal-content-stock">
-                <h3>Actualizar Stock</h3>
+                <div class="modal-header-stock">
+                    <h3>Actualizar Stock</h3>
+                    <button type="button" class="modal-close-btn" onclick="cerrarModalStock()">&times;</button>
+                </div>
                 <form method="POST">
                     <input type="hidden" name="accion" value="actualizar_stock">
                     <input type="hidden" name="id_producto" id="id_producto_modal">
@@ -210,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                         <input type="number" id="nuevo_stock" name="nuevo_stock" min="0" required>
                     </div>
 
-                    <div style="margin-top: 1.5rem; text-align: right;">
+                    <div class="modal-actions-stock">
                         <button type="button" class="btn-empleado btn-secondary-empleado" onclick="cerrarModalStock()">Cancelar</button>
                         <button type="submit" class="btn-empleado btn-primary-empleado">Actualizar</button>
                     </div>
@@ -218,6 +221,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
             </div>
         </div>
     </div>
+
+    <style>
+        .modal-header-stock {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--empleado-border);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header-stock h3 {
+            margin: 0;
+            color: var(--empleado-text);
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--empleado-text-light);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .modal-close-btn:hover {
+            background: var(--empleado-border);
+            color: var(--empleado-danger);
+        }
+
+        .modal-actions-stock {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--empleado-border);
+        }
+
+        @media (max-width: 768px) {
+            .modal-content-stock {
+                width: 90%;
+                margin: 5% auto;
+            }
+
+            .modal-actions-stock {
+                flex-direction: column;
+            }
+
+            .btn-empleado {
+                width: 100%;
+            }
+        }
+    </style>
 
     <script>
         function cerrarSesion() {

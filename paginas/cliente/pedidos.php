@@ -5,20 +5,36 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');
 // Check if user is logged in
 $logueado = isset($_SESSION['logueado']) && $_SESSION['logueado'] === true;
 
-// Include clientes_db.php only if user is logged in
+$id_cliente = null;
+
+// Get id_cliente if user is logged in
 if ($logueado) {
     include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
+    
+    // Obtener el ID del cliente basado en el usuario
+    try {
+        $stmt_cliente = $pdo->prepare("SELECT id_cliente FROM usuarios WHERE id_usuario = :id_usuario");
+        $stmt_cliente->bindParam(':id_usuario', $_SESSION['id_usuario']);
+        $stmt_cliente->execute();
+        $usuario_cliente = $stmt_cliente->fetch(PDO::FETCH_ASSOC);
+        
+        if ($usuario_cliente && $usuario_cliente['id_cliente']) {
+            $id_cliente = $usuario_cliente['id_cliente'];
+        }
+    } catch(PDOException $e) {
+        error_log("Error al obtener id_cliente: " . $e->getMessage());
+    }
 }
 
 // For logged in users, handle order creation
-if ($logueado && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'crear_pedido') {
+if ($logueado && $id_cliente && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'crear_pedido') {
     $id_producto = $_POST['id_producto'];
     $cantidad = $_POST['cantidad'];
-    $id_cliente = $_SESSION['id_cliente'];
 
     try {
-        // Verificar stock disponible
-        $stmt_stock = $pdo->prepare("SELECT stock FROM productos WHERE id_producto = :id_producto");
+        // Verificar stock y precio disponible
+        // FIX: Added 'precio' to the select clause
+        $stmt_stock = $pdo->prepare("SELECT stock, precio FROM productos WHERE id_producto = :id_producto");
         $stmt_stock->bindParam(':id_producto', $id_producto);
         $stmt_stock->execute();
         $producto = $stmt_stock->fetch(PDO::FETCH_ASSOC);
@@ -32,7 +48,7 @@ if ($logueado && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']
             // Crear venta con estado Pendiente
             $stmt_venta = $pdo->prepare("
                 INSERT INTO ventas (id_cliente, id_vendedor, total, estado, nota)
-                VALUES (:id_cliente, NULL, :total, 'Pendiente', 'Pedido del cliente')
+                VALUES (:id_cliente, NULL, :total, 'Pendiente', 'Pedido rápido desde web')
             ");
             $total = $producto['precio'] * $cantidad;
             $stmt_venta->bindParam(':id_cliente', $id_cliente);
@@ -55,7 +71,7 @@ if ($logueado && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']
 
             $pdo->commit();
 
-            $_SESSION['mensaje_exito'] = 'Pedido registrado exitosamente. Será procesado por nuestro equipo.';
+            $_SESSION['mensaje_exito'] = '¡Pedido realizado con éxito! Tu orden #' . $id_venta . ' está pendiente.';
         }
     } catch(PDOException $e) {
         $pdo->rollback();
@@ -87,11 +103,61 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heladería Concelato - Pedidos</title>
+    <title>Heladería Concelato - Realizar Pedido Rápido</title>
     <link rel="stylesheet" href="/heladeriacg/css/cliente/modernos_estilos_cliente.css">
     <link rel="stylesheet" href="/heladeriacg/css/cliente/navbar.css">
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/modales.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos adicionales para el formulario en tarjeta */
+        .quick-order-form {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qty-input {
+            width: 60px;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 1rem;
+        }
+        
+        .btn-quick-order {
+            background: var(--cliente-primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .btn-quick-order:hover {
+            background: var(--cliente-secondary);
+            transform: translateY(-2px);
+        }
+
+        .flavor-tag {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
     <div class="cliente-container">
@@ -100,10 +166,10 @@ try {
 
         <main class="cliente-main">
             <div class="welcome-section-cliente">
-                <h1><?php echo $logueado ? 'Realizar Pedido' : 'Ver Productos Disponibles'; ?></h1>
-                <p><?php echo $logueado ? 'Selecciona los productos que deseas comprar' : 'Explora nuestros productos. Para realizar pedidos, inicia sesión.'; ?></p>
+                <h1><?php echo $logueado ? 'Pedido Rápido' : 'Nuestros Productos'; ?></h1>
+                <p><?php echo $logueado ? 'Compra tus helados favoritos con un solo clic' : 'Explora nuestra variedad de sabores'; ?></p>
                 <?php if (!$logueado): ?>
-                <p class="guest-notice">Estás navegando como invitado. Para realizar pedidos, inicia sesión o regístrate.</p>
+                <p class="guest-notice">Estás navegando como invitado. Para realizar pedidos, inicia sesión.</p>
                 <?php endif; ?>
             </div>
 
@@ -125,67 +191,73 @@ try {
             <?php endif; ?>
 
             <div class="card-cliente">
-                <div class="table-container-cliente">
-                    <table class="cliente-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Sabor</th>
-                                <th>Descripción</th>
-                                <th>Precio</th>
-                                <th>Stock Disponible</th>
-                                <th>Proveedor</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($productos)): ?>
-                                <?php foreach ($productos as $producto): ?>
-                                <tr>
-                                    <td><?php echo $producto['id_producto']; ?></td>
-                                    <td><strong><?php echo htmlspecialchars($producto['nombre']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($producto['sabor']); ?></td>
-                                    <td><?php echo htmlspecialchars(substr($producto['descripcion'], 0, 50)) . (strlen($producto['descripcion']) > 50 ? '...' : ''); ?></td>
-                                    <td>S/. <?php echo number_format($producto['precio'], 2); ?></td>
-                                    <td><?php echo $producto['stock']; ?>L</td>
-                                    <td><?php echo htmlspecialchars($producto['proveedor_nombre'] ?: 'N/A'); ?></td>
-                                    <td>
-                                        <?php if ($logueado): ?>
-                                        <form method="POST" style="display: inline;">
-                                            <input type="hidden" name="accion" value="crear_pedido">
-                                            <input type="hidden" name="id_producto" value="<?php echo $producto['id_producto']; ?>">
-                                            <input type="number" name="cantidad" value="1" min="1" max="<?php echo $producto['stock']; ?>" style="width: 60px; margin-right: 5px;">
-                                            <button type="submit" class="btn-cliente btn-primary-cliente">
-                                                <i class="fas fa-shopping-cart"></i> Pedir
-                                            </button>
-                                        </form>
-                                        <?php else: ?>
-                                        <button class="btn-cliente btn-outline-cliente" onclick="showLoginPrompt()">
-                                            <i class="fas fa-lock"></i> Pedir
-                                        </button>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
+                <?php if (empty($productos)): ?>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>No hay productos disponibles en este momento.</span>
+                    </div>
+                <?php else: ?>
+                    <div class="products-grid">
+                        <?php foreach ($productos as $producto): ?>
+                        <div class="product-card">
+                            <div class="product-icon">
+                                <i class="fas fa-ice-cream"></i>
+                            </div>
+                            <span class="flavor-tag"><?php echo htmlspecialchars($producto['sabor']); ?></span>
+                            <h3><?php echo htmlspecialchars($producto['nombre']); ?></h3>
+                            <p class="description">
+                                <?php echo htmlspecialchars(substr($producto['descripcion'], 0, 80)) . (strlen($producto['descripcion']) > 80 ? '...' : ''); ?>
+                            </p>
+                            <div class="price">S/. <?php echo number_format($producto['precio'], 2); ?></div>
+                            <div class="stock">
+                                <i class="fas fa-box"></i> Stock: <?php echo $producto['stock']; ?>
+                            </div>
+                            
+                            <?php if ($logueado): ?>
+                            <form method="POST" class="quick-order-form" onsubmit="return confirmOrder(event, '<?php echo addslashes(htmlspecialchars($producto['nombre'])); ?>');">
+                                <input type="hidden" name="accion" value="crear_pedido">
+                                <input type="hidden" name="id_producto" value="<?php echo $producto['id_producto']; ?>">
+                                <input type="number" name="cantidad" value="1" min="0.5" max="<?php echo floatval($producto['stock']); ?>" step="0.5" class="qty-input" title="Cantidad">
+                                <button type="submit" class="btn-quick-order">
+                                    <i class="fas fa-shopping-bag"></i> Pedir
+                                </button>
+                            </form>
                             <?php else: ?>
-                                <tr>
-                                    <td colspan="8" style="text-align: center;">No hay productos disponibles</td>
-                                </tr>
+                            <button class="btn-cliente btn-outline-cliente" onclick="showLoginPrompt()" style="margin-top: 1rem; width: 100%;">
+                                <i class="fas fa-lock"></i> Iniciar Sesión
+                            </button>
                             <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </main>
     </div>
 
     <script>
-        function showLoginPrompt() {
-            if (confirm('Debes iniciar sesión para realizar un pedido. ¿Deseas ir a la página de inicio de sesión?')) {
+        async function showLoginPrompt() {
+            const confirmed = await ModalCliente.confirm(
+                'Debes iniciar sesión para realizar un pedido. ¿Deseas ir a la página de inicio de sesión?',
+                'Iniciar Sesión Requerida'
+            );
+            if (confirmed) {
                 window.location.href = '../publico/login.php';
             }
         }
+
+        async function confirmOrder(event, productName) {
+            event.preventDefault();
+            const confirmed = await ModalCliente.confirm(
+                `¿Estás seguro de que deseas pedir ${productName}?`,
+                'Confirmar Pedido'
+            );
+            if (confirmed) {
+                event.target.submit();
+            }
+            return false;
+        }
     </script>
+    <script src="/heladeriacg/js/cliente/modales.js"></script>
 </body>
 </html>

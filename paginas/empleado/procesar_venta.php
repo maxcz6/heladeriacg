@@ -1,7 +1,18 @@
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
-verificarSesion();
-verificarRol('empleado');
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');
+
+// Check if user is logged in and has employee role
+if (!isset($_SESSION['logueado']) || $_SESSION['logueado'] !== true) {
+    echo json_encode(['success' => false, 'message' => 'No has iniciado sesión']);
+    exit;
+}
+
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'empleado') {
+    echo json_encode(['success' => false, 'message' => 'No tienes permiso para realizar esta acción']);
+    exit;
+}
+
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sucursales_db.php');
 
 header('Content-Type: application/json');
@@ -29,8 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
     // Validar que los productos existan y tengan stock suficiente
     foreach ($productos_venta as $producto) {
         $stmt_validar = $pdo->prepare("
-            SELECT i.stock_sucursal 
-            FROM inventario_sucursal i 
+            SELECT i.stock_sucursal
+            FROM inventario_sucursal i
             WHERE i.id_producto = :id_producto AND i.id_sucursal = :id_sucursal
         ");
         $stmt_validar->bindParam(':id_producto', $producto['id']);
@@ -40,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 
         if (!$inventario || $inventario['stock_sucursal'] < $producto['cantidad']) {
             echo json_encode([
-                'success' => false, 
+                'success' => false,
                 'message' => 'No hay suficiente stock para ' . $producto['nombre']
             ]);
             exit();

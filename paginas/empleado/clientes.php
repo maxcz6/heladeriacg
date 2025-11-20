@@ -33,40 +33,9 @@ $tipo_mensaje = '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heladería Concelato - Empleado - Gestión de Clientes</title>
-    <link rel="stylesheet" href="/heladeriacg/css/empleado/estilos_empleado.css">
+    <link rel="stylesheet" href="/heladeriacg/css/empleado/modernos_estilos_empleado.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .cliente-stats {
-            display: flex;
-            gap: 15px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-        
-        .stat-card-cliente {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 10px 15px;
-            text-align: center;
-            flex: 1;
-            min-width: 150px;
-        }
-        
-        .stat-card-cliente h4 {
-            margin: 0 0 5px 0;
-            font-size: 1rem;
-            color: #64748b;
-        }
-        
-        .stat-card-cliente p {
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #0f172a;
-        }
-    </style>
 </head>
 <body>
     <div class="empleado-container">
@@ -94,8 +63,8 @@ $tipo_mensaje = '';
                         <li><a href="pedidos_recibidos.php">
                             <i class="fas fa-list"></i> <span>Pedidos</span>
                         </a></li>
-                        <li><a href="../admin/productos.php">
-                            <i class="fas fa-box"></i> <span>Productos</span>
+                        <li><a href="descuentos.php">
+                            <i class="fas fa-tags"></i> <span>Descuentos</span>
                         </a></li>
                         <li><a href="clientes.php" class="active">
                             <i class="fas fa-user-friends"></i> <span>Clientes</span>
@@ -193,12 +162,12 @@ $tipo_mensaje = '';
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
-        
+
         function verDetallesCliente(id) {
             // Mostrar detalles en un modal o redirigir a página de detalles
             alert('Funcionalidad de ver detalles del cliente ID: ' + id + '\n(En implementación real, se mostrarían los detalles completos)');
         }
-        
+
         function filtrarClientes() {
             const input = document.getElementById('searchCliente');
             const filter = input.value.toLowerCase();
@@ -208,18 +177,18 @@ $tipo_mensaje = '';
             for (let i = 1; i < tr.length; i++) {
                 const td = tr[i].getElementsByTagName('td');
                 let found = false;
-                
+
                 for (let j = 0; j < td.length; j++) {
                     if (td[j].textContent.toLowerCase().includes(filter)) {
                         found = true;
                         break;
                     }
                 }
-                
+
                 tr[i].style.display = found ? '' : 'none';
             }
         }
-        
+
         // Toggle mobile menu
         document.querySelector('.menu-toggle-empleado').addEventListener('click', function() {
             const nav = document.querySelector('.empleado-nav ul');

@@ -37,8 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $id_cliente = $usuario_cliente['id_cliente'];
+    
+    if (!$id_cliente) {
+        echo json_encode(['success' => false, 'message' => 'Error: Tu usuario no tiene un perfil de cliente asociado. Por favor, contacta al soporte.']);
+        exit;
+    }
+
     $productos = $input['productos'];
     $metodo_entrega = $input['metodo_entrega'];
+    $mesa = isset($input['mesa']) ? $input['mesa'] : null;
+    $codigo_cupon = isset($input['cupon']) ? strtoupper(trim($input['cupon'])) : null;
 
     // Validar stock antes de crear el pedido
     foreach ($productos as $producto) {
@@ -47,14 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_stock->execute();
         $stock_actual = $stmt_stock->fetchColumn();
 
-        if ($producto['quantity'] > $stock_actual) {
+        if ($producto['quantity'] > floatval($stock_actual)) {
             echo json_encode(['success' => false, 'message' => 'No hay suficiente stock para ' . $producto['name']]);
             exit;
         }
     }
 
-    // Crear el pedido
-    $resultado = crearPedido($id_cliente, $productos, $metodo_entrega);
+    // Crear el pedido con información de mesa y cupón
+    $resultado = crearPedido($id_cliente, $productos, $metodo_entrega, $mesa, $codigo_cupon);
 
     if ($resultado['success']) {
         echo json_encode([

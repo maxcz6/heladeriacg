@@ -69,63 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heladería Concelato - Empleado - Pedidos Recibidos</title>
-    <link rel="stylesheet" href="/heladeriacg/css/empleado/estilos_empleado.css">
+    <link rel="stylesheet" href="/heladeriacg/css/empleado/modernos_estilos_empleado.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .estado-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .estado-pendiente {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        
-        .estado-procesando {
-            background: #dbeafe;
-            color: #2563eb;
-        }
-        
-        .estado-procesada {
-            background: #d1fadf;
-            color: #16a34a;
-        }
-        
-        .btn-actualizar {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .btn-procesar {
-            background: #f59e0b;
-            color: white;
-        }
-        
-        .btn-completar {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-cancelar {
-            background: #ef4444;
-            color: white;
-        }
-    </style>
 </head>
 <body>
     <div class="empleado-container">
@@ -153,10 +99,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                         <li><a href="pedidos_recibidos.php" class="active">
                             <i class="fas fa-list"></i> <span>Pedidos</span>
                         </a></li>
-                        <li><a href="../admin/productos.php">
-                            <i class="fas fa-box"></i> <span>Productos</span>
+                        <li><a href="descuentos.php">
+                            <i class="fas fa-tags"></i> <span>Descuentos</span>
                         </a></li>
-                        <li><a href="../admin/clientes.php">
+                        <li><a href="clientes.php">
                             <i class="fas fa-user-friends"></i> <span>Clientes</span>
                         </a></li>
                     </ul>
@@ -181,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 </div>
                 <?php unset($_SESSION['mensaje_exito']); ?>
             <?php endif; ?>
-            
+
             <?php if (isset($_SESSION['mensaje_error'])): ?>
                 <div class="alert alert-error" role="status" aria-live="polite">
                     <i class="fas fa-exclamation-circle"></i>
@@ -191,7 +137,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
             <?php endif; ?>
 
             <div class="card-empleado">
-                <h2>Pedidos Pendientes</h2>
+                <div class="section-header">
+                    <h2>Pedidos Pendientes</h2>
+                    <div class="filter-controls">
+                        <select id="filtroEstado" onchange="filtrarPedidos()">
+                            <option value="todo">Mostrar Todos</option>
+                            <option value="pendiente">Pendientes</option>
+                            <option value="procesando">En Proceso</option>
+                            <option value="procesada">Completados</option>
+                            <option value="anulada">Cancelados</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="table-container-empleado">
                     <table class="empleado-table">
                         <thead>
@@ -201,23 +158,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                                 <th>Cliente</th>
                                 <th>Productos</th>
                                 <th>Total Items</th>
+                                <th>Subtotal</th>
+                                <th>IGV</th>
                                 <th>Total</th>
                                 <th>Estado Actual</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="tablaPedidos">
                             <?php if (!empty($pedidos)): ?>
                                 <?php foreach ($pedidos as $pedido): ?>
-                                <tr>
+                                <tr data-estado="<?php echo strtolower($pedido['estado']); ?>">
                                     <td>#<?php echo $pedido['id_venta']; ?></td>
                                     <td><?php echo date('d/m/Y H:i', strtotime($pedido['fecha'])); ?></td>
                                     <td><?php echo htmlspecialchars($pedido['cliente_nombre'] ?: 'Cliente Público'); ?></td>
                                     <td><?php echo htmlspecialchars($pedido['productos']); ?></td>
                                     <td><?php echo $pedido['total_items']; ?></td>
+                                    <td>S/. <?php
+                                        $subtotal = $pedido['total'] / 1.18;
+                                        echo number_format($subtotal, 2);
+                                    ?></td>
+                                    <td>S/. <?php
+                                        $igv = ($pedido['total'] / 1.18) * 0.18;
+                                        echo number_format($igv, 2);
+                                    ?></td>
                                     <td>S/. <?php echo number_format($pedido['total'], 2); ?></td>
                                     <td>
-                                        <span class="estado-badge estado-<?php echo strtolower($pedido['estado']); ?>">
+                                        <span class="status-badge <?php
+                                            echo $pedido['estado'] === 'Procesada' ? 'active' :
+                                            ($pedido['estado'] === 'Pendiente' ? 'warning' :
+                                            ($pedido['estado'] === 'Procesando' ? 'active' : 'inactive')); ?>">
                                             <?php echo $pedido['estado']; ?>
                                         </span>
                                     </td>
@@ -227,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                                                 <input type="hidden" name="accion" value="actualizar_estado">
                                                 <input type="hidden" name="id_venta" value="<?php echo $pedido['id_venta']; ?>">
                                                 <input type="hidden" name="nuevo_estado" value="Procesando">
-                                                <button type="submit" class="btn-actualizar btn-procesar" title="Marcar como en proceso">
+                                                <button type="submit" class="btn-empleado btn-primary-empleado" title="Marcar como en proceso">
                                                     <i class="fas fa-cogs"></i> Procesar
                                                 </button>
                                             </form>
@@ -236,25 +206,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                                                 <input type="hidden" name="accion" value="actualizar_estado">
                                                 <input type="hidden" name="id_venta" value="<?php echo $pedido['id_venta']; ?>">
                                                 <input type="hidden" name="nuevo_estado" value="Procesada">
-                                                <button type="submit" class="btn-actualizar btn-completar" title="Marcar como completado">
+                                                <button type="submit" class="btn-empleado btn-primary-empleado" title="Marcar como completado">
                                                     <i class="fas fa-check"></i> Completar
                                                 </button>
                                             </form>
-                                            <form method="POST" style="display: inline; margin-left: 5px;">
+                                            <form method="POST" style="display: inline; margin-left: 0.5rem;">
                                                 <input type="hidden" name="accion" value="actualizar_estado">
                                                 <input type="hidden" name="id_venta" value="<?php echo $pedido['id_venta']; ?>">
                                                 <input type="hidden" name="nuevo_estado" value="Anulada">
-                                                <button type="submit" class="btn-actualizar btn-cancelar" title="Cancelar pedido" onclick="return confirm('¿Estás seguro de que deseas cancelar este pedido?')">
+                                                <button type="submit" class="btn-empleado btn-secondary-empleado" title="Cancelar pedido" onclick="return confirm('¿Estás seguro de que deseas cancelar este pedido?')">
                                                     <i class="fas fa-ban"></i> Cancelar
                                                 </button>
                                             </form>
                                         <?php endif; ?>
+                                        <button class="btn-empleado btn-secondary-empleado" title="Ver detalle" onclick="verDetallePedido(<?php echo $pedido['id_venta']; ?>)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="8" style="text-align: center;">No hay pedidos pendientes</td>
+                                    <td colspan="10" style="text-align: center;">No hay pedidos pendientes</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -270,12 +243,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
-        
+
+        function verDetallePedido(id_venta) {
+            // Redireccionar al detalle de la venta
+            window.location.href = 'detalle_venta.php?id=' + id_venta;
+        }
+
+        function filtrarPedidos() {
+            const filtro = document.getElementById('filtroEstado').value;
+            const filas = document.querySelectorAll('#tablaPedidos tr');
+
+            filas.forEach(fila => {
+                const estado = fila.getAttribute('data-estado');
+
+                // Mostrar todos o solo los que coinciden con el filtro
+                if (filtro === 'todo' || estado === filtro) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+
         // Toggle mobile menu
         document.querySelector('.menu-toggle-empleado').addEventListener('click', function() {
             const nav = document.querySelector('.empleado-nav ul');
             nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
         });
     </script>
+
+    <style>
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        select {
+            padding: 0.6rem 1rem;
+            border: 2px solid var(--empleado-border);
+            border-radius: var(--radius-sm);
+            background: var(--empleado-card-bg);
+            color: var(--empleado-text);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .filter-controls {
+                width: 100%;
+            }
+
+            select {
+                width: 100%;
+            }
+        }
+    </style>
 </body>
 </html>

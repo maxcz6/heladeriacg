@@ -1,3 +1,49 @@
+<?php
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');
+
+// Check if user is logged in
+$logueado = isset($_SESSION['logueado']) && $_SESSION['logueado'] === true;
+
+// Obtener productos disponibles con promociones
+try {
+    $stmt = $pdo->prepare("
+        SELECT p.*, pr.empresa as proveedor_nombre,
+               promo.id_promocion, promo.descuento, promo.fecha_inicio, promo.fecha_fin
+        FROM productos p
+        LEFT JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
+        LEFT JOIN promociones promo ON p.id_producto = promo.id_producto 
+            AND promo.activa = 1 
+            AND CURDATE() BETWEEN promo.fecha_inicio AND promo.fecha_fin
+        WHERE p.activo = 1 AND p.stock > 0
+        ORDER BY p.nombre
+    ");
+    $stmt->execute();
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    $productos = [];
+    error_log("Error al obtener productos: " . $e->getMessage());
+}
+
+// Obtener promociones activas
+try {
+    $stmt_promo = $pdo->prepare("
+        SELECT p.*, pr.nombre as producto_nombre
+        FROM promociones p
+        JOIN productos pr ON p.id_producto = pr.id_producto
+        WHERE p.activa = 1 
+        AND p.fecha_inicio <= CURDATE() 
+        AND p.fecha_fin >= CURDATE()
+        ORDER BY p.fecha_fin ASC
+    ");
+    $stmt_promo->execute();
+    $promociones = $stmt_promo->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    $promociones = [];
+    error_log("Error al obtener promociones: " . $e->getMessage());
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,8 +52,125 @@
     <title>Concelato Gelateria - Nuestros Sabores</title>
     <link rel="stylesheet" href="/heladeriacg/css/cliente/modernos_estilos_cliente.css">
     <link rel="stylesheet" href="/heladeriacg/css/cliente/navbar.css">
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/modales.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos específicos para la sección de promociones */
+        .promo-section {
+            margin-bottom: 3rem;
+        }
+        
+        .promo-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .promo-card {
+            background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
+            border: 1px solid var(--cliente-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .promo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .promo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--cliente-gradient);
+        }
+        
+        .promo-card h3 {
+            color: var(--cliente-primary);
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .promo-card p {
+            color: var(--cliente-text-light);
+            margin-bottom: 0.5rem;
+        }
+        
+        .promo-card .validity {
+            font-size: 0.85rem;
+            color: var(--cliente-text);
+            font-weight: 500;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .promo-card .validity i {
+            color: var(--cliente-accent);
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--cliente-accent);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Estilos para productos con promoción */
+        .product-card.has-promo {
+            background: linear-gradient(135deg, #fffbeb 0%, #fff 100%);
+            border-color: #f59e0b;
+        }
+
+        .promo-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            z-index: 1;
+        }
+
+        .product-card .price {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .original-price {
+            font-size: 0.9rem;
+            color: #9ca3af;
+            text-decoration: line-through;
+        }
+
+        .discounted-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #f59e0b;
+        }
+    </style>
 </head>
 <body>
     <div class="cliente-container">
@@ -17,189 +180,90 @@
             <div class="welcome-section-cliente">
                 <h1>¡Bienvenido a Concelato Gelateria!</h1>
                 <p>Disfruta de nuestros deliciosos helados artesanales</p>
+                <?php if (!$logueado): ?>
                 <p class="guest-notice">Estás navegando como invitado. Para realizar pedidos, inicia sesión o regístrate.</p>
+                <?php endif; ?>
             </div>
+
+            <!-- Sección de Promociones Dinámicas -->
+            <?php if (!empty($promociones)): ?>
+            <div class="promo-section">
+                <h2 style="color: var(--cliente-text); font-size: 1.75rem; margin-bottom: 1rem;">Promociones Actuales</h2>
+                <div class="promo-cards">
+                    <?php foreach ($promociones as $promo): ?>
+                    <div class="promo-card">
+                        <div class="discount-badge">
+                            <?php echo floatval($promo['descuento']); ?>% OFF
+                        </div>
+                        <h3><?php echo htmlspecialchars($promo['producto_nombre']); ?></h3>
+                        <p><?php echo htmlspecialchars($promo['descripcion'] ?: 'Aprovecha este descuento especial'); ?></p>
+                        <div class="validity">
+                            <i class="far fa-clock"></i>
+                            Válido hasta: <?php echo date('d/m/Y', strtotime($promo['fecha_fin'])); ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <div class="card-cliente">
                 <h2>Nuestros Sabores</h2>
 
-                <div class="category">
-                    <h3>Sabores Clásicos</h3>
-                    <div class="products-grid">
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
-                                <i class="fas fa-ice-cream"></i>
-                            </div>
-                            <h3>Helado de Vainilla</h3>
-                            <p class="description">Vainilla natural con esencia pura</p>
-                            <p class="price">S/. 7.50</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
-
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
-                                <i class="fas fa-ice-cream"></i>
-                            </div>
-                            <h3>Helado de Chocolate</h3>
-                            <p class="description">Chocolate oscuro premium</p>
-                            <p class="price">S/. 9.00</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
-
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
-                                <i class="fas fa-ice-cream"></i>
-                            </div>
-                            <h3>Helado de Fresa</h3>
-                            <p class="description">Helado artesanal de fresa con trozos de fruta</p>
-                            <p class="price">S/. 8.50</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
-
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
-                                <i class="fas fa-ice-cream"></i>
-                            </div>
-                            <h3>Helado de Nata</h3>
-                            <p class="description">Crema de leche fresca con vainilla</p>
-                            <p class="price">S/. 8.00</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
+                <?php if (empty($productos)): ?>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>No hay productos disponibles en este momento.</span>
                     </div>
-                </div>
-
-                <div class="category">
-                    <h3>Sabores Premium</h3>
+                <?php else: ?>
                     <div class="products-grid">
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #a855f7, #8b5cf6);">
+                        <?php foreach ($productos as $producto): 
+                            $hasDiscount = !empty($producto['descuento']);
+                            $originalPrice = $producto['precio'];
+                            $discountedPrice = $hasDiscount ? $originalPrice * (1 - $producto['descuento'] / 100) : $originalPrice;
+                        ?>
+                        <div class="product-card <?php echo $hasDiscount ? 'has-promo' : ''; ?>">
+                            <?php if ($hasDiscount): ?>
+                            <div class="promo-badge">
+                                -<?php echo floatval($producto['descuento']); ?>% OFF
+                            </div>
+                            <?php endif; ?>
+                            <div class="product-icon">
                                 <i class="fas fa-ice-cream"></i>
                             </div>
-                            <h3>Helado de Pistacho</h3>
-                            <p class="description">Nueces tostadas de alta calidad</p>
-                            <p class="price">S/. 12.00</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
-
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #a855f7, #8b5cf6);">
-                                <i class="fas fa-ice-cream"></i>
+                            <h3><?php echo htmlspecialchars($producto['nombre']); ?></h3>
+                            <p class="description">
+                                <?php echo htmlspecialchars(substr($producto['descripcion'], 0, 80)) . (strlen($producto['descripcion']) > 80 ? '...' : ''); ?>
+                            </p>
+                            <div class="price">
+                                <?php if ($hasDiscount): ?>
+                                    <span class="original-price">S/. <?php echo number_format($originalPrice, 2); ?></span>
+                                    <span class="discounted-price">S/. <?php echo number_format($discountedPrice, 2); ?></span>
+                                <?php else: ?>
+                                    S/. <?php echo number_format($originalPrice, 2); ?>
+                                <?php endif; ?>
                             </div>
-                            <h3>Helado de Tiramisú</h3>
-                            <p class="description">Café espresso y queso mascarpone</p>
-                            <p class="price">S/. 11.50</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
-
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #a855f7, #8b5cf6);">
-                                <i class="fas fa-ice-cream"></i>
+                            <div class="stock">
+                                <i class="fas fa-box"></i> Stock: <?php echo $producto['stock']; ?>
                             </div>
-                            <h3>Helado de Ferrero Rocher</h3>
-                            <p class="description">Trozos de avellanas y chocolate</p>
-                            <p class="price">S/. 13.00</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
+                            
+                            <?php if ($logueado): ?>
+                            <button class="order-btn" onclick="window.location.href='realizar_pedido.php'">
+                                <i class="fas fa-shopping-cart"></i> Pedir Ahora
+                            </button>
+                            <?php else: ?>
+                            <button class="order-btn disabled" onclick="showLoginPrompt()">
                                 <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
                             </button>
+                            <?php endif; ?>
                         </div>
-
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #a855f7, #8b5cf6);">
-                                <i class="fas fa-ice-cream"></i>
-                            </div>
-                            <h3>Helado de Cheesecake</h3>
-                            <p class="description">Sabor a tarta de queso con trozos de galleta</p>
-                            <p class="price">S/. 10.50</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
-                </div>
-
-                <div class="category">
-                    <h3>Sabores Frutales</h3>
-                    <div class="products-grid">
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                <i class="fas fa-ice-cream"></i>
-                            </div>
-                            <h3>Helado de Mango</h3>
-                            <p class="description">Pulpa de mango fresco</p>
-                            <p class="price">S/. 8.50</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
-
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                <i class="fas fa-ice-cream"></i>
-                            </div>
-                            <h3>Helado de Limón</h3>
-                            <p class="description">Zumo de limón fresco natural</p>
-                            <p class="price">S/. 7.50</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
-
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                <i class="fas fa-ice-cream"></i>
-                            </div>
-                            <h3>Helado de Maracuyá</h3>
-                            <p class="description">Pulpa de maracuyá orgánico</p>
-                            <p class="price">S/. 9.00</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
-
-                        <div class="product-card">
-                            <div class="product-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                                <i class="fas fa-ice-cream"></i>
-                            </div>
-                            <h3>Helado de Coco</h3>
-                            <p class="description">Pasta de coco natural</p>
-                            <p class="price">S/. 8.75</p>
-                            <button class="order-btn disabled" disabled onclick="showLoginPrompt()">
-                                <i class="fas fa-lock"></i> Pedir (Iniciar Sesión)
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
 
-            <div class="promo-section">
-                <h2>Promociones Actuales</h2>
-                <div class="promo-cards">
-                    <div class="promo-card">
-                        <h3>2x1 en helados medianos</h3>
-                        <p>Aplican sabores clásicos</p>
-                        <p class="validity">Válido hasta fin de mes</p>
-                    </div>
-                    <div class="promo-card">
-                        <h3>Tercer helado gratis</h3>
-                        <p>En compras de 2 o más helados grandes</p>
-                        <p class="validity">Válido toda la semana</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-cliente">
+            <?php if (!$logueado): ?>
+            <div class="card-cliente" style="margin-top: 2rem;">
                 <h2>¿Quieres hacer un pedido?</h2>
                 <div style="text-align: center; margin-top: 1.5rem;">
                     <a href="../publico/login.php?tab=register" class="btn-cliente btn-primary-cliente" style="margin-right: 1rem; display: inline-block;">
@@ -210,15 +274,21 @@
                     </a>
                 </div>
             </div>
+            <?php endif; ?>
         </main>
     </div>
 
     <script>
-        function showLoginPrompt() {
-            if (confirm('Debes iniciar sesión para realizar un pedido. ¿Deseas ir a la página de inicio de sesión?')) {
+        async function showLoginPrompt() {
+            const confirmed = await ModalCliente.confirm(
+                'Debes iniciar sesión para realizar un pedido. ¿Deseas ir a la página de inicio de sesión?',
+                'Iniciar Sesión Requerida'
+            );
+            if (confirmed) {
                 window.location.href = '../publico/login.php';
             }
         }
     </script>
+    <script src="/heladeriacg/js/cliente/modales.js"></script>
 </body>
 </html>
