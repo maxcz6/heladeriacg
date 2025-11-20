@@ -114,112 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heladería Concelato - Empleado - Sistema de Ventas</title>
-    <link rel="stylesheet" href="/heladeriacg/css/empleado/estilos_empleado.css">
+    <link rel="stylesheet" href="/heladeriacg/css/empleado/modernos_estilos_empleado.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .venta-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .venta-section {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .productos-disponibles {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            height: 400px;
-            overflow-y: auto;
-        }
-        
-        .producto-item {
-            padding: 10px;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .producto-item:hover {
-            background: #f0fdf4;
-            border-color: #10b981;
-        }
-        
-        .producto-item.selected {
-            background: #ecfdf5;
-            border-color: #10b981;
-        }
-        
-        .carrito-venta {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            height: 400px;
-            overflow-y: auto;
-        }
-        
-        .item-carrito {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .acciones-carrito {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .btn-carrito {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        .btn-add {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-remove {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .btn-finalizar {
-            background: #3b82f6;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            width: 100%;
-            margin-top: 15px;
-        }
-        
-        .total-carrito {
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-align: right;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 2px solid #e5e7eb;
-        }
-    </style>
 </head>
 <body>
     <div class="empleado-container">
@@ -275,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 </div>
                 <?php unset($_SESSION['mensaje_exito']); ?>
             <?php endif; ?>
-            
+
             <?php if (isset($_SESSION['mensaje_error'])): ?>
                 <div class="alert alert-error" role="status" aria-live="polite">
                     <i class="fas fa-exclamation-circle"></i>
@@ -288,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
             <div class="card-empleado">
                 <form method="POST" id="formaVenta">
                     <input type="hidden" name="accion" value="crear_venta">
-                    
+
                     <div class="venta-section">
                         <div class="productos-disponibles">
                             <h3>Productos Disponibles</h3>
@@ -302,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                                 <?php endforeach; ?>
                             </div>
                         </div>
-                        
+
                         <div class="carrito-venta">
                             <h3>Carrito de Venta</h3>
                             <div id="carritoItems">
@@ -311,10 +208,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                             <div class="total-carrito">
                                 Total: <span id="totalCarrito">S/. 0.00</span>
                             </div>
-                            
-                            <div style="margin-top: 15px;">
+
+                            <div style="margin-top: 1.5rem;">
                                 <label for="id_cliente">Cliente (Opcional):</label>
-                                <select name="id_cliente" id="id_cliente" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <select name="id_cliente" id="id_cliente">
                                     <option value="">Cliente Público</option>
                                     <?php foreach ($clientes as $cliente): ?>
                                     <option value="<?php echo $cliente['id_cliente']; ?>">
@@ -323,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            
+
                             <button type="submit" class="btn-finalizar" id="btnFinalizar">
                                 <i class="fas fa-check-circle"></i> Finalizar Venta
                             </button>
@@ -336,23 +233,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 
     <script>
         let carrito = JSON.parse(localStorage.getItem('carrito_venta')) || [];
-        
+
         // Cargar carrito desde localStorage
         function cargarCarrito() {
             const carritoDiv = document.getElementById('carritoItems');
             carritoDiv.innerHTML = '';
-            
+
             if (carrito.length === 0) {
                 carritoDiv.innerHTML = '<p>No hay productos en el carrito</p>';
                 document.getElementById('totalCarrito').textContent = 'S/. 0.00';
                 return;
             }
-            
+
             let total = 0;
             carrito.forEach((item, index) => {
                 const subtotal = item.precio * item.cantidad;
                 total += subtotal;
-                
+
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'item-carrito';
                 itemDiv.innerHTML = `
@@ -367,14 +264,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 `;
                 carritoDiv.appendChild(itemDiv);
             });
-            
+
             document.getElementById('totalCarrito').textContent = 'S/. ' + total.toFixed(2);
         }
-        
+
         function agregarAlCarrito(id, nombre, precio, stock) {
             // Verificar si el producto ya está en el carrito
             const index = carrito.findIndex(item => item.id === id);
-            
+
             if (index !== -1) {
                 // Si ya está, aumentar cantidad si hay stock suficiente
                 if (carrito[index].cantidad < stock) {
@@ -397,11 +294,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                     return;
                 }
             }
-            
+
             // Guardar en localStorage
             localStorage.setItem('carrito_venta', JSON.stringify(carrito));
             cargarCarrito();
-            
+
             // Resaltar el producto seleccionado
             const productoItems = document.querySelectorAll('.producto-item');
             productoItems.forEach(item => {
@@ -411,7 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 }
             });
         }
-        
+
         function modificarCantidad(index, cambio) {
             if (cambio > 0) {
                 // Aumentar cantidad
@@ -428,27 +325,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                     carrito.splice(index, 1);
                 }
             }
-            
+
             localStorage.setItem('carrito_venta', JSON.stringify(carrito));
             cargarCarrito();
         }
-        
+
         function quitarDelCarrito(index) {
             carrito.splice(index, 1);
             localStorage.setItem('carrito_venta', JSON.stringify(carrito));
             cargarCarrito();
         }
-        
+
         function cerrarSesion() {
             if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
-        
+
         // Inicializar carrito
         document.addEventListener('DOMContentLoaded', function() {
             cargarCarrito();
-            
+
             // Validar antes de enviar el formulario
             document.getElementById('formaVenta').addEventListener('submit', function(e) {
                 if (carrito.length === 0) {
@@ -456,7 +353,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                     e.preventDefault();
                     return false;
                 }
-                
+
                 // Convertir carrito a formato para envío
                 const input = document.createElement('input');
                 input.type = 'hidden';
@@ -465,7 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 this.appendChild(input);
             });
         });
-        
+
         // Toggle mobile menu
         document.querySelector('.menu-toggle-empleado').addEventListener('click', function() {
             const nav = document.querySelector('.empleado-nav ul');

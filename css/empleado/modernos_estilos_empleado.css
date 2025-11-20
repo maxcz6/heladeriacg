@@ -1,0 +1,1089 @@
+/* ============================================
+   ESTILOS MODERNOS EMPLEADO - BASEDOS EN MODERN DESIGN
+   ============================================ */
+
+:root {
+  --empleado-primary: #2563eb;
+  --empleado-primary-dark: #1d4ed8;
+  --empleado-primary-light: #3b82f6;
+  --empleado-secondary: #8b5cf6;
+  --empleado-accent: #f59e0b;
+  --empleado-bg: #f0f9ff;
+  --empleado-text: #1e293b;
+  --empleado-text-light: #64748b;
+  --empleado-card-bg: #ffffff;
+  --empleado-border: #d1e0f0;
+  --empleado-shadow: rgba(37, 99, 235, 0.1);
+  --empleado-hover: rgba(37, 99, 235, 0.05);
+  --empleado-success: #10b981;
+  --empleado-warning: #f59e0b;
+  --empleado-danger: #ef4444;
+  --empleado-gradient: linear-gradient(135deg, var(--empleado-primary) 0%, var(--empleado-secondary) 100%);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: var(--empleado-text);
+  background-color: var(--empleado-bg);
+}
+
+.empleado-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
+}
+
+/* ============================================
+   HEADER EMPLEADO - MODERNO
+   ============================================ */
+
+.empleado-header {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(225, 225, 225, 0.8);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: var(--transition);
+}
+
+.header-content-empleado {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.logo-empleado {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--empleado-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: var(--transition);
+}
+
+.logo-empleado:hover {
+  transform: translateY(-2px);
+}
+
+.logo-empleado i {
+  flex-shrink: 0;
+  font-size: 1.8rem;
+  background: var(--empleado-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.menu-toggle-empleado {
+  display: none;
+  background: var(--empleado-card-bg);
+  border: 2px solid var(--empleado-border);
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--empleado-text);
+  padding: 0.75rem;
+  border-radius: 50%;
+  transition: var(--transition);
+  flex-shrink: 0;
+  min-width: 50px;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.menu-toggle-empleado:hover {
+  background: var(--empleado-hover);
+  border-color: var(--empleado-primary);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+nav.empleado-nav {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.empleado-nav ul {
+  display: flex;
+  list-style: none;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.empleado-nav li {
+  position: relative;
+}
+
+.empleado-nav a,
+.empleado-nav li a {
+  text-decoration: none;
+  color: var(--empleado-text-light);
+  font-weight: 500;
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  min-height: 48px;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.empleado-nav a:hover,
+.empleado-nav li a:hover {
+  background: var(--empleado-hover);
+  color: var(--empleado-primary);
+  border-color: rgba(37, 99, 235, 0.2);
+  transform: translateY(-2px);
+}
+
+.empleado-nav a.active,
+.empleado-nav li a.active {
+  color: var(--empleado-primary);
+  font-weight: 600;
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+}
+
+.empleado-nav i {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+  background: var(--empleado-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.empleado-nav a:hover i,
+.empleado-nav li a:hover i {
+  transform: translateY(-2px) scale(1.1);
+}
+
+.logout-btn-empleado {
+  background: var(--empleado-gradient);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: var(--transition);
+  white-space: nowrap;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  min-height: 48px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.logout-btn-empleado:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.logout-btn-empleado i {
+  transition: transform 0.3s ease;
+}
+
+.logout-btn-empleado:hover i {
+  transform: rotate(-15deg);
+}
+
+/* ============================================
+   MAIN CONTENT - MODERNO
+   ============================================ */
+
+.empleado-main {
+  flex: 1;
+  padding: 3rem 0;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  width: 100%;
+}
+
+.welcome-section-empleado {
+  background: var(--empleado-card-bg);
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  margin-bottom: 3rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--empleado-border);
+  text-align: center;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.02) 0%, rgba(139, 92, 246, 0.02) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-section-empleado::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--empleado-gradient);
+}
+
+.welcome-section-empleado h1 {
+  color: var(--empleado-primary);
+  margin: 0 0 1rem 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.welcome-section-empleado p {
+  color: var(--empleado-text-light);
+  margin: 0;
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ============================================
+   CARD COMPONENT - MODERNO
+   ============================================ */
+
+.card-empleado {
+  background: var(--empleado-card-bg);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--empleado-border);
+  transition: var(--transition);
+}
+
+.card-empleado:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-empleado h2 {
+  margin: 0 0 1.5rem 0;
+  color: var(--empleado-text);
+  font-size: 1.75rem;
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+}
+
+.card-empleado h2::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: var(--empleado-gradient);
+  border-radius: 2px;
+}
+
+/* ============================================
+   PRODUCT CARDS - MODERNO
+   ============================================ */
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.product-card {
+  background: var(--empleado-card-bg);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  border: 1px solid var(--empleado-border);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+.product-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: white;
+  background: var(--empleado-gradient);
+  transition: var(--transition);
+}
+
+.product-card:hover .product-icon {
+  transform: scale(1.1);
+}
+
+.product-card h3 {
+  color: var(--empleado-text);
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.product-card .description {
+  color: var(--empleado-text-light);
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+}
+
+.product-card .price {
+  color: var(--empleado-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+}
+
+.product-card .stock {
+  color: var(--empleado-success);
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+  font-weight: 500;
+}
+
+.order-btn {
+  background: var(--empleado-gradient);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.order-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.order-btn.disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ============================================
+   TABLE STYLES - MODERNO
+   ============================================ */
+
+.table-container-empleado {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  margin: 1rem 0;
+  display: block;
+  width: 100%;
+  min-width: fit-content;
+  background: var(--empleado-card-bg);
+  border: 1px solid var(--empleado-border);
+  border-radius: var(--radius-lg);
+}
+
+.empleado-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: var(--empleado-card-bg);
+}
+
+.empleado-table thead {
+  background: linear-gradient(to bottom, rgba(37, 99, 235, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border-bottom: 2px solid var(--empleado-border);
+}
+
+.empleado-table th {
+  padding: 1.2rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--empleado-text);
+  font-size: 0.95rem;
+  white-space: nowrap;
+  word-break: break-word;
+  vertical-align: middle;
+  position: relative;
+}
+
+.empleado-table th::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 70%;
+  width: 1px;
+  background: var(--empleado-border);
+  opacity: 0.5;
+}
+
+.empleado-table th:last-child::after {
+  display: none;
+}
+
+.empleado-table td {
+  padding: 1.2rem;
+  border-bottom: 1px solid var(--empleado-border);
+  color: var(--empleado-text-light);
+  font-size: 0.95rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  vertical-align: middle;
+}
+
+.empleado-table tbody tr {
+  transition: var(--transition);
+  border-bottom: 1px solid var(--empleado-border);
+}
+
+.empleado-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.empleado-table tbody tr:hover {
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateX(5px);
+}
+
+/* ============================================
+   BTN STYLES - MODERNO
+   ============================================ */
+
+.btn-empleado {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  min-height: 44px;
+  border: 1px solid transparent;
+}
+
+.btn-primary-empleado {
+  background: var(--empleado-gradient);
+  color: white;
+}
+
+.btn-primary-empleado:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary-empleado {
+  background: var(--empleado-secondary);
+  color: white;
+}
+
+.btn-secondary-empleado:hover {
+  background: #7c3aed;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-outline-empleado {
+  background: transparent;
+  border: 2px solid var(--empleado-primary);
+  color: var(--empleado-primary);
+}
+
+.btn-outline-empleado:hover {
+  background: var(--empleado-primary);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   STATUS BADGES - MODERNO
+   ============================================ */
+
+.status-badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--empleado-success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--empleado-warning);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.inactive {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--empleado-danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================
+   STOCK BADGES - MODERNO
+   ============================================ */
+
+.stock-badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  min-width: 80px;
+}
+
+.stock-bajo {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--empleado-danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.stock-medio {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--empleado-warning);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.stock-normal {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--empleado-success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* ============================================
+   ALERT STYLES - MODERNO
+   ============================================ */
+
+.alert {
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.alert-success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--empleado-success);
+}
+
+.alert-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--empleado-danger);
+}
+
+.alert i {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   VENTA SECTION - MODERNO
+   ============================================ */
+
+.venta-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.productos-disponibles,
+.carrito-venta {
+  background: var(--empleado-card-bg);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--empleado-border);
+  height: 400px;
+  overflow-y: auto;
+}
+
+.producto-item {
+  padding: 1rem;
+  border: 2px solid var(--empleado-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.producto-item:hover {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: var(--empleado-success);
+}
+
+.producto-item.selected {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--empleado-success);
+}
+
+.item-carrito {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--empleado-border);
+}
+
+.acciones-carrito {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-carrito {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+
+.btn-add {
+  background: var(--empleado-success);
+  color: white;
+}
+
+.btn-remove {
+  background: var(--empleado-danger);
+  color: white;
+}
+
+.btn-finalizar {
+  background: var(--empleado-gradient);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.btn-finalizar:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.total-carrito {
+  font-size: 1.25rem;
+  font-weight: bold;
+  text-align: right;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--empleado-border);
+  color: var(--empleado-primary);
+}
+
+/* ============================================
+   MODAL STYLES - MODERNO
+   ============================================ */
+
+.modal-stock {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content-stock {
+  background-color: var(--empleado-card-bg);
+  margin: 15% auto;
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  width: 400px;
+  max-width: 90%;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--empleado-border);
+  animation: slideIn 0.3s ease;
+}
+
+.form-group-stock {
+  margin-bottom: 1.5rem;
+}
+
+.form-group-stock label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--empleado-text);
+}
+
+.form-group-stock input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--empleado-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.form-group-stock input:focus {
+  border-color: var(--empleado-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* ============================================
+   RESPONSIVE - MODERNO
+   ============================================ */
+
+@media (max-width: 1200px) {
+  .empleado-main {
+    padding: 2rem 1.5rem;
+  }
+  
+  .welcome-section-empleado {
+    padding: 2rem;
+  }
+  
+  .card-empleado {
+    padding: 1.5rem;
+  }
+  
+  .venta-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .menu-toggle-empleado {
+    display: flex;
+  }
+
+  .header-content-empleado {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  nav.empleado-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(225, 225, 225, 0.8);
+    padding: 1rem 0;
+    flex-direction: column;
+    width: 100%;
+    z-index: 999;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: slideDown 0.3s ease;
+  }
+
+  .empleado-header.nav-open nav.empleado-nav {
+    display: flex;
+  }
+
+  .empleado-nav ul {
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  .empleado-nav li {
+    width: 100%;
+  }
+
+  .empleado-nav a,
+  .empleado-nav li a {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 0;
+    justify-content: flex-start;
+    border-left: 4px solid transparent;
+  }
+
+  .empleado-nav a:hover,
+  .empleado-nav li a:hover {
+    background: rgba(37, 99, 235, 0.1);
+    border-left-color: var(--empleado-primary);
+  }
+
+  .empleado-nav a.active,
+  .empleado-nav li a.active {
+    background: rgba(37, 99, 235, 0.15);
+    border-left-color: var(--empleado-primary);
+  }
+
+  .logout-btn-empleado {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 0;
+    padding: 1rem 1.5rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--empleado-border);
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content-empleado {
+    padding: 0 1rem;
+  }
+
+  .logo-empleado {
+    font-size: 1.3rem;
+  }
+
+  .logo-empleado span {
+    display: none;
+  }
+
+  .empleado-nav a span,
+  .empleado-nav li a span {
+    display: none;
+  }
+
+  .empleado-nav a,
+  .empleado-nav li a {
+    padding: 1rem 1.2rem;
+    justify-content: center;
+    min-width: 44px;
+  }
+
+  .empleado-nav i {
+    margin-right: 0;
+  }
+
+  .logout-btn-empleado span {
+    display: none;
+  }
+
+  .logout-btn-empleado {
+    padding: 0.8rem 1.2rem;
+  }
+
+  .empleado-main {
+    padding: 1.5rem 1rem;
+  }
+
+  .welcome-section-empleado {
+    padding: 1.5rem;
+  }
+
+  .welcome-section-empleado h1 {
+    font-size: 2rem;
+  }
+
+  .card-empleado {
+    padding: 1.2rem;
+  }
+
+  .empleado-table th,
+  .empleado-table td {
+    padding: 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content-empleado {
+    padding: 0 0.75rem;
+  }
+
+  .empleado-main {
+    padding: 1rem 0.75rem;
+  }
+
+  .welcome-section-empleado {
+    padding: 1rem;
+  }
+
+  .welcome-section-empleado h1 {
+    font-size: 1.75rem;
+  }
+
+  .card-empleado {
+    padding: 1rem;
+  }
+
+  .empleado-nav a,
+  .empleado-nav li a {
+    padding: 0.8rem 1rem;
+    min-height: 40px;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   ANIMATIONS - MODERNO
+   ============================================ */
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ============================================
+   CUSTOM INPUT STYLES - MODERNO
+   ============================================ */
+
+select {
+  padding: 0.75rem;
+  border: 2px solid var(--empleado-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  background-color: var(--empleado-card-bg);
+  color: var(--empleado-text);
+  transition: var(--transition);
+  width: 100%;
+}
+
+select:focus {
+  border-color: var(--empleado-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+input[type="number"] {
+  padding: 0.75rem;
+  border: 2px solid var(--empleado-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  background-color: var(--empleado-card-bg);
+  color: var(--empleado-text);
+  transition: var(--transition);
+  width: 100%;
+}
+
+input[type="number"]:focus {
+  border-color: var(--empleado-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}

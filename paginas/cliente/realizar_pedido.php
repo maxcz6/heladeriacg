@@ -1,37 +1,58 @@
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
-verificarSesion();
-verificarRol('cliente');
-include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');
 
-// Obtener el ID del cliente basado en el usuario
-$stmt_cliente = $pdo->prepare("SELECT id_cliente FROM usuarios WHERE id_usuario = :id_usuario");
-$stmt_cliente->bindParam(':id_usuario', $_SESSION['id_usuario']);
-$stmt_cliente->execute();
-$usuario_cliente = $stmt_cliente->fetch(PDO::FETCH_ASSOC);
+// Check if user is logged in
+$logueado = isset($_SESSION['logueado']) && $_SESSION['logueado'] === true;
 
-if (!$usuario_cliente) {
-    // Si no hay cliente asociado, crear uno
-    $stmt_insert = $pdo->prepare("INSERT INTO clientes (nombre, dni, telefono, direccion, correo) VALUES (:nombre, :dni, :telefono, :direccion, :correo)");
-    $stmt_insert->bindParam(':nombre', $_SESSION['username']);
-    $stmt_insert->bindParam(':dni', '00000000');
-    $stmt_insert->bindParam(':telefono', '000000000');
-    $stmt_insert->bindParam(':direccion', 'No especificada');
-    $stmt_insert->bindParam(':correo', 'cliente@concelato.com');
-    $stmt_insert->execute();
+// Include clientes_db.php only if user is logged in
+if ($logueado) {
+    include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
 
-    $id_cliente = $pdo->lastInsertId();
+    // Obtener el ID del cliente basado en el usuario
+    $stmt_cliente = $pdo->prepare("SELECT id_cliente FROM usuarios WHERE id_usuario = :id_usuario");
+    $stmt_cliente->bindParam(':id_usuario', $_SESSION['id_usuario']);
+    $stmt_cliente->execute();
+    $usuario_cliente = $stmt_cliente->fetch(PDO::FETCH_ASSOC);
 
-    // Actualizar el usuario para asociar con el cliente
-    $stmt_update = $pdo->prepare("UPDATE usuarios SET id_cliente = :id_cliente WHERE id_usuario = :id_usuario");
-    $stmt_update->bindParam(':id_cliente', $id_cliente);
-    $stmt_update->bindParam(':id_usuario', $_SESSION['id_usuario']);
-    $stmt_update->execute();
+    if (!$usuario_cliente) {
+        // Si no hay cliente asociado, crear uno
+        $stmt_insert = $pdo->prepare("INSERT INTO clientes (nombre, dni, telefono, direccion, correo) VALUES (:nombre, :dni, :telefono, :direccion, :correo)");
+        $stmt_insert->bindParam(':nombre', $_SESSION['username']);
+        $stmt_insert->bindParam(':dni', '00000000');
+        $stmt_insert->bindParam(':telefono', '000000000');
+        $stmt_insert->bindParam(':direccion', 'No especificada');
+        $stmt_insert->bindParam(':correo', 'cliente@concelato.com');
+        $stmt_insert->execute();
+
+        $id_cliente = $pdo->lastInsertId();
+
+        // Actualizar el usuario para asociar con el cliente
+        $stmt_update = $pdo->prepare("UPDATE usuarios SET id_cliente = :id_cliente WHERE id_usuario = :id_usuario");
+        $stmt_update->bindParam(':id_cliente', $id_cliente);
+        $stmt_update->bindParam(':id_usuario', $_SESSION['id_usuario']);
+        $stmt_update->execute();
+    } else {
+        $id_cliente = $usuario_cliente['id_cliente'];
+    }
+
+    $productos = obtenerProductos();
 } else {
-    $id_cliente = $usuario_cliente['id_cliente'];
+    $productos = [];
+    // For guests, get all products
+    try {
+        $stmt = $pdo->prepare("
+            SELECT id_producto, nombre, descripcion, precio, stock
+            FROM productos
+            WHERE stock > 0 AND activo = 1
+            ORDER BY nombre
+        ");
+        $stmt->execute();
+        $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch(PDOException $e) {
+        $productos = [];
+    }
 }
-
-$productos = obtenerProductos();
 ?>
 
 <!DOCTYPE html>
@@ -40,37 +61,59 @@ $productos = obtenerProductos();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Realizar Pedido - Concelato Gelateria</title>
-    <link rel="stylesheet" href="/heladeriacg/css/cliente/estilos_cliente.css">
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/modernos_estilos_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="client-container">
-        <header class="client-header">
-            <div class="header-content">
-                <div class="logo">
+    <div class="cliente-container">
+        <header class="cliente-header">
+            <div class="header-content-cliente">
+                <button class="menu-toggle-cliente" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="cliente-nav">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo-cliente">
                     <i class="fas fa-ice-cream"></i>
-                    Concelato Gelateria - Cliente
+                    <span>Concelato <?php echo $logueado ? 'Cliente' : 'Invitado'; ?></span>
                 </div>
-                <nav>
+                <nav id="cliente-nav" class="cliente-nav">
                     <ul>
-                        <li><a href="index.php"><i class="fas fa-home"></i> Inicio</a></li>
-                        <li><a href="pedidos.php"><i class="fas fa-list"></i> Mis Pedidos</a></li>
-                        <li><a href="estado_pedido.php"><i class="fas fa-truck"></i> Estado Pedido</a></li>
+                        <li><a href="index.php">
+                            <i class="fas fa-home"></i> <span>Inicio</span>
+                        </a></li>
+                        <li><a href="pedidos.php">
+                            <i class="fas fa-shopping-cart"></i> <span><?php echo $logueado ? 'Mis Pedidos' : 'Realizar Pedidos'; ?></span>
+                        </a></li>
+                        <li><a href="estado_pedido.php">
+                            <i class="fas fa-truck"></i> <span>Estado Pedido</span>
+                        </a></li>
+                        <li><a href="invitado.php">
+                            <i class="fas fa-ice-cream"></i> <span>Nuestros Sabores</span>
+                        </a></li>
                     </ul>
                 </nav>
-                <button class="logout-btn" onclick="cerrarSesion()">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                <?php if ($logueado): ?>
+                <button class="logout-btn-cliente" onclick="cerrarSesion()">
+                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
                 </button>
+                <?php else: ?>
+                <a href="../publico/login.php" class="btn-cliente btn-primary-cliente">
+                    <i class="fas fa-sign-in-alt"></i> <span>Iniciar Sesión</span>
+                </a>
+                <?php endif; ?>
             </div>
         </header>
 
-        <main class="client-main">
-            <div class="welcome-section">
-                <h1>Realizar Pedido</h1>
-                <p>Selecciona los productos que deseas agregar a tu pedido</p>
+        <main class="cliente-main">
+            <div class="welcome-section-cliente">
+                <h1><?php echo $logueado ? 'Realizar Pedido' : 'Ver Productos'; ?></h1>
+                <p><?php echo $logueado ? 'Selecciona los productos que deseas agregar a tu pedido' : 'Explora nuestros productos. Para realizar pedidos, inicia sesión.'; ?></p>
+                <?php if (!$logueado): ?>
+                <p class="guest-notice">Estás navegando como invitado. Para realizar pedidos, inicia sesión o regístrate.</p>
+                <?php endif; ?>
             </div>
 
+            <?php if ($logueado): ?>
             <div class="order-container">
                 <div class="products-section">
                     <h2>Productos Disponibles</h2>
@@ -115,10 +158,41 @@ $productos = obtenerProductos();
                     </button>
                 </div>
             </div>
+            <?php else: ?>
+            <div class="card-cliente">
+                <h2>Productos Disponibles</h2>
+                <div class="products-grid">
+                    <?php foreach ($productos as $producto): ?>
+                    <div class="product-card">
+                        <div class="product-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                            <i class="fas fa-ice-cream"></i>
+                        </div>
+                        <h3><?php echo htmlspecialchars($producto['nombre']); ?></h3>
+                        <p class="description"><?php echo htmlspecialchars($producto['descripcion']); ?></p>
+                        <p class="price">S/. <?php echo number_format($producto['precio'], 2); ?></p>
+                        <p class="stock">Stock: <?php echo $producto['stock']; ?>L</p>
+                        <button class="btn-cliente btn-outline-cliente" onclick="showLoginPrompt()">
+                            <i class="fas fa-lock"></i> Agregar al Carrito
+                        </button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <div class="card-cliente" style="text-align: center;">
+                <h3 style="margin-bottom: 1rem;">¿Quieres hacer un pedido?</h3>
+                <a href="../publico/login.php" class="btn-cliente btn-primary-cliente">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </a>
+                <a href="../publico/login.php?tab=register" class="btn-cliente btn-outline-cliente" style="margin-left: 1rem;">
+                    <i class="fas fa-user-plus"></i> Registrarse
+                </a>
+            </div>
+            <?php endif; ?>
         </main>
     </div>
 
     <script>
+        <?php if ($logueado): ?>
         let cart = [];
 
         function addToCart(id, name, price, stock) {
@@ -250,12 +324,25 @@ $productos = obtenerProductos();
                 alert('Error de conexión al confirmar el pedido.');
             });
         }
+        <?php endif; ?>
 
         function cerrarSesion() {
             if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
+
+        function showLoginPrompt() {
+            if (confirm('Debes iniciar sesión para realizar un pedido. ¿Deseas ir a la página de inicio de sesión?')) {
+                window.location.href = '../publico/login.php';
+            }
+        }
+
+        // Toggle mobile menu
+        document.querySelector('.menu-toggle-cliente').addEventListener('click', function() {
+            const nav = document.querySelector('.cliente-nav ul');
+            nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+        });
     </script>
 </body>
 </html>

@@ -11,6 +11,34 @@ $tipo_mensaje = '';
 // Inicializar sucursal local
 $sucursal_local = new SucursalLocal($pdo);
 
+// Obtener sucursal ANTES de usarla
+$sucursal_actual = $sucursal_local->obtenerDatosSucursalActual($pdo);
+
+// Si no hay sucursal seleccionada, obtener de la sesión o la primera disponible
+if (!$sucursal_actual) {
+    // Intentar obtener la sucursal del usuario actual
+    if (!empty($_SESSION['id_sucursal'])) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM sucursales WHERE id_sucursal = :id");
+            $stmt->bindParam(':id', $_SESSION['id_sucursal'], PDO::PARAM_INT);
+            $stmt->execute();
+            $sucursal_actual = $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $sucursal_actual = null;
+        }
+    }
+    
+    // Si aún no hay sucursal, obtener la primera disponible
+    if (!$sucursal_actual) {
+        try {
+            $stmt = $pdo->query("SELECT * FROM sucursales LIMIT 1");
+            $sucursal_actual = $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $sucursal_actual = null;
+        }
+    }
+}
+
 // Manejar operaciones de configuración
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['accion'])) {
@@ -28,14 +56,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
             case 'backup_db':
                 // Crear backup de la base de datos
-                $archivo = 'backup_heladeria_' . date('Y-m-d_H-i-s') . '.sql';
+                // Obtener información de sucursal
+                $sucursal_id = isset($sucursal_actual['id_sucursal']) ? $sucursal_actual['id_sucursal'] : 'N-A';
+                $sucursal_nombre = isset($sucursal_actual['nombre']) ? str_replace(' ', '_', substr($sucursal_actual['nombre'], 0, 25)) : 'sucursal_' . $sucursal_id;
+                
+                $timestamp = date('Y-m-d_H-i-s');
+                $archivo_sql = 'backup_' . $sucursal_nombre . '_' . $timestamp . '.sql';
                 $ruta = $_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/backups/';
 
                 if (!is_dir($ruta)) {
                     mkdir($ruta, 0755, true);
                 }
 
-                $archivo_completo = $ruta . $archivo;
+                $archivo_sql_completo = $ruta . $archivo_sql;
 
                 // Usar PDO para exportar la base de datos de forma segura
                 try {
@@ -44,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $username = 'root';
                     $password = '';
 
-                    $comando = 'mysqldump --host=' . $host . ' --user=' . $username . ' --password="' . $password . '" ' . $dbname . ' > ' . escapeshellarg($archivo_completo);
+                    $comando = 'mysqldump --host=' . $host . ' --user=' . $username . ' --password="' . $password . '" ' . $dbname . ' > ' . escapeshellarg($archivo_sql_completo);
 
                     // Ejecutar mysqldump en Windows/XAMPP
                     $process = proc_open($comando, [
@@ -52,6 +85,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         1 => ['pipe', 'w'],
                         2 => ['pipe', 'w']
                     ], $pipes);
+
+                    $backup_exitoso = false;
 
                     if (is_resource($process)) {
                         $stdout = stream_get_contents($pipes[1]);
@@ -63,61 +98,136 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         $return_code = proc_close($process);
 
-                        if ($return_code === 0 && file_exists($archivo_completo)) {
-                            $mensaje = 'Backup creado exitosamente: ' . $archivo;
-                            $tipo_mensaje = 'success';
+                        if ($return_code === 0 && file_exists($archivo_sql_completo)) {
+                            $backup_exitoso = true;
+                            
+                            // Agregar información de sucursal al inicio del archivo
+                            $contenido_existente = file_get_contents($archivo_sql_completo);
+                            
+                            $informacion_sucursal = "-- ================================================================================\n";
+                            $informacion_sucursal .= "-- BACKUP DE BASE DE DATOS - HELADERÍA CG\n";
+                            $informacion_sucursal .= "-- ================================================================================\n";
+                            $informacion_sucursal .= "-- SUCURSAL: " . htmlspecialchars($sucursal_actual['nombre'] ?? 'Desconocida') . "\n";
+                            $informacion_sucursal .= "-- ID SUCURSAL: " . (isset($sucursal_actual['id_sucursal']) ? $sucursal_actual['id_sucursal'] : 'N/A') . "\n";
+                            $informacion_sucursal .= "-- DIRECCIÓN: " . htmlspecialchars($sucursal_actual['direccion'] ?? 'N/A') . "\n";
+                            $informacion_sucursal .= "-- TELÉFONO: " . htmlspecialchars($sucursal_actual['telefono'] ?? 'N/A') . "\n";
+                            $informacion_sucursal .= "-- EMAIL: " . htmlspecialchars($sucursal_actual['email'] ?? 'N/A') . "\n";
+                            $informacion_sucursal .= "-- ================================================================================\n";
+                            $informacion_sucursal .= "-- FECHA DE BACKUP: " . date('Y-m-d H:i:s') . "\n";
+                            $informacion_sucursal .= "-- USUARIO QUE CREÓ: " . htmlspecialchars($_SESSION['username']) . " (ID: " . htmlspecialchars($_SESSION['id_usuario']) . ")\n";
+                            $informacion_sucursal .= "-- BASE DE DATOS: " . $dbname . "\n";
+                            $informacion_sucursal .= "-- ================================================================================\n\n";
+                            
+                            file_put_contents($archivo_sql_completo, $informacion_sucursal . $contenido_existente);
                         } else {
-                            $mensaje = 'Error al crear backup: ' . $stderr;
-                            $tipo_mensaje = 'error';
+                            $backup_exitoso = false;
                         }
                     } else {
-                        // Alternativa: crear backup manual
-                        $backup_content = "-- Backup de heladeriacgbd\n-- Fecha: " . date('Y-m-d H:i:s') . "\n\n";
+                        $backup_exitoso = false;
+                    }
 
-                        // Exportar estructura y datos de tablas importantes
-                        $tables = ['productos', 'clientes', 'vendedores', 'ventas', 'detalle_ventas', 'usuarios', 'proveedores', 'roles'];
+                    // Si mysqldump falló, crear backup manual en SQL
+                    if (!$backup_exitoso) {
+                        $backup_content = "-- ================================================================================\n";
+                        $backup_content .= "-- BACKUP DE BASE DE DATOS - HELADERÍA CG\n";
+                        $backup_content .= "-- ================================================================================\n";
+                        $backup_content .= "-- SUCURSAL: " . htmlspecialchars($sucursal_actual['nombre'] ?? 'Desconocida') . "\n";
+                        $backup_content .= "-- ID SUCURSAL: " . (isset($sucursal_actual['id_sucursal']) ? $sucursal_actual['id_sucursal'] : 'N/A') . "\n";
+                        $backup_content .= "-- DIRECCIÓN: " . htmlspecialchars($sucursal_actual['direccion'] ?? 'N/A') . "\n";
+                        $backup_content .= "-- TELÉFONO: " . htmlspecialchars($sucursal_actual['telefono'] ?? 'N/A') . "\n";
+                        $backup_content .= "-- EMAIL: " . htmlspecialchars($sucursal_actual['email'] ?? 'N/A') . "\n";
+                        $backup_content .= "-- ================================================================================\n";
+                        $backup_content .= "-- FECHA DE BACKUP: " . date('Y-m-d H:i:s') . "\n";
+                        $backup_content .= "-- USUARIO QUE CREÓ: " . htmlspecialchars($_SESSION['username']) . " (ID: " . htmlspecialchars($_SESSION['id_usuario']) . ")\n";
+                        $backup_content .= "-- BASE DE DATOS: " . $dbname . "\n";
+                        $backup_content .= "-- ================================================================================\n\n";
+                        $backup_content .= "SET FOREIGN_KEY_CHECKS=0;\n";
+                        $backup_content .= "SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n\n";
 
-                        foreach ($tables as $table) {
-                            // Obtener estructura de la tabla
-                            $stmt = $pdo->query("SHOW CREATE TABLE $table");
-                            $create_table = $stmt->fetch();
-                            $backup_content .= $create_table[1] . ";\n\n";
+                        // Obtener todas las tablas de la base de datos
+                        try {
+                            $stmt = $pdo->query("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '$dbname'");
+                            $all_tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                        } catch (Exception $e) {
+                            $all_tables = ['sucursales', 'roles', 'usuarios', 'productos', 'clientes', 'vendedores', 'proveedores', 'ventas', 'detalle_ventas', 'inventario_sucursal', 'cupones', 'audit_logs'];
+                        }
 
-                            // Exportar datos
-                            $stmt = $pdo->query("SELECT * FROM $table");
-                            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($all_tables as $table) {
+                            try {
+                                // Obtener estructura de la tabla
+                                $stmt = $pdo->query("SHOW CREATE TABLE `$table`");
+                                $create_table = $stmt->fetch();
+                                $backup_content .= "\n-- ================================================================================\n";
+                                $backup_content .= "-- TABLA: " . strtoupper($table) . "\n";
+                                $backup_content .= "-- ================================================================================\n";
+                                $backup_content .= "DROP TABLE IF EXISTS `$table`;\n";
+                                $backup_content .= $create_table[1] . ";\n\n";
 
-                            if (!empty($rows)) {
-                                $backup_content .= "INSERT INTO `$table` VALUES ";
-                                $values = [];
-                                foreach ($rows as $row) {
-                                    $row_values = [];
-                                    foreach ($row as $value) {
-                                        if ($value === null) {
-                                            $row_values[] = 'NULL';
-                                        } else {
-                                            $row_values[] = $pdo->quote($value);
+                                // Exportar datos
+                                $stmt = $pdo->query("SELECT * FROM `$table`");
+                                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                if (!empty($rows)) {
+                                    $backup_content .= "-- Datos de la tabla `$table` (" . count($rows) . " registros)\n";
+                                    $backup_content .= "INSERT INTO `$table` VALUES ";
+                                    $values = [];
+                                    foreach ($rows as $row) {
+                                        $row_values = [];
+                                        foreach ($row as $value) {
+                                            if ($value === null) {
+                                                $row_values[] = 'NULL';
+                                            } else {
+                                                $row_values[] = $pdo->quote($value);
+                                            }
                                         }
+                                        $values[] = '(' . implode(',', $row_values) . ')';
                                     }
-                                    $values[] = '(' . implode(',', $row_values) . ')';
+                                    $backup_content .= implode(",\n", $values) . ";\n\n";
+                                } else {
+                                    $backup_content .= "-- Tabla vacía\n\n";
                                 }
-                                $backup_content .= implode(',', $values) . ";\n\n";
+                            } catch (Exception $e) {
+                                $backup_content .= "-- Error al exportar tabla $table: " . $e->getMessage() . "\n\n";
                             }
                         }
 
-                        if (file_put_contents($archivo_completo, $backup_content)) {
-                            $mensaje = 'Backup creado exitosamente (método alternativo): ' . $archivo;
-                            $tipo_mensaje = 'success';
-                        } else {
-                            $mensaje = 'No se pudo crear el backup';
-                            $tipo_mensaje = 'error';
+                        $backup_content .= "SET FOREIGN_KEY_CHECKS=1;\n";
+                        $backup_content .= "\n-- Fin del Backup\n";
+
+                        if (file_put_contents($archivo_sql_completo, $backup_content)) {
+                            $backup_exitoso = true;
                         }
+                    }
+
+                    if ($backup_exitoso) {
+                        $tamaño_archivo = filesize($archivo_sql_completo);
+                        $tamaño_legible = $tamaño_archivo > 1024 * 1024 ? 
+                            round($tamaño_archivo / (1024 * 1024), 2) . ' MB' :
+                            ($tamaño_archivo > 1024 ? 
+                            round($tamaño_archivo / 1024, 2) . ' KB' : 
+                            $tamaño_archivo . ' B');
+                        
+                        $nombre_sucursal = isset($sucursal_actual['nombre']) ? $sucursal_actual['nombre'] : 'Desconocida';
+                        $id_sucursal = isset($sucursal_actual['id_sucursal']) ? $sucursal_actual['id_sucursal'] : 'N/A';
+                        
+                        $mensaje = '✓ Backup creado exitosamente<br>' .
+                                   '<strong>Sucursal:</strong> ' . htmlspecialchars($nombre_sucursal) . ' (ID: ' . $id_sucursal . ')<br>' .
+                                   '<small style="opacity: 0.85; display: block; margin-top: 8px;">' .
+                                   'Archivo: ' . htmlspecialchars($archivo_sql) . '<br>' .
+                                   'Tamaño: ' . $tamaño_legible . '<br>' .
+                                   'Fecha: ' . date('Y-m-d H:i:s') . 
+                                   '</small>';
+                        $tipo_mensaje = 'success';
+                    } else {
+                        $mensaje = 'Error: No se pudo crear el backup de la base de datos';
+                        $tipo_mensaje = 'error';
                     }
                 } catch (Exception $e) {
                     $mensaje = 'Error al crear backup: ' . $e->getMessage();
                     $tipo_mensaje = 'error';
                 }
                 break;
+
             case 'configurar_sistema':
                 // Actualmente no se almacena la configuración en la base de datos
                 // pero se puede implementar si se necesita
@@ -132,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $metricas = obtenerMetricasSistema();
 $stats_inventario = obtenerEstadisticasInventario();
 $stats_ventas = obtenerEstadisticasVentas();
-$sucursal_actual = $sucursal_local->obtenerDatosSucursalActual($pdo);
+
 $modo_offline = $sucursal_local->estaEnModoOffline();
 ?>
 
@@ -161,7 +271,15 @@ $modo_offline = $sucursal_local->estaEnModoOffline();
             <?php if ($mensaje): ?>
             <div class="mensaje <?php echo $tipo_mensaje; ?>">
                 <i class="fas fa-<?php echo $tipo_mensaje === 'success' ? 'check-circle' : 'exclamation-circle'; ?>"></i>
-                <?php echo htmlspecialchars($mensaje); ?>
+                <div class="mensaje-contenido">
+                    <?php 
+                    if ($tipo_mensaje === 'success') {
+                        echo $mensaje;
+                    } else {
+                        echo htmlspecialchars($mensaje);
+                    }
+                    ?>
+                </div>
             </div>
             <?php endif; ?>
 

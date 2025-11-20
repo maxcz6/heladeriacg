@@ -71,72 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heladería Concelato - Empleado - Inventario</title>
-    <link rel="stylesheet" href="/heladeriacg/css/empleado/estilos_empleado.css">
+    <link rel="stylesheet" href="/heladeriacg/css/empleado/modernos_estilos_empleado.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .stock-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .stock-bajo {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-        
-        .stock-medio {
-            background: #fef3c7;
-            color: #d97706;
-        }
-        
-        .stock-normal {
-            background: #d1fadf;
-            color: #16a34a;
-        }
-        
-        .modal-stock {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content-stock {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 400px;
-            max-width: 90%;
-        }
-        
-        .form-group-stock {
-            margin-bottom: 15px;
-        }
-        
-        .form-group-stock label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        
-        .form-group-stock input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-    </style>
 </head>
 <body>
     <div class="empleado-container">
@@ -192,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 </div>
                 <?php unset($_SESSION['mensaje_exito']); ?>
             <?php endif; ?>
-            
+
             <?php if (isset($_SESSION['mensaje_error'])): ?>
                 <div class="alert alert-error" role="status" aria-live="polite">
                     <i class="fas fa-exclamation-circle"></i>
@@ -257,23 +194,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 <form method="POST">
                     <input type="hidden" name="accion" value="actualizar_stock">
                     <input type="hidden" name="id_producto" id="id_producto_modal">
-                    
+
                     <div class="form-group-stock">
                         <label for="producto_nombre">Producto</label>
                         <input type="text" id="producto_nombre" readonly>
                     </div>
-                    
+
                     <div class="form-group-stock">
                         <label for="stock_actual">Stock Actual</label>
                         <input type="number" id="stock_actual" readonly>
                     </div>
-                    
+
                     <div class="form-group-stock">
                         <label for="nuevo_stock">Nuevo Stock (Litros)</label>
                         <input type="number" id="nuevo_stock" name="nuevo_stock" min="0" required>
                     </div>
-                    
-                    <div style="margin-top: 20px; text-align: right;">
+
+                    <div style="margin-top: 1.5rem; text-align: right;">
                         <button type="button" class="btn-empleado btn-secondary-empleado" onclick="cerrarModalStock()">Cancelar</button>
                         <button type="submit" class="btn-empleado btn-primary-empleado">Actualizar</button>
                     </div>
@@ -288,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
-        
+
         function abrirModalStock(id, nombre, stock) {
             document.getElementById('id_producto_modal').value = id;
             document.getElementById('producto_nombre').value = nombre;
@@ -296,11 +233,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
             document.getElementById('nuevo_stock').value = stock;
             document.getElementById('modalStock').style.display = 'block';
         }
-        
+
         function cerrarModalStock() {
             document.getElementById('modalStock').style.display = 'none';
         }
-        
+
         // Cerrar modal si se hace clic fuera
         window.onclick = function(event) {
             const modal = document.getElementById('modalStock');
@@ -308,7 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 cerrarModalStock();
             }
         }
-        
+
         // Toggle mobile menu
         document.querySelector('.menu-toggle-empleado').addEventListener('click', function() {
             const nav = document.querySelector('.empleado-nav ul');

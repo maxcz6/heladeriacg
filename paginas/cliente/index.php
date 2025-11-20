@@ -1,10 +1,16 @@
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
-verificarSesion();
-verificarRol('cliente');
-include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');  // Include conexion for guests
 
-// Obtener productos para mostrar al cliente
+// Check if user is logged in
+$logueado = isset($_SESSION['logueado']) && $_SESSION['logueado'] === true;
+
+// Include clientes_db.php only if user is logged in
+if ($logueado) {
+    include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
+}
+
+// Obtener productos para mostrar
 try {
     $stmt = $pdo->prepare("
         SELECT p.*, pr.empresa as proveedor_nombre
@@ -25,8 +31,8 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heladería Concelato - Cliente</title>
-    <link rel="stylesheet" href="/heladeriacg/css/cliente/estilos_cliente.css">
+    <title>Heladería Concelato - <?php echo $logueado ? 'Cliente' : 'Invitado'; ?></title>
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/modernos_estilos_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -40,7 +46,7 @@ try {
                 </button>
                 <div class="logo-cliente">
                     <i class="fas fa-ice-cream"></i>
-                    <span>Concelato Cliente</span>
+                    <span>Concelato <?php echo $logueado ? 'Cliente' : 'Invitado'; ?></span>
                 </div>
                 <nav id="cliente-nav" class="cliente-nav">
                     <ul>
@@ -48,7 +54,7 @@ try {
                             <i class="fas fa-home"></i> <span>Inicio</span>
                         </a></li>
                         <li><a href="pedidos.php">
-                            <i class="fas fa-shopping-cart"></i> <span>Mis Pedidos</span>
+                            <i class="fas fa-shopping-cart"></i> <span><?php echo $logueado ? 'Mis Pedidos' : 'Realizar Pedidos'; ?></span>
                         </a></li>
                         <li><a href="estado_pedido.php">
                             <i class="fas fa-truck"></i> <span>Estado Pedido</span>
@@ -58,9 +64,15 @@ try {
                         </a></li>
                     </ul>
                 </nav>
+                <?php if ($logueado): ?>
                 <button class="logout-btn-cliente" onclick="cerrarSesion()">
                     <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
                 </button>
+                <?php else: ?>
+                <a href="../publico/login.php" class="btn-cliente btn-primary-cliente">
+                    <i class="fas fa-sign-in-alt"></i> <span>Iniciar Sesión</span>
+                </a>
+                <?php endif; ?>
             </div>
         </header>
 
@@ -68,6 +80,9 @@ try {
             <div class="welcome-section-cliente">
                 <h1>Bienvenido a Concelato Gelateria</h1>
                 <p>Disfruta de nuestros deliciosos helados artesanales</p>
+                <?php if (!$logueado): ?>
+                <p class="guest-notice">Estás navegando como invitado. Para realizar pedidos, inicia sesión o regístrate.</p>
+                <?php endif; ?>
             </div>
 
             <div class="card-cliente">
@@ -104,9 +119,15 @@ try {
                                         </span>
                                     </td>
                                     <td>
+                                        <?php if ($logueado): ?>
                                         <button class="btn-cliente btn-primary-cliente" onclick="realizarPedido(<?php echo $producto['id_producto']; ?>)">
                                             <i class="fas fa-shopping-cart"></i> Pedir
                                         </button>
+                                        <?php else: ?>
+                                        <button class="btn-cliente btn-outline-cliente" onclick="showLoginPrompt()">
+                                            <i class="fas fa-lock"></i> Pedir
+                                        </button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -128,14 +149,17 @@ try {
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
-        
+
         function realizarPedido(id_producto) {
-            // Simular proceso de pedido
-            alert('Funcionalidad de pedido del producto ID: ' + id_producto);
-            // Aquí iría la lógica para crear un pedido
-            // window.location.href = 'realizar_pedido.php?id=' + id_producto;
+            window.location.href = 'realizar_pedido.php?id=' + id_producto;
         }
-        
+
+        function showLoginPrompt() {
+            if (confirm('Debes iniciar sesión para realizar un pedido. ¿Deseas ir a la página de inicio de sesión?')) {
+                window.location.href = '../publico/login.php';
+            }
+        }
+
         // Toggle mobile menu
         document.querySelector('.menu-toggle-cliente').addEventListener('click', function() {
             const nav = document.getElementById('cliente-nav');

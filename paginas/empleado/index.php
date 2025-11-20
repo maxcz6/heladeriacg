@@ -39,7 +39,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heladería Concelato - Empleado</title>
-    <link rel="stylesheet" href="/heladeriacg/css/empleado/estilos_empleado.css">
+    <link rel="stylesheet" href="/heladeriacg/css/empleado/modernos_estilos_empleado.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -69,7 +69,7 @@ try {
                         <li><a href="pedidos_recibidos.php">
                             <i class="fas fa-list"></i> <span>Pedidos</span>
                         </a></li>
-                        <li><a href="productos.php">
+                        <li><a href="../admin/productos.php">
                             <i class="fas fa-box"></i> <span>Productos</span>
                         </a></li>
                         <li><a href="clientes.php">
@@ -189,20 +189,20 @@ try {
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
-        
+
         function actualizarStock(id_producto) {
             // Simular actualización de stock
             alert('Funcionalidad de actualización de stock para producto ID: ' + id_producto);
             // Aquí iría la lógica para actualizar el stock
             // window.location.href = 'actualizar_stock.php?id=' + id_producto;
         }
-        
+
         function verDetalleVenta(id_venta) {
             // Simular ver detalle de venta
             alert('Funcionalidad de ver detalle de venta ID: ' + id_venta);
             // Aquí iría la lógica para ver el detalle de la venta
         }
-        
+
         // Toggle mobile menu
         document.querySelector('.menu-toggle-empleado').addEventListener('click', function() {
             const nav = document.getElementById('empleado-nav');

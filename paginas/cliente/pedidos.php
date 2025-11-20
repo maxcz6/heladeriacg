@@ -1,28 +1,17 @@
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');
-verificarSesion();
-verificarRol('cliente');
 
-// Obtener productos disponibles para el cliente
-try {
-    $stmt = $pdo->prepare("
-        SELECT p.id_producto, p.nombre, p.sabor, p.descripcion, p.precio, p.stock,
-               pr.empresa as proveedor_nombre
-        FROM productos p
-        LEFT JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
-        WHERE p.activo = 1 AND p.stock > 0
-        ORDER BY p.nombre
-    ");
-    $stmt->execute();
-    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
-    $productos = [];
-    error_log("Error al obtener productos para cliente: " . $e->getMessage());
+// Check if user is logged in
+$logueado = isset($_SESSION['logueado']) && $_SESSION['logueado'] === true;
+
+// Include clientes_db.php only if user is logged in
+if ($logueado) {
+    include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
 }
 
-// Manejar creación de pedido
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'crear_pedido') {
+// For logged in users, handle order creation
+if ($logueado && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'crear_pedido') {
     $id_producto = $_POST['id_producto'];
     $cantidad = $_POST['cantidad'];
     $id_cliente = $_SESSION['id_cliente'];
@@ -74,6 +63,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
         error_log("Error al crear pedido: " . $e->getMessage());
     }
 }
+
+// Obtener productos disponibles
+try {
+    $stmt = $pdo->prepare("
+        SELECT p.id_producto, p.nombre, p.sabor, p.descripcion, p.precio, p.stock,
+               pr.empresa as proveedor_nombre
+        FROM productos p
+        LEFT JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
+        WHERE p.activo = 1 AND p.stock > 0
+        ORDER BY p.nombre
+    ");
+    $stmt->execute();
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    $productos = [];
+    error_log("Error al obtener productos para cliente: " . $e->getMessage());
+}
 ?>
 
 <!DOCTYPE html>
@@ -81,8 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heladería Concelato - Cliente - Pedidos</title>
-    <link rel="stylesheet" href="/heladeriacg/css/cliente/estilos_cliente.css">
+    <title>Heladería Concelato - <?php echo $logueado ? 'Cliente' : 'Invitado'; ?> - Pedidos</title>
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/modernos_estilos_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -96,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 </button>
                 <div class="logo-cliente">
                     <i class="fas fa-ice-cream"></i>
-                    <span>Concelato Cliente</span>
+                    <span>Concelato <?php echo $logueado ? 'Cliente' : 'Invitado'; ?></span>
                 </div>
                 <nav id="cliente-nav" class="cliente-nav">
                     <ul>
@@ -104,26 +110,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                             <i class="fas fa-home"></i> <span>Inicio</span>
                         </a></li>
                         <li><a href="pedidos.php" class="active">
-                            <i class="fas fa-shopping-cart"></i> <span>Mis Pedidos</span>
+                            <i class="fas fa-shopping-cart"></i> <span><?php echo $logueado ? 'Mis Pedidos' : 'Realizar Pedidos'; ?></span>
                         </a></li>
                         <li><a href="estado_pedido.php">
                             <i class="fas fa-truck"></i> <span>Estado Pedido</span>
                         </a></li>
-                        <li><a href="../publico/index.php">
+                        <li><a href="invitado.php">
                             <i class="fas fa-ice-cream"></i> <span>Nuestros Sabores</span>
                         </a></li>
                     </ul>
                 </nav>
+                <?php if ($logueado): ?>
                 <button class="logout-btn-cliente" onclick="cerrarSesion()">
                     <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
                 </button>
+                <?php else: ?>
+                <a href="../publico/login.php" class="btn-cliente btn-primary-cliente">
+                    <i class="fas fa-sign-in-alt"></i> <span>Iniciar Sesión</span>
+                </a>
+                <?php endif; ?>
             </div>
         </header>
 
         <main class="cliente-main">
             <div class="welcome-section-cliente">
-                <h1>Realizar Pedido</h1>
-                <p>Selecciona los productos que deseas comprar</p>
+                <h1><?php echo $logueado ? 'Realizar Pedido' : 'Ver Productos Disponibles'; ?></h1>
+                <p><?php echo $logueado ? 'Selecciona los productos que deseas comprar' : 'Explora nuestros productos. Para realizar pedidos, inicia sesión.'; ?></p>
+                <?php if (!$logueado): ?>
+                <p class="guest-notice">Estás navegando como invitado. Para realizar pedidos, inicia sesión o regístrate.</p>
+                <?php endif; ?>
             </div>
 
             <!-- Mensajes -->
@@ -134,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 </div>
                 <?php unset($_SESSION['mensaje_exito']); ?>
             <?php endif; ?>
-            
+
             <?php if (isset($_SESSION['mensaje_error'])): ?>
                 <div class="alert alert-error" role="status" aria-live="polite">
                     <i class="fas fa-exclamation-circle"></i>
@@ -170,6 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                                     <td><?php echo $producto['stock']; ?>L</td>
                                     <td><?php echo htmlspecialchars($producto['proveedor_nombre'] ?: 'N/A'); ?></td>
                                     <td>
+                                        <?php if ($logueado): ?>
                                         <form method="POST" style="display: inline;">
                                             <input type="hidden" name="accion" value="crear_pedido">
                                             <input type="hidden" name="id_producto" value="<?php echo $producto['id_producto']; ?>">
@@ -178,6 +194,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                                                 <i class="fas fa-shopping-cart"></i> Pedir
                                             </button>
                                         </form>
+                                        <?php else: ?>
+                                        <button class="btn-cliente btn-outline-cliente" onclick="showLoginPrompt()">
+                                            <i class="fas fa-lock"></i> Pedir
+                                        </button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -199,7 +220,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
-        
+
+        function showLoginPrompt() {
+            if (confirm('Debes iniciar sesión para realizar un pedido. ¿Deseas ir a la página de inicio de sesión?')) {
+                window.location.href = '../publico/login.php';
+            }
+        }
+
         // Toggle mobile menu
         document.querySelector('.menu-toggle-cliente').addEventListener('click', function() {
             const nav = document.querySelector('.cliente-nav ul');

@@ -1,28 +1,37 @@
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');
-verificarSesion();
-verificarRol('cliente');
 
-// Obtener pedidos del cliente
-try {
-    $stmt = $pdo->prepare("
-        SELECT v.id_venta, v.fecha, v.total, v.estado, v.nota,
-               GROUP_CONCAT(CONCAT(p.nombre, ' x', dv.cantidad)) as productos,
-               COUNT(dv.id_detalle) as total_items
-        FROM ventas v
-        LEFT JOIN detalle_ventas dv ON v.id_venta = dv.id_venta
-        LEFT JOIN productos p ON dv.id_producto = p.id_producto
-        WHERE v.id_cliente = :id_cliente
-        GROUP BY v.id_venta, v.fecha, v.total, v.estado, v.nota
-        ORDER BY v.fecha DESC
-    ");
-    $stmt->bindParam(':id_cliente', $_SESSION['id_cliente']);
-    $stmt->execute();
-    $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
-    $pedidos = [];
-    error_log("Error al obtener pedidos del cliente: " . $e->getMessage());
+// Check if user is logged in
+$logueado = isset($_SESSION['logueado']) && $_SESSION['logueado'] === true;
+
+// Include clientes_db.php only if user is logged in
+if ($logueado) {
+    include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
+}
+
+$pedidos = [];
+if ($logueado) {
+    // Obtener pedidos del cliente
+    try {
+        $stmt = $pdo->prepare("
+            SELECT v.id_venta, v.fecha, v.total, v.estado, v.nota,
+                   GROUP_CONCAT(CONCAT(p.nombre, ' x', dv.cantidad)) as productos,
+                   COUNT(dv.id_detalle) as total_items
+            FROM ventas v
+            LEFT JOIN detalle_ventas dv ON v.id_venta = dv.id_venta
+            LEFT JOIN productos p ON dv.id_producto = p.id_producto
+            WHERE v.id_cliente = :id_cliente
+            GROUP BY v.id_venta, v.fecha, v.total, v.estado, v.nota
+            ORDER BY v.fecha DESC
+        ");
+        $stmt->bindParam(':id_cliente', $_SESSION['id_cliente']);
+        $stmt->execute();
+        $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch(PDOException $e) {
+        $pedidos = [];
+        error_log("Error al obtener pedidos del cliente: " . $e->getMessage());
+    }
 }
 ?>
 
@@ -31,8 +40,8 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heladería Concelato - Cliente - Estado de Pedidos</title>
-    <link rel="stylesheet" href="/heladeriacg/css/cliente/estilos_cliente.css">
+    <title>Heladería Concelato - <?php echo $logueado ? 'Cliente' : 'Invitado'; ?> - Estado de Pedidos</title>
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/modernos_estilos_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -46,7 +55,7 @@ try {
                 </button>
                 <div class="logo-cliente">
                     <i class="fas fa-ice-cream"></i>
-                    <span>Concelato Cliente</span>
+                    <span>Concelato <?php echo $logueado ? 'Cliente' : 'Invitado'; ?></span>
                 </div>
                 <nav id="cliente-nav" class="cliente-nav">
                     <ul>
@@ -54,28 +63,38 @@ try {
                             <i class="fas fa-home"></i> <span>Inicio</span>
                         </a></li>
                         <li><a href="pedidos.php">
-                            <i class="fas fa-shopping-cart"></i> <span>Mis Pedidos</span>
+                            <i class="fas fa-shopping-cart"></i> <span><?php echo $logueado ? 'Mis Pedidos' : 'Realizar Pedidos'; ?></span>
                         </a></li>
                         <li><a href="estado_pedido.php" class="active">
                             <i class="fas fa-truck"></i> <span>Estado Pedido</span>
                         </a></li>
-                        <li><a href="../publico/index.php">
+                        <li><a href="invitado.php">
                             <i class="fas fa-ice-cream"></i> <span>Nuestros Sabores</span>
                         </a></li>
                     </ul>
                 </nav>
+                <?php if ($logueado): ?>
                 <button class="logout-btn-cliente" onclick="cerrarSesion()">
                     <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
                 </button>
+                <?php else: ?>
+                <a href="../publico/login.php" class="btn-cliente btn-primary-cliente">
+                    <i class="fas fa-sign-in-alt"></i> <span>Iniciar Sesión</span>
+                </a>
+                <?php endif; ?>
             </div>
         </header>
 
         <main class="cliente-main">
             <div class="welcome-section-cliente">
-                <h1>Estado de Mis Pedidos</h1>
-                <p>Consulta el estado de tus pedidos recientes</p>
+                <h1><?php echo $logueado ? 'Estado de Mis Pedidos' : 'Consulta de Pedidos'; ?></h1>
+                <p><?php echo $logueado ? 'Consulta el estado de tus pedidos recientes' : 'Inicia sesión para ver el estado de tus pedidos.'; ?></p>
+                <?php if (!$logueado): ?>
+                <p class="guest-notice">Estás navegando como invitado. Para ver tus pedidos, inicia sesión o regístrate.</p>
+                <?php endif; ?>
             </div>
 
+            <?php if ($logueado): ?>
             <div class="card-cliente">
                 <div class="table-container-cliente">
                     <table class="cliente-table">
@@ -101,8 +120,8 @@ try {
                                     <td><?php echo $pedido['total_items']; ?></td>
                                     <td>S/. <?php echo number_format($pedido['total'], 2); ?></td>
                                     <td>
-                                        <span class="status-badge <?php 
-                                            echo $pedido['estado'] === 'Procesada' ? 'active' : 
+                                        <span class="status-badge <?php
+                                            echo $pedido['estado'] === 'Procesada' ? 'active' :
                                             ($pedido['estado'] === 'Pendiente' ? 'warning' : 'inactive'); ?>">
                                             <?php echo $pedido['estado']; ?>
                                         </span>
@@ -124,6 +143,18 @@ try {
                     </table>
                 </div>
             </div>
+            <?php else: ?>
+            <div class="card-cliente">
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-lock" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+                    <h3>Inicia sesión para ver tus pedidos</h3>
+                    <p>Debes estar registrado para consultar el estado de tus pedidos</p>
+                    <a href="../publico/login.php" class="btn-cliente btn-primary-cliente" style="margin-top: 1rem;">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                </div>
+            </div>
+            <?php endif; ?>
         </main>
     </div>
 
@@ -133,12 +164,12 @@ try {
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
-        
+
         function verDetallePedido(id_pedido) {
             // Mostrar detalles del pedido
             window.location.href = 'detalle_pedido.php?id=' + id_pedido;
         }
-        
+
         // Toggle mobile menu
         document.querySelector('.menu-toggle-cliente').addEventListener('click', function() {
             const nav = document.querySelector('.cliente-nav ul');
