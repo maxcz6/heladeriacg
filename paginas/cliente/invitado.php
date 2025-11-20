@@ -3,40 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concelato Gelateria - Invitado</title>
-    <link rel="stylesheet" href="/heladeriacg/css/cliente/modernos_estilos_cliente.css">
+    <title>Concelato Gelateria - Nuestros Sabores</title>
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/estilos_cliente.css">
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/navbar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="cliente-container">
-        <header class="cliente-header">
-            <div class="header-content-cliente">
-                <button class="menu-toggle-cliente" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="cliente-nav">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="logo-cliente">
-                    <i class="fas fa-ice-cream"></i>
-                    <span>Concelato Gelateria - Invitado</span>
-                </div>
-                <nav id="cliente-nav" class="cliente-nav">
-                    <ul>
-                        <li><a href="../../paginas/publico/index.php">
-                            <i class="fas fa-home"></i> <span>Inicio</span>
-                        </a></li>
-                        <li><a href="index.php">
-                            <i class="fas fa-ice-cream"></i> <span>Nuestros Sabores</span>
-                        </a></li>
-                        <li><a href="../publico/login.php">
-                            <i class="fas fa-sign-in-alt"></i> <span>Iniciar Sesión</span>
-                        </a></li>
-                    </ul>
-                </nav>
-                <a href="../publico/login.php" class="btn-cliente btn-primary-cliente">
-                    <i class="fas fa-sign-in-alt"></i> <span>Iniciar Sesión</span>
-                </a>
-            </div>
-        </header>
+        <?php include 'includes/navbar.php'; ?>
 
         <main class="cliente-main">
             <div class="welcome-section-cliente">
@@ -244,12 +219,6 @@
                 window.location.href = '../publico/login.php';
             }
         }
-
-        // Toggle mobile menu
-        document.querySelector('.menu-toggle-cliente').addEventListener('click', function() {
-            const nav = document.getElementById('cliente-nav');
-            nav.style.display = nav.style.display === 'block' ? 'none' : 'block';
-        });
     </script>
 </body>
 </html>

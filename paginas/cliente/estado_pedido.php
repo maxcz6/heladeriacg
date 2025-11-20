@@ -40,50 +40,16 @@ if ($logueado) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Heladería Concelato - <?php echo $logueado ? 'Cliente' : 'Invitado'; ?> - Estado de Pedidos</title>
-    <link rel="stylesheet" href="/heladeriacg/css/cliente/modernos_estilos_cliente.css">
+    <title>Heladería Concelato - Estado de Pedidos</title>
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/estilos_cliente.css">
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/navbar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="cliente-container">
         <!-- Header con navegación -->
-        <header class="cliente-header">
-            <div class="header-content-cliente">
-                <button class="menu-toggle-cliente" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="cliente-nav">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="logo-cliente">
-                    <i class="fas fa-ice-cream"></i>
-                    <span>Concelato <?php echo $logueado ? 'Cliente' : 'Invitado'; ?></span>
-                </div>
-                <nav id="cliente-nav" class="cliente-nav">
-                    <ul>
-                        <li><a href="index.php">
-                            <i class="fas fa-home"></i> <span>Inicio</span>
-                        </a></li>
-                        <li><a href="pedidos.php">
-                            <i class="fas fa-shopping-cart"></i> <span><?php echo $logueado ? 'Mis Pedidos' : 'Realizar Pedidos'; ?></span>
-                        </a></li>
-                        <li><a href="estado_pedido.php" class="active">
-                            <i class="fas fa-truck"></i> <span>Estado Pedido</span>
-                        </a></li>
-                        <li><a href="invitado.php">
-                            <i class="fas fa-ice-cream"></i> <span>Nuestros Sabores</span>
-                        </a></li>
-                    </ul>
-                </nav>
-                <?php if ($logueado): ?>
-                <button class="logout-btn-cliente" onclick="cerrarSesion()">
-                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
-                </button>
-                <?php else: ?>
-                <a href="../publico/login.php" class="btn-cliente btn-primary-cliente">
-                    <i class="fas fa-sign-in-alt"></i> <span>Iniciar Sesión</span>
-                </a>
-                <?php endif; ?>
-            </div>
-        </header>
+        <?php include 'includes/navbar.php'; ?>
 
         <main class="cliente-main">
             <div class="welcome-section-cliente">
