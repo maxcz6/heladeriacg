@@ -1,37 +1,29 @@
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');
 verificarSesion();
 verificarRol('cliente');
-include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
 
-// Obtener el ID del cliente basado en el usuario
-$stmt_cliente = $pdo->prepare("SELECT id_cliente FROM usuarios WHERE id_usuario = :id_usuario");
-$stmt_cliente->bindParam(':id_usuario', $_SESSION['id_usuario']);
-$stmt_cliente->execute();
-$usuario_cliente = $stmt_cliente->fetch(PDO::FETCH_ASSOC);
-
-if (!$usuario_cliente) {
-    // Si no hay cliente asociado, crear uno
-    $stmt_insert = $pdo->prepare("INSERT INTO clientes (nombre, dni, telefono, direccion, correo) VALUES (:nombre, :dni, :telefono, :direccion, :correo)");
-    $stmt_insert->bindParam(':nombre', $_SESSION['username']);
-    $stmt_insert->bindParam(':dni', '00000000');
-    $stmt_insert->bindParam(':telefono', '000000000');
-    $stmt_insert->bindParam(':direccion', 'No especificada');
-    $stmt_insert->bindParam(':correo', 'cliente@concelato.com');
-    $stmt_insert->execute();
-
-    $id_cliente = $pdo->lastInsertId();
-
-    // Actualizar el usuario para asociar con el cliente
-    $stmt_update = $pdo->prepare("UPDATE usuarios SET id_cliente = :id_cliente WHERE id_usuario = :id_usuario");
-    $stmt_update->bindParam(':id_cliente', $id_cliente);
-    $stmt_update->bindParam(':id_usuario', $_SESSION['id_usuario']);
-    $stmt_update->execute();
-} else {
-    $id_cliente = $usuario_cliente['id_cliente'];
+// Obtener pedidos del cliente
+try {
+    $stmt = $pdo->prepare("
+        SELECT v.id_venta, v.fecha, v.total, v.estado, v.nota,
+               GROUP_CONCAT(CONCAT(p.nombre, ' x', dv.cantidad)) as productos,
+               COUNT(dv.id_detalle) as total_items
+        FROM ventas v
+        LEFT JOIN detalle_ventas dv ON v.id_venta = dv.id_venta
+        LEFT JOIN productos p ON dv.id_producto = p.id_producto
+        WHERE v.id_cliente = :id_cliente
+        GROUP BY v.id_venta, v.fecha, v.total, v.estado, v.nota
+        ORDER BY v.fecha DESC
+    ");
+    $stmt->bindParam(':id_cliente', $_SESSION['id_cliente']);
+    $stmt->execute();
+    $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    $pedidos = [];
+    error_log("Error al obtener pedidos del cliente: " . $e->getMessage());
 }
-
-$pedidos_recientes = obtenerPedidosCliente($id_cliente);
 ?>
 
 <!DOCTYPE html>
@@ -39,142 +31,97 @@ $pedidos_recientes = obtenerPedidosCliente($id_cliente);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estado de Pedido - Concelato Gelateria</title>
+    <title>Heladería Concelato - Cliente - Estado de Pedidos</title>
     <link rel="stylesheet" href="/heladeriacg/css/cliente/estilos_cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="client-container">
-        <header class="client-header">
-            <div class="header-content">
-                <div class="logo">
+    <div class="cliente-container">
+        <!-- Header con navegación -->
+        <header class="cliente-header">
+            <div class="header-content-cliente">
+                <button class="menu-toggle-cliente" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="cliente-nav">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo-cliente">
                     <i class="fas fa-ice-cream"></i>
-                    Concelato Gelateria - Cliente
+                    <span>Concelato Cliente</span>
                 </div>
-                <nav>
+                <nav id="cliente-nav" class="cliente-nav">
                     <ul>
-                        <li><a href="index.php"><i class="fas fa-home"></i> Inicio</a></li>
-                        <li><a href="pedidos.php"><i class="fas fa-list"></i> Mis Pedidos</a></li>
-                        <li><a href="realizar_pedido.php"><i class="fas fa-shopping-cart"></i> Realizar Pedido</a></li>
+                        <li><a href="index.php">
+                            <i class="fas fa-home"></i> <span>Inicio</span>
+                        </a></li>
+                        <li><a href="pedidos.php">
+                            <i class="fas fa-shopping-cart"></i> <span>Mis Pedidos</span>
+                        </a></li>
+                        <li><a href="estado_pedido.php" class="active">
+                            <i class="fas fa-truck"></i> <span>Estado Pedido</span>
+                        </a></li>
+                        <li><a href="../publico/index.php">
+                            <i class="fas fa-ice-cream"></i> <span>Nuestros Sabores</span>
+                        </a></li>
                     </ul>
                 </nav>
-                <button class="logout-btn" onclick="cerrarSesion()">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                <button class="logout-btn-cliente" onclick="cerrarSesion()">
+                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
                 </button>
             </div>
         </header>
 
-        <main class="client-main">
-            <div class="welcome-section">
-                <h1>Estado de Pedido</h1>
-                <p>Consulta el estado actual de tus pedidos</p>
+        <main class="cliente-main">
+            <div class="welcome-section-cliente">
+                <h1>Estado de Mis Pedidos</h1>
+                <p>Consulta el estado de tus pedidos recientes</p>
             </div>
 
-            <div class="tracking-section">
-                <div class="search-order">
-                    <input type="text" id="orderId" placeholder="Ingresa el ID de tu pedido...">
-                    <button class="search-btn" onclick="searchOrder()">
-                        <i class="fas fa-search"></i> Buscar Pedido
-                    </button>
-                </div>
-
-                <div class="order-details" id="orderDetails" style="display: none;">
-                    <div class="order-header">
-                        <h3>ID Pedido: <span id="orderNumber"></span></h3>
-                        <span class="status-tag in-progress" id="orderStatus"></span>
-                    </div>
-
-                    <div class="order-progress">
-                        <div class="progress-step completed">
-                            <i class="fas fa-check-circle"></i>
-                            <p>Confirmado</p>
-                        </div>
-                        <div class="progress-step" id="stepPreparacion">
-                            <i class="fas fa-clock"></i>
-                            <p>En preparación</p>
-                        </div>
-                        <div class="progress-step" id="stepCamino">
-                            <i class="fas fa-truck"></i>
-                            <p>En camino</p>
-                        </div>
-                        <div class="progress-step" id="stepEntregado">
-                            <i class="fas fa-check"></i>
-                            <p>Entregado</p>
-                        </div>
-                    </div>
-
-                    <div class="order-info">
-                        <div class="info-item">
-                            <i class="fas fa-calendar"></i>
-                            <div>
-                                <p>Fecha de pedido</p>
-                                <p id="orderDate"></p>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-shopping-cart"></i>
-                            <div>
-                                <p>Productos</p>
-                                <p id="orderProducts"></p>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-dollar-sign"></i>
-                            <div>
-                                <p>Total</p>
-                                <p id="orderTotal"></p>
-                            </div>
-                        </div>
-                        <div class="info-item">
-                            <i class="fas fa-truck"></i>
-                            <div>
-                                <p>Entrega</p>
-                                <p id="deliveryMethod"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="order-products">
-                        <h4>Productos:</h4>
-                        <ul id="productsList">
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="no-order" id="noOrder">
-                    <i class="fas fa-search"></i>
-                    <p>Ingresa el ID de tu pedido para ver su estado</p>
-                </div>
-            </div>
-
-            <div class="recent-orders">
-                <h2>Mis Pedidos Recientes</h2>
-                <div class="recent-orders-list">
-                    <?php if (count($pedidos_recientes) > 0): ?>
-                        <?php foreach ($pedidos_recientes as $pedido): ?>
-                            <div class="recent-order-item">
-                                <div class="order-info">
-                                    <p>ID: <?php echo htmlspecialchars($pedido['id_venta']); ?></p>
-                                    <p>Fecha: <?php echo date('d/m/Y', strtotime($pedido['fecha'])); ?></p>
-                                </div>
-                                <div class="order-status">
-                                    <span class="status-tag <?php echo strtolower($pedido['estado']) === 'procesada' ? 'delivered' : (strtolower($pedido['estado']) === 'pendiente' ? 'pending' : 'in-progress'); ?>">
-                                        <?php
-                                        switch(strtolower($pedido['estado'])) {
-                                            case 'pendiente': echo 'Pendiente'; break;
-                                            case 'procesada': echo 'Procesada'; break;
-                                            case 'anulada': echo 'Anulada'; break;
-                                            default: echo htmlspecialchars($pedido['estado']); break;
-                                        }
-                                        ?>
-                                    </span>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <p>No tienes pedidos recientes</p>
-                    <?php endif; ?>
+            <div class="card-cliente">
+                <div class="table-container-cliente">
+                    <table class="cliente-table">
+                        <thead>
+                            <tr>
+                                <th>ID Pedido</th>
+                                <th>Fecha</th>
+                                <th>Productos</th>
+                                <th>Total Items</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Nota</th>
+                                <th>Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($pedidos)): ?>
+                                <?php foreach ($pedidos as $pedido): ?>
+                                <tr>
+                                    <td>#<?php echo $pedido['id_venta']; ?></td>
+                                    <td><?php echo date('d/m/Y H:i', strtotime($pedido['fecha'])); ?></td>
+                                    <td><?php echo htmlspecialchars($pedido['productos']); ?></td>
+                                    <td><?php echo $pedido['total_items']; ?></td>
+                                    <td>S/. <?php echo number_format($pedido['total'], 2); ?></td>
+                                    <td>
+                                        <span class="status-badge <?php 
+                                            echo $pedido['estado'] === 'Procesada' ? 'active' : 
+                                            ($pedido['estado'] === 'Pendiente' ? 'warning' : 'inactive'); ?>">
+                                            <?php echo $pedido['estado']; ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($pedido['nota'] ?: 'N/A'); ?></td>
+                                    <td>
+                                        <button class="btn-cliente btn-secondary-cliente" onclick="verDetallePedido(<?php echo $pedido['id_venta']; ?>)">
+                                            <i class="fas fa-eye"></i> Detalles
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="8" style="text-align: center;">No tienes pedidos registrados</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -186,73 +133,17 @@ $pedidos_recientes = obtenerPedidosCliente($id_cliente);
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
-
-        function searchOrder() {
-            const orderId = document.getElementById('orderId').value;
-
-            if (orderId.trim() === '') {
-                alert('Por favor, ingresa un ID de pedido válido.');
-                return;
-            }
-
-            // Hacer una solicitud al servidor para obtener el estado del pedido
-            fetch(`obtener_estado_pedido.php?id=${orderId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Actualizar la interfaz con la información del pedido
-                    document.getElementById('orderNumber').textContent = data.pedido.id_venta;
-                    document.getElementById('orderStatus').textContent = 'En preparación';
-                    document.getElementById('orderStatus').className = 'status-tag in-progress';
-                    document.getElementById('orderDate').textContent = data.pedido.fecha;
-                    document.getElementById('orderTotal').textContent = 'S/. ' + parseFloat(data.pedido.total).toFixed(2);
-                    document.getElementById('orderProducts').textContent = data.pedido.productos.split(', ').length + ' artículos';
-                    document.getElementById('deliveryMethod').textContent = 'Recojo en tienda'; // Por defecto
-                    document.getElementById('productsList').innerHTML = data.pedido.productos.replace(/<br>/g, '</li><li>').replace(/, /g, '</li><li>') + '</li>';
-
-                    document.getElementById('orderDetails').style.display = 'block';
-                    document.getElementById('noOrder').style.display = 'none';
-
-                    // Actualizar el estado del progreso
-                    updateProgress('En preparación');
-                } else {
-                    alert('Pedido no encontrado');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al buscar el pedido');
-            });
+        
+        function verDetallePedido(id_pedido) {
+            // Mostrar detalles del pedido
+            window.location.href = 'detalle_pedido.php?id=' + id_pedido;
         }
-
-        function updateProgress(status) {
-            // Actualizar el estado del progreso
-            const stepPreparacion = document.getElementById('stepPreparacion');
-            const stepCamino = document.getElementById('stepCamino');
-            const stepEntregado = document.getElementById('stepEntregado');
-
-            if (status === 'En preparación') {
-                stepPreparacion.classList.add('active');
-                stepCamino.classList.remove('active');
-                stepEntregado.classList.remove('active');
-            } else if (status === 'En camino') {
-                stepPreparacion.classList.add('completed');
-                stepCamino.classList.add('active');
-                stepEntregado.classList.remove('active');
-            } else if (status === 'Entregado') {
-                stepPreparacion.classList.add('completed');
-                stepCamino.classList.add('completed');
-                stepEntregado.classList.add('active');
-            }
-        }
-
-        // Simular actualización del estado del pedido
-        setInterval(updateOrderStatus, 30000); // Actualizar cada 30 segundos
-
-        function updateOrderStatus() {
-            // En una implementación real, esto se haría con AJAX y PHP
-            // Por ahora, solo simulamos un cambio de estado
-        }
+        
+        // Toggle mobile menu
+        document.querySelector('.menu-toggle-cliente').addEventListener('click', function() {
+            const nav = document.querySelector('.cliente-nav ul');
+            nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+        });
     </script>
 </body>
 </html>

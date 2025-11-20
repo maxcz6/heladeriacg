@@ -3,72 +3,34 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
 verificarSesion();
 verificarRol('empleado');
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
-include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sucursales_db.php');
 
-// Obtener el ID del empleado basado en el usuario
-$stmt_empleado = $pdo->prepare("SELECT id_vendedor, id_sucursal FROM usuarios WHERE id_usuario = :id_usuario");
-$stmt_empleado->bindParam(':id_usuario', $_SESSION['id_usuario']);
-$stmt_empleado->execute();
-$usuario_empleado = $stmt_empleado->fetch(PDO::FETCH_ASSOC);
+// Obtener información para mostrar al empleado
+try {
+    // Obtener productos
+    $stmt_productos = $pdo->prepare("
+        SELECT p.*, pr.empresa as proveedor_nombre
+        FROM productos p
+        LEFT JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
+        WHERE p.activo = 1
+        ORDER BY p.nombre
+    ");
+    $stmt_productos->execute();
+    $productos = $stmt_productos->fetchAll(PDO::FETCH_ASSOC);
 
-if (!$usuario_empleado) {
-    // Si no hay empleado asociado, redireccionar
-    header('Location: ../publico/login.php');
-    exit();
-} else {
-    $id_vendedor = $usuario_empleado['id_vendedor'];
-    $id_sucursal = $usuario_empleado['id_sucursal'];
-    
-    // Si no tiene sucursal asignada, se la asignamos a la principal
-    if (!$id_sucursal) {
-        $stmt_sucursal = $pdo->prepare("SELECT id_sucursal FROM sucursales WHERE activa = 1 LIMIT 1");
-        $stmt_sucursal->execute();
-        $sucursal = $stmt_sucursal->fetch(PDO::FETCH_ASSOC);
-        if ($sucursal) {
-            $id_sucursal = $sucursal['id_sucursal'];
-            $stmt_update = $pdo->prepare("UPDATE usuarios SET id_sucursal = :id_sucursal WHERE id_usuario = :id_usuario");
-            $stmt_update->bindParam(':id_sucursal', $id_sucursal);
-            $stmt_update->bindParam(':id_usuario', $_SESSION['id_usuario']);
-            $stmt_update->execute();
-        }
-    }
+    // Obtener ventas recientes
+    $stmt_ventas = $pdo->prepare("
+        SELECT v.*, c.nombre as cliente_nombre
+        FROM ventas v
+        LEFT JOIN clientes c ON v.id_cliente = c.id_cliente
+        ORDER BY v.fecha DESC
+        LIMIT 5
+    ");
+    $stmt_ventas->execute();
+    $ventas_recientes = $stmt_ventas->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    $productos = [];
+    $ventas_recientes = [];
 }
-
-// Obtener información de la sucursal actual
-$sucursal_info = obtenerSucursalPorId($id_sucursal);
-$empleados_sucursal = obtenerEmpleadosPorSucursal($id_sucursal);
-$inventario_sucursal = obtenerInventarioPorSucursal($id_sucursal);
-
-// Obtener productos activos disponibles en la sucursal
-$stmt_productos = $pdo->prepare("
-    SELECT p.id_producto, p.nombre, p.sabor, p.descripcion, p.precio, i.stock_sucursal as stock
-    FROM productos p
-    JOIN inventario_sucursal i ON p.id_producto = i.id_producto
-    WHERE p.activo = 1 AND i.id_sucursal = :id_sucursal AND i.stock_sucursal > 0
-    ORDER BY p.nombre
-");
-$stmt_productos->bindParam(':id_sucursal', $id_sucursal);
-$stmt_productos->execute();
-$productos = $stmt_productos->fetchAll(PDO::FETCH_ASSOC);
-
-// Obtener estadísticas del día
-$stmt_stats = $pdo->prepare("
-    SELECT COUNT(*) as total_ventas, SUM(total) as total_ingresos 
-    FROM ventas 
-    WHERE DATE(fecha) = CURDATE() AND id_sucursal = :id_sucursal
-");
-$stmt_stats->bindParam(':id_sucursal', $id_sucursal);
-$stmt_stats->execute();
-$stats = $stmt_stats->fetch(PDO::FETCH_ASSOC);
-
-$stmt_pedidos = $pdo->prepare("
-    SELECT COUNT(*) as total_pedidos 
-    FROM ventas 
-    WHERE DATE(fecha) = CURDATE() AND id_sucursal = :id_sucursal AND estado = 'Pendiente'
-");
-$stmt_pedidos->bindParam(':id_sucursal', $id_sucursal);
-$stmt_pedidos->execute();
-$pedidos_count = $stmt_pedidos->fetch(PDO::FETCH_ASSOC)['total_pedidos'];
 ?>
 
 <!DOCTYPE html>
@@ -76,133 +38,146 @@ $pedidos_count = $stmt_pedidos->fetch(PDO::FETCH_ASSOC)['total_pedidos'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Empleado - <?php echo htmlspecialchars($sucursal_info['nombre'] ?? 'Sucursal Principal'); ?></title>
+    <title>Heladería Concelato - Empleado</title>
     <link rel="stylesheet" href="/heladeriacg/css/empleado/estilos_empleado.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="employee-container">
-        <header class="employee-header">
-            <div class="header-content">
-                <div class="logo">
+    <div class="empleado-container">
+        <!-- Header con navegación -->
+        <header class="empleado-header">
+            <div class="header-content-empleado">
+                <button class="menu-toggle-empleado" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="empleado-nav">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo-empleado">
                     <i class="fas fa-ice-cream"></i>
-                    <?php echo htmlspecialchars($sucursal_info['nombre'] ?? 'Heladería'); ?> - Empleado
+                    <span>Concelato Empleado</span>
                 </div>
-                <nav>
+                <nav id="empleado-nav" class="empleado-nav">
                     <ul>
-                        <li><a href="ventas.php"><i class="fas fa-shopping-cart"></i> Ventas</a></li>
-                        <li><a href="inventario.php"><i class="fas fa-boxes"></i> Inventario</a></li>
-                        <li><a href="pedidos_recibidos.php"><i class="fas fa-list"></i> Pedidos</a></li>
+                        <li><a href="index.php" class="active">
+                            <i class="fas fa-chart-line"></i> <span>Dashboard</span>
+                        </a></li>
+                        <li><a href="ventas.php">
+                            <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
+                        </a></li>
+                        <li><a href="inventario.php">
+                            <i class="fas fa-boxes"></i> <span>Inventario</span>
+                        </a></li>
+                        <li><a href="pedidos_recibidos.php">
+                            <i class="fas fa-list"></i> <span>Pedidos</span>
+                        </a></li>
+                        <li><a href="productos.php">
+                            <i class="fas fa-box"></i> <span>Productos</span>
+                        </a></li>
+                        <li><a href="clientes.php">
+                            <i class="fas fa-user-friends"></i> <span>Clientes</span>
+                        </a></li>
                     </ul>
                 </nav>
-                <div class="user-info">
-                    <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                    <span class="sucursal-name"><?php echo htmlspecialchars($sucursal_info['nombre'] ?? 'Sin sucursal'); ?></span>
-                </div>
-                <button class="logout-btn" onclick="cerrarSesion()">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                <button class="logout-btn-empleado" onclick="cerrarSesion()">
+                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
                 </button>
             </div>
         </header>
 
-        <main class="employee-main">
-            <div class="welcome-section">
-                <h1>Panel de Empleado</h1>
-                <p>Bienvenido de vuelta, <?php echo htmlspecialchars($_SESSION['username']); ?>!</p>
-                <p>Trabajando en: <strong><?php echo htmlspecialchars($sucursal_info['nombre'] ?? 'Sin sucursal'); ?></strong></p>
+        <main class="empleado-main">
+            <div class="welcome-section-empleado">
+                <h1>Panel de Empleado - <?php echo htmlspecialchars($_SESSION['username']); ?></h1>
+                <p>Aquí puedes gestionar las operaciones diarias</p>
             </div>
 
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?php echo $stats['total_ventas']; ?></h3>
-                        <p>Ventas Hoy</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>S/. <?php echo number_format($stats['total_ingresos'] ?: 0, 2); ?></h3>
-                        <p>Total Hoy</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-tint"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?php echo count(array_filter($inventario_sucursal, function($producto) { return $producto['stock'] < 10; })); ?></h3>
-                        <p>Productos Bajos</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-truck"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3><?php echo $pedidos_count; ?></h3>
-                        <p>Pedidos Pendientes</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="quick-actions">
-                <div class="action-card">
-                    <div class="action-icon">
-                        <i class="fas fa-cash-register"></i>
-                    </div>
-                    <h3>Registrar Venta</h3>
-                    <p>Procesar una nueva venta</p>
-                    <a href="ventas.php" class="action-btn">Iniciar Venta</a>
-                </div>
-                <div class="action-card">
-                    <div class="action-icon">
-                        <i class="fas fa-boxes"></i>
-                    </div>
-                    <h3>Control de Inventario</h3>
-                    <p>Ver y actualizar stock</p>
-                    <a href="inventario.php" class="action-btn">Ver Inventario</a>
-                </div>
-                <div class="action-card">
-                    <div class="action-icon">
-                        <i class="fas fa-clipboard-list"></i>
-                    </div>
-                    <h3>Gestionar Pedidos</h3>
-                    <p>Ver y actualizar estado de pedidos</p>
-                    <a href="pedidos_recibidos.php" class="action-btn">Ver Pedidos</a>
+            <div class="card-empleado">
+                <h2>Productos Disponibles</h2>
+                <div class="table-container-empleado">
+                    <table class="empleado-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Sabor</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Proveedor</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($productos)): ?>
+                                <?php foreach ($productos as $producto): ?>
+                                <tr>
+                                    <td><?php echo $producto['id_producto']; ?></td>
+                                    <td><strong><?php echo htmlspecialchars($producto['nombre']); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($producto['sabor']); ?></td>
+                                    <td>S/. <?php echo number_format($producto['precio'], 2); ?></td>
+                                    <td><?php echo $producto['stock']; ?>L</td>
+                                    <td><?php echo htmlspecialchars($producto['proveedor_nombre'] ?: 'N/A'); ?></td>
+                                    <td>
+                                        <span class="status-badge <?php echo $producto['activo'] ? 'active' : 'inactive'; ?>">
+                                            <?php echo $producto['activo'] ? 'Activo' : 'Inactivo'; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-empleado btn-primary-empleado" onclick="actualizarStock(<?php echo $producto['id_producto']; ?>)">
+                                            <i class="fas fa-boxes"></i> Stock
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="8" style="text-align: center;">No hay productos registrados</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="recent-activity">
-                <h2>Actividad Reciente en <?php echo htmlspecialchars($sucursal_info['nombre'] ?? 'Sucursal'); ?></h2>
-                <div class="activity-list">
-                    <div class="activity-item">
-                        <i class="fas fa-shopping-cart activity-sale"></i>
-                        <div class="activity-info">
-                            <p><?php echo $stats['total_ventas']; ?> ventas procesadas hoy</p>
-                            <span>Hoy</span>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <i class="fas fa-box activity-stock"></i>
-                        <div class="activity-info">
-                            <p><?php echo count($productos); ?> productos disponibles</p>
-                            <span>En stock</span>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <i class="fas fa-user activity-employee"></i>
-                        <div class="activity-info">
-                            <p><?php echo count($empleados_sucursal); ?> empleados en sucursal</p>
-                            <span>Trabajando</span>
-                        </div>
-                    </div>
+            <div class="card-empleado">
+                <h2>Ventas Recientes</h2>
+                <div class="table-container-empleado">
+                    <table class="empleado-table">
+                        <thead>
+                            <tr>
+                                <th>ID Venta</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($ventas_recientes)): ?>
+                                <?php foreach ($ventas_recientes as $venta): ?>
+                                <tr>
+                                    <td><?php echo $venta['id_venta']; ?></td>
+                                    <td><?php echo date('d/m/Y H:i', strtotime($venta['fecha'])); ?></td>
+                                    <td><?php echo htmlspecialchars($venta['cliente_nombre'] ?: 'Cliente Anónimo'); ?></td>
+                                    <td>S/. <?php echo number_format($venta['total'], 2); ?></td>
+                                    <td>
+                                        <span class="status-badge <?php echo $venta['estado'] === 'Procesada' ? 'active' : ($venta['estado'] === 'Pendiente' ? 'warning' : 'inactive'); ?>">
+                                            <?php echo $venta['estado']; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-empleado btn-secondary-empleado" onclick="verDetalleVenta(<?php echo $venta['id_venta']; ?>)">
+                                            <i class="fas fa-eye"></i> Ver
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">No hay ventas recientes</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -214,6 +189,25 @@ $pedidos_count = $stmt_pedidos->fetch(PDO::FETCH_ASSOC)['total_pedidos'];
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
+        
+        function actualizarStock(id_producto) {
+            // Simular actualización de stock
+            alert('Funcionalidad de actualización de stock para producto ID: ' + id_producto);
+            // Aquí iría la lógica para actualizar el stock
+            // window.location.href = 'actualizar_stock.php?id=' + id_producto;
+        }
+        
+        function verDetalleVenta(id_venta) {
+            // Simular ver detalle de venta
+            alert('Funcionalidad de ver detalle de venta ID: ' + id_venta);
+            // Aquí iría la lógica para ver el detalle de la venta
+        }
+        
+        // Toggle mobile menu
+        document.querySelector('.menu-toggle-empleado').addEventListener('click', function() {
+            const nav = document.getElementById('empleado-nav');
+            nav.style.display = nav.style.display === 'block' ? 'none' : 'block';
+        });
     </script>
 </body>
 </html>

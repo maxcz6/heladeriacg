@@ -146,7 +146,7 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
 
 // Obtener productos
 $stmt_productos = $pdo->prepare("
-    SELECT p.id_producto, p.nombre, p.sabor, p.descripcion, p.precio, p.stock, p.activo, p.fecha_registro, pr.empresa as proveedor_nombre
+    SELECT p.id_producto, p.nombre, p.sabor, p.descripcion, p.precio, p.stock, p.id_proveedor, p.activo, p.fecha_registro, pr.empresa as proveedor_nombre
     FROM productos p
     LEFT JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
     ORDER BY p.nombre
@@ -163,58 +163,16 @@ $productos = $stmt_productos->fetchAll(PDO::FETCH_ASSOC);
     <title>Gestión de Productos - Concelato Gelateria</title>
     <link rel="stylesheet" href="../../css/admin/estilos_admin.css">
     <link rel="stylesheet" href="../../css/admin/modal.css">
+    <link rel="stylesheet" href="../../css/admin/navbar.css">
+    <link rel="stylesheet" href="../../css/admin/productos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Header con navegación mejorada y responsiva -->
+    <?php include 'includes/navbar.php'; ?>
+
     <div class="admin-container">
-        <!-- Header con navegación mejorada y responsiva -->
-        <header class="admin-header">
-            <div>
-                <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="logo">
-                    <i class="fas fa-ice-cream"></i>
-                    <span>Concelato Admin</span>
-                </div>
-                <nav id="admin-nav">
-                    <a href="index.php">
-                        <i class="fas fa-chart-line"></i> Dashboard
-                    </a>
-                    <a href="productos.php" class="active">
-                        <i class="fas fa-box"></i> Productos
-                    </a>
-                    <a href="ventas.php">
-                        <i class="fas fa-shopping-cart"></i> Ventas
-                    </a>
-                    <a href="empleados.php">
-                        <i class="fas fa-users"></i> Empleados
-                    </a>
-                    <a href="clientes.php">
-                        <i class="fas fa-user-friends"></i> Clientes
-                    </a>
-                    <a href="proveedores.php">
-                        <i class="fas fa-truck"></i> Proveedores
-                    </a>
-                    <a href="usuarios.php">
-                        <i class="fas fa-user-cog"></i> Usuarios
-                    </a>
-                    <a href="promociones.php">
-                        <i class="fas fa-tag"></i> Promociones
-                    </a>
-                    <a href="sucursales.php">
-                        <i class="fas fa-store"></i> Sucursales
-                    </a>
-                    <a href="configuracion.php">
-                        <i class="fas fa-cog"></i> Configuración
-                    </a>
-                    <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                    </a>
-                </nav>
-            </div>
-        </header>
 
         <main class="admin-main">
             <div class="welcome-section">
@@ -261,53 +219,65 @@ $productos = $stmt_productos->fetchAll(PDO::FETCH_ASSOC);
 
             <!-- Tabla de productos -->
             <div class="table-container">
-                <table class="productos-table">
+                <table id="tablaProductos" class="productos-table" role="table">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Sabor</th>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Stock</th>
-                            <th>Proveedor</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
+                        <tr role="row">
+                            <th role="columnheader">ID</th>
+                            <th role="columnheader">Nombre</th>
+                            <th role="columnheader">Sabor</th>
+                            <th role="columnheader">Descripción</th>
+                            <th role="columnheader">Precio (S/.)</th>
+                            <th role="columnheader">Stock (L)</th>
+                            <th role="columnheader">Proveedor</th>
+                            <th role="columnheader">Estado</th>
+                            <th role="columnheader" aria-label="Acciones">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="productosTable">
-                        <?php foreach ($productos as $producto):
-                            // Determinar el estado de stock
-                            if ($producto['stock'] < 10) {
-                                $estado_stock = 'bajo';
-                            } elseif ($producto['stock'] <= 30) {
-                                $estado_stock = 'medio';
-                            } else {
-                                $estado_stock = 'alto';
-                            }
+                    <tbody>
+                        <?php foreach ($productos as $producto): 
+                            $stockCategory = 'medio';
+                            $stock = isset($producto['stock']) ? floatval($producto['stock']) : 0;
+                            if ($stock < 10) $stockCategory = 'bajo';
+                            elseif ($stock > 30) $stockCategory = 'alto';
+                            
+                            $idProveedor = isset($producto['id_proveedor']) ? $producto['id_proveedor'] : '';
+                            $activo = isset($producto['activo']) ? $producto['activo'] : 0;
                         ?>
-                        <tr data-id="<?php echo $producto['id_producto']; ?>" data-status="<?php echo $producto['activo']; ?>" data-proveedor="<?php echo isset($producto['id_proveedor']) && $producto['id_proveedor'] ? $producto['id_proveedor'] : '0'; ?>" data-stock="<?php echo $estado_stock; ?>">
-                            <td><?php echo $producto['id_producto']; ?></td>
-                            <td><?php echo htmlspecialchars($producto['nombre']); ?></td>
-                            <td><?php echo htmlspecialchars($producto['sabor']); ?></td>
-                            <td><?php echo htmlspecialchars(substr($producto['descripcion'], 0, 50)) . (strlen($producto['descripcion']) > 50 ? '...' : ''); ?></td>
-                            <td>S/. <?php echo number_format($producto['precio'], 2); ?></td>
-                            <td><?php echo $producto['stock']; ?>L</td>
-                            <td><?php echo htmlspecialchars(isset($producto['proveedor_nombre']) && $producto['proveedor_nombre'] ? $producto['proveedor_nombre'] : 'N/A'); ?></td>
-                            <td>
+                        <tr role="row" tabindex="0" 
+                            data-status="<?php echo htmlspecialchars($activo); ?>" 
+                            data-proveedor="<?php echo htmlspecialchars($idProveedor); ?>" 
+                            data-stock="<?php echo htmlspecialchars($stockCategory); ?>"
+                            data-id="<?php echo htmlspecialchars($producto['id_producto']); ?>">
+                            <td data-label="ID"><?php echo htmlspecialchars($producto['id_producto']); ?></td>
+                            <td data-label="Nombre"><strong><?php echo htmlspecialchars($producto['nombre']); ?></strong></td>
+                            <td data-label="Sabor"><?php echo htmlspecialchars($producto['sabor']); ?></td>
+                            <td data-label="Descripción"><?php echo htmlspecialchars(isset($producto['descripcion']) && $producto['descripcion'] ? (strlen($producto['descripcion']) > 50 ? substr($producto['descripcion'], 0, 50) . '...' : $producto['descripcion']) : 'N/A'); ?></td>
+                            <td data-label="Precio">S/. <?php echo number_format(floatval($producto['precio']), 2); ?></td>
+                            <td data-label="Stock"><?php echo htmlspecialchars($producto['stock']); ?>L</td>
+                            <td data-label="Proveedor"><?php echo htmlspecialchars(isset($producto['proveedor_nombre']) && $producto['proveedor_nombre'] ? $producto['proveedor_nombre'] : 'N/A'); ?></td>
+                            <td data-label="Estado">
                                 <span class="status-badge <?php echo $producto['activo'] ? 'active' : 'inactive'; ?>">
                                     <?php echo $producto['activo'] ? 'Activo' : 'Inactivo'; ?>
                                 </span>
                             </td>
-                            <td>
-                                <button class="action-btn edit" onclick="editarProducto(<?php echo $producto['id_producto']; ?>)">
-                                    <i class="fas fa-edit"></i> Editar
+                            <td data-label="Acciones">
+                                <button 
+                                    class="action-btn edit" 
+                                    onclick="editarProducto(<?php echo $producto['id_producto']; ?>)"
+                                    aria-label="Editar producto <?php echo htmlspecialchars($producto['nombre']); ?>">
+                                    <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="action-btn delete" onclick="confirmarEliminar(<?php echo $producto['id_producto']; ?>, '<?php echo addslashes(htmlspecialchars($producto['nombre'])); ?>')">
-                                    <i class="fas fa-trash"></i> Desactivar
+                                <button 
+                                    class="action-btn delete" 
+                                    onclick="confirmarEliminar(<?php echo $producto['id_producto']; ?>, '<?php echo addslashes(htmlspecialchars($producto['nombre'])); ?>')"
+                                    aria-label="Desactivar producto <?php echo htmlspecialchars($producto['nombre']); ?>">
+                                    <i class="fas fa-trash"></i>
                                 </button>
-                                <button class="action-btn secondary" onclick="actualizarStock(<?php echo $producto['id_producto']; ?>, <?php echo $producto['stock']; ?>)">
-                                    <i class="fas fa-boxes"></i> Stock
+                                <button 
+                                    class="action-btn secondary" 
+                                    onclick="actualizarStock(<?php echo $producto['id_producto']; ?>, <?php echo $producto['stock']; ?>)"
+                                    aria-label="Actualizar stock de <?php echo htmlspecialchars($producto['nombre']); ?>">
+                                    <i class="fas fa-boxes"></i>
                                 </button>
                             </td>
                         </tr>
@@ -315,6 +285,11 @@ $productos = $stmt_productos->fetchAll(PDO::FETCH_ASSOC);
                     </tbody>
                 </table>
             </div>
+            <?php if (empty($productos)): ?>
+            <div style="text-align: center; padding: 20px; background: white; margin-bottom: 24px;">
+                <p><i class="fas fa-inbox"></i> No hay productos registrados. <a href="#" onclick="openModal('modalProducto')">Crear uno</a></p>
+            </div>
+            <?php endif; ?>
         </main>
     </div>
 
@@ -413,45 +388,120 @@ $productos = $stmt_productos->fetchAll(PDO::FETCH_ASSOC);
 
         function searchProductos() {
             const input = document.getElementById('searchProducto');
-            const filter = input.value.toLowerCase();
-            const rows = document.querySelectorAll('#productosTable tr');
+            const filter = input.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('#tablaProductos tbody tr');
+            let visibleCount = 0;
 
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                const nombreCell = row.cells[1].textContent.toLowerCase();
-                const saborCell = row.cells[2].textContent.toLowerCase();
+            rows.forEach(row => {
+                // Buscar en nombre, sabor y descripción
+                const nombreCell = row.cells[1]?.textContent?.toLowerCase() || '';
+                const saborCell = row.cells[2]?.textContent?.toLowerCase() || '';
+                const descCell = row.cells[3]?.textContent?.toLowerCase() || '';
+                
+                const match = !filter || 
+                              nombreCell.includes(filter) || 
+                              saborCell.includes(filter) || 
+                              descCell.includes(filter);
+                
+                row.style.display = match ? '' : 'none';
+                if (match) visibleCount++;
+            });
 
-                if (nombreCell.includes(filter) || saborCell.includes(filter)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
+            // Mostrar mensaje si no hay resultados
+            updateNoResultsMessage();
         }
 
         function filterProductos() {
             const statusFilter = document.getElementById('filterStatus').value;
             const proveedorFilter = document.getElementById('filterProveedor').value;
             const stockFilter = document.getElementById('filterStock').value;
-            const rows = document.querySelectorAll('#productosTable tr');
+            const rows = document.querySelectorAll('#tablaProductos tbody tr');
+            let visibleCount = 0;
 
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
+            rows.forEach(row => {
                 const status = row.getAttribute('data-status');
                 const proveedor = row.getAttribute('data-proveedor');
                 const stock = row.getAttribute('data-stock');
 
-                const statusMatch = statusFilter === '' || status == statusFilter;
-                const proveedorMatch = proveedorFilter === '' || proveedor == proveedorFilter;
-                const stockMatch = stockFilter === '' || stock == stockFilter;
+                const statusMatch = !statusFilter || status == statusFilter;
+                const proveedorMatch = !proveedorFilter || proveedor == proveedorFilter;
+                const stockMatch = !stockFilter || stock == stockFilter;
 
-                if (statusMatch && proveedorMatch && stockMatch) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+                const shouldShow = statusMatch && proveedorMatch && stockMatch;
+                row.style.display = shouldShow ? '' : 'none';
+                if (shouldShow) visibleCount++;
+            });
+
+            // Mostrar mensaje si no hay resultados
+            updateNoResultsMessage();
+        }
+
+        function updateNoResultsMessage() {
+            const tbody = document.querySelector('#tablaProductos tbody');
+            const visibleRows = Array.from(tbody.querySelectorAll('tr')).filter(row => row.style.display !== 'none');
+            
+            // Eliminar mensaje anterior si existe
+            const existingMsg = tbody.parentElement?.querySelector('.no-results-message');
+            if (existingMsg) existingMsg.remove();
+            
+            if (visibleRows.length === 0) {
+                const message = document.createElement('div');
+                message.className = 'no-results-message';
+                message.textContent = '📭 No hay productos que coincidan con los filtros';
+                message.style.cssText = `
+                    padding: 20px;
+                    text-align: center;
+                    color: #6b7280;
+                    font-size: 0.95rem;
+                    background: white;
+                    border-top: 1px solid #e5e7eb;
+                `;
+                tbody.parentElement.appendChild(message);
             }
         }
+
+        // Combinar búsqueda y filtrado
+        function applyAllFilters() {
+            searchProductos();
+            // Aplicar filtros después de la búsqueda
+            setTimeout(() => {
+                const rows = document.querySelectorAll('#tablaProductos tbody tr');
+                const statusFilter = document.getElementById('filterStatus').value;
+                const proveedorFilter = document.getElementById('filterProveedor').value;
+                const stockFilter = document.getElementById('filterStock').value;
+                
+                rows.forEach(row => {
+                    if (row.style.display !== 'none') {
+                        const status = row.getAttribute('data-status');
+                        const proveedor = row.getAttribute('data-proveedor');
+                        const stock = row.getAttribute('data-stock');
+
+                        const statusMatch = !statusFilter || status == statusFilter;
+                        const proveedorMatch = !proveedorFilter || proveedor == proveedorFilter;
+                        const stockMatch = !stockFilter || stock == stockFilter;
+
+                        row.style.display = (statusMatch && proveedorMatch && stockMatch) ? '' : 'none';
+                    }
+                });
+                updateNoResultsMessage();
+            }, 0);
+        }
+
+        // Agregar event listeners para búsqueda en tiempo real
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchProducto');
+            if (searchInput) {
+                searchInput.addEventListener('input', applyAllFilters);
+            }
+
+            const filterStatus = document.getElementById('filterStatus');
+            const filterProveedor = document.getElementById('filterProveedor');
+            const filterStock = document.getElementById('filterStock');
+
+            if (filterStatus) filterStatus.addEventListener('change', applyAllFilters);
+            if (filterProveedor) filterProveedor.addEventListener('change', applyAllFilters);
+            if (filterStock) filterStock.addEventListener('change', applyAllFilters);
+        });
 
         function editarProducto(id) {
             // Obtener datos del producto directamente de la tabla
@@ -582,5 +632,17 @@ $productos = $stmt_productos->fetchAll(PDO::FETCH_ASSOC);
     </script>
     <!-- Script mejorado con accesibilidad -->
     <script src="../../js/admin/script.js"></script>
+    <script src="../../js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
+        });
+    </script>
+    <script src="../../js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
+        });
+    </script>
 </body>
 </html>

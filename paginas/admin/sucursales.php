@@ -90,63 +90,43 @@ if (isset($_GET['editar'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Sucursales - Concelato Gelateria</title>
     <link rel="stylesheet" href="/heladeriacg/css/admin/estilos_admin.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/navbar.css">
     <link rel="stylesheet" href="/heladeriacg/css/admin/sucursales.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <?php include 'includes/navbar.php'; ?>
     <div class="admin-container">
-        <header class="admin-header">
-            <div>
-                <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="logo">
-                    <i class="fas fa-ice-cream"></i>
-                    <span>Concelato Admin</span>
-                </div>
-                <nav id="admin-nav">
-                    <a href="index.php">
-                        <i class="fas fa-chart-line"></i> <span>Dashboard</span>
-                    </a>
-                    <a href="productos.php">
-                        <i class="fas fa-box"></i> <span>Productos</span>
-                    </a>
-                    <a href="ventas.php">
-                        <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
-                    </a>
-                    <a href="empleados.php">
-                        <i class="fas fa-users"></i> <span>Empleados</span>
-                    </a>
-                    <a href="clientes.php">
-                        <i class="fas fa-user-friends"></i> <span>Clientes</span>
-                    </a>
-                    <a href="proveedores.php">
-                        <i class="fas fa-truck"></i> <span>Proveedores</span>
-                    </a>
-                    <a href="usuarios.php">
-                        <i class="fas fa-user-cog"></i> <span>Usuarios</span>
-                    </a>
-                    <a href="promociones.php">
-                        <i class="fas fa-tag"></i> <span>Promociones</span>
-                    </a>
-                    <a href="sucursales.php" class="active">
-                        <i class="fas fa-store"></i> <span>Sucursales</span>
-                    </a>
-                    <a href="configuracion.php">
-                        <i class="fas fa-cog"></i> <span>Configuración</span>
-                    </a>
-                    <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
-                    </a>
-                </nav>
-            </div>
-        </header>
 
         <main class="admin-main">
             <div class="welcome-section">
                 <h1>Gestión de Sucursales</h1>
-                <p>Aquí puedes administrar las sucursales de la heladería</p>
+                <p>Administra la información de sucursales y selecciona tu sucursal de trabajo</p>
+            </div>
+
+            <!-- Banner de Selector de Sucursal -->
+            <div class="sucursal-selector-banner">
+                <div class="sucursal-selector-content">
+                    <div class="sucursal-info">
+                        <h3 id="sucursalNombreActual">Selecciona tu sucursal</h3>
+                        <p id="sucursalDireccionActual">Haz clic en el selector para elegir una sucursal</p>
+                    </div>
+                    <div class="sucursal-status">
+                        <div class="status-badge offline" id="statusBadge">
+                            <span class="status-indicator offline"></span>
+                            <span id="statusTexto">Offline</span>
+                        </div>
+                    </div>
+                    <div class="sucursal-actions-top">
+                        <button class="btn-selector" onclick="openSelectorModal()">
+                            <i class="fas fa-store"></i> Cambiar Sucursal
+                        </button>
+                        <button class="btn-selector" onclick="sincronizarSucursal()">
+                            <i class="fas fa-sync"></i> Sincronizar
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <?php if ($mensaje): ?>
@@ -161,6 +141,23 @@ if (isset($_GET['editar'])) {
                 </button>
                 <div class="search-filter">
                     <input type="text" id="searchSucursal" placeholder="Buscar sucursal..." onkeyup="searchSucursales()">
+                </div>
+            </div>
+
+            <!-- Modal: Selector de Sucursal -->
+            <div id="selectorSucursalModal" class="sucursal-selector-modal">
+                <div class="sucursal-selector-modal-content">
+                    <div class="sucursal-selector-header">
+                        <h2>Seleccionar Sucursal de Trabajo</h2>
+                        <button class="sucursal-selector-close" onclick="closeSelectorModal()" aria-label="Cerrar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="sucursal-selector-body">
+                        <div class="sucursal-list" id="sucursalListContainer">
+                            <!-- Se llena con JavaScript -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -276,6 +273,179 @@ if (isset($_GET['editar'])) {
     </div>
 
     <script>
+        // ========== GESTOR DE SUCURSAL LOCAL ==========
+        
+        let sucursalActualId = null;
+        
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarSucursalActual();
+            cargarListaSucursales();
+        });
+        
+        // Cargar sucursal actual seleccionada
+        function cargarSucursalActual() {
+            fetch('funcionalidades/gestionar_sucursal_local.php?accion=obtener_sucursal_actual')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.id_sucursal) {
+                        sucursalActualId = data.id_sucursal;
+                        document.getElementById('sucursalNombreActual').textContent = data.datos?.nombre || 'Sucursal seleccionada';
+                        document.getElementById('sucursalDireccionActual').textContent = data.datos?.direccion || 'Sin dirección';
+                        
+                        // Actualizar estado online/offline
+                        const statusBadge = document.getElementById('statusBadge');
+                        const statusTexto = document.getElementById('statusTexto');
+                        
+                        if (data.modo_offline) {
+                            statusBadge.classList.remove('online');
+                            statusBadge.classList.add('offline');
+                            statusTexto.textContent = 'Modo Offline';
+                        } else {
+                            statusBadge.classList.remove('offline');
+                            statusBadge.classList.add('online');
+                            statusTexto.textContent = 'Sincronizado';
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+        // Cargar lista de sucursales para selector
+        function cargarListaSucursales() {
+            const tabla = document.getElementById('sucursalesTable');
+            const lista = document.getElementById('sucursalListContainer');
+            
+            if (tabla) {
+                const sucursales = [];
+                tabla.querySelectorAll('tr').forEach(row => {
+                    if (row.cells.length >= 2) {
+                        sucursales.push({
+                            id: row.getAttribute('data-id'),
+                            nombre: row.cells[0].textContent,
+                            direccion: row.cells[1].textContent,
+                            telefono: row.cells[2].textContent,
+                            email: row.cells[3].textContent
+                        });
+                    }
+                });
+                
+                // Llenar modal selector
+                lista.innerHTML = sucursales.map(suc => `
+                    <div class="sucursal-item ${suc.id == sucursalActualId ? 'selected' : ''}" onclick="seleccionarSucursal(${suc.id}, '${suc.nombre}')">
+                        <div class="sucursal-item-header">
+                            <div class="sucursal-item-name">${suc.nombre}</div>
+                            ${suc.id == sucursalActualId ? '<div class="sucursal-item-badge"><i class="fas fa-check"></i> Activo</div>' : ''}
+                        </div>
+                        <div class="sucursal-item-details">
+                            <div class="sucursal-item-detail">
+                                <i class="fas fa-map-marker-alt" style="color: #0891b2;"></i>
+                                <strong>${suc.direccion}</strong>
+                            </div>
+                            <div class="sucursal-item-detail">
+                                <i class="fas fa-phone" style="color: #0891b2;"></i>
+                                <strong>${suc.telefono || 'N/A'}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Abrir modal de selector
+        function openSelectorModal() {
+            document.getElementById('selectorSucursalModal').classList.add('active');
+        }
+        
+        // Cerrar modal de selector
+        function closeSelectorModal() {
+            document.getElementById('selectorSucursalModal').classList.remove('active');
+        }
+        
+        // Seleccionar sucursal
+        function seleccionarSucursal(id_sucursal, nombre) {
+            fetch('funcionalidades/gestionar_sucursal_local.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'accion=seleccionar_sucursal&id_sucursal=' + id_sucursal
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    sucursalActualId = id_sucursal;
+                    cargarSucursalActual();
+                    cargarListaSucursales();
+                    closeSelectorModal();
+                    showNotification(`Sucursal "${nombre}" seleccionada correctamente`, 'success');
+                } else {
+                    showNotification('Error al seleccionar sucursal', 'error');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        
+        // Sincronizar sucursal
+        function sincronizarSucursal() {
+            if (!sucursalActualId) {
+                showNotification('Por favor selecciona una sucursal primero', 'error');
+                return;
+            }
+            
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+            
+            fetch('funcionalidades/gestionar_sucursal_local.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'accion=sincronizar&id_sucursal=' + sucursalActualId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    cargarSucursalActual();
+                    showNotification('Sincronización completada correctamente', 'success');
+                } else {
+                    showNotification('Error en la sincronización', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error de conexión', 'error');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sync"></i> Sincronizar';
+            });
+        }
+        
+        // Función para mostrar notificaciones
+        function showNotification(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.animation = 'slideInRight 0.3s ease-out';
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 4000);
+        }
+        
+        // ========== GESTOR DE MODAL DE CREAR/EDITAR ==========
+        
         // Funciones para manejar el modal
         function openSucursalModal() {
             document.getElementById('accionForm').value = 'crear';
@@ -296,10 +466,18 @@ if (isset($_GET['editar'])) {
             }
         });
         
+        // Cerrar modal selector al hacer click fuera
+        document.getElementById('selectorSucursalModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSelectorModal();
+            }
+        });
+        
         // Cerrar con ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeSucursalModal();
+                closeSelectorModal();
             }
         });
         
@@ -372,5 +550,11 @@ if (isset($_GET['editar'])) {
         }
     </script>
     <script src="/heladeriacg/js/admin/script.js"></script>
+    <script src="/heladeriacg/js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
+        });
+    </script>
 </body>
 </html>

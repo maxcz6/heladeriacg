@@ -37,57 +37,15 @@ $productos_bajos = $stmt_stats->fetch(PDO::FETCH_ASSOC)['total'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Concelato Gelateria</title>
     <link rel="stylesheet" href="/heladeriacg/css/admin/estilos_admin.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/navbar.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Header con navegación mejorada y responsiva -->
-    <header class="admin-header">
-        <div>
-            <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <i class="fas fa-ice-cream"></i>
-                <span>Concelato Admin</span>
-            </div>
-            <nav id="admin-nav">
-                <a href="index.php" class="active">
-                    <i class="fas fa-chart-line"></i> Dashboard
-                </a>
-                <a href="productos.php">
-                    <i class="fas fa-box"></i> Productos
-                </a>
-                <a href="ventas.php">
-                    <i class="fas fa-shopping-cart"></i> Ventas
-                </a>
-                <a href="empleados.php">
-                    <i class="fas fa-users"></i> Empleados
-                </a>
-                <a href="clientes.php">
-                    <i class="fas fa-user-friends"></i> Clientes
-                </a>
-                <a href="proveedores.php">
-                    <i class="fas fa-truck"></i> Proveedores
-                </a>
-                <a href="usuarios.php">
-                    <i class="fas fa-user-cog"></i> Usuarios
-                </a>
-                <a href="promociones.php">
-                    <i class="fas fa-tag"></i> Promociones
-                </a>
-                <a href="sucursales.php">
-                    <i class="fas fa-store"></i> Sucursales
-                </a>
-                <a href="configuracion.php">
-                    <i class="fas fa-cog"></i> Configuración
-                </a>
-                <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                </a>
-            </nav>
-        </div>
-    </header>
+    <!-- Header con navegación mejorada y responsiva -->
+    <?php include 'includes/navbar.php'; ?>
 
     <!-- Main content -->
     <main class="admin-container">
@@ -308,6 +266,87 @@ $productos_bajos = $stmt_stats->fetch(PDO::FETCH_ASSOC)['total'];
     </main>
 
     <!-- Scripts -->
+    <script src="/heladeriacg/js/admin/dashboard-utils.js"></script>
     <script src="/heladeriacg/js/admin/script.js"></script>
+
+    <script>
+        // ============================================
+        // DASHBOARD INTERACTIVITY
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDashboard();
+            setupKeyboardShortcuts();
+        });
+
+        function initializeDashboard() {
+            // Animar tarjetas de estadísticas
+            animateElements('.stats-grid .stat-card', 100, 'slideUp');
+            
+            // Animar tarjetas de contenido
+            animateElements('.dashboard-grid .card', 100, 'slideUp');
+            
+            // Animar items de listas
+            animateListCascade('.list-item', 50);
+
+            // Agregar efectos hover
+            addHoverEffect('.stat-card', 'lift');
+            addHoverEffect('.card', 'lift');
+            addHoverEffect('.action-btn', 'grow');
+            addHoverEffect('.list-item', 'lift');
+
+            // Hacer clickeable las tarjetas de estadísticas
+            makeStatCardsClickable();
+
+            // Mostrar notificación de bienvenida (opcional)
+            // showToast('Bienvenido al Dashboard', 'success', 2000);
+        }
+
+        function makeStatCardsClickable() {
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const link = card.querySelector('.stat-link');
+                    if (link) {
+                        window.location.href = link.getAttribute('href');
+                    }
+                });
+            });
+        }
+
+        function setupKeyboardShortcuts() {
+            addKeyboardShortcuts({
+                'alt+d': () => window.location.href = 'index.php',
+                'alt+p': () => window.location.href = 'productos.php',
+                'alt+v': () => window.location.href = 'ventas.php',
+                'alt+e': () => window.location.href = 'empleados.php',
+                'alt+c': () => window.location.href = 'clientes.php'
+            });
+        }
+
+        // ============================================
+        // FORMATEO DE DATOS
+        // ============================================
+
+        // Ejemplo de uso en el código (comentado)
+        // Descomentar si se necesita formatear valores dinámicamente
+        /*
+        document.querySelectorAll('[data-format="currency"]').forEach(el => {
+            const value = parseFloat(el.textContent);
+            el.textContent = formatCurrency(value, 'PEN');
+        });
+
+        document.querySelectorAll('[data-format="date"]').forEach(el => {
+            const date = el.textContent;
+            el.textContent = formatDate(date, 'short');
+        });
+        */
+    </script>
+    <script src="/heladeriacg/js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
+        });
+    </script>
 </body>
 </html>

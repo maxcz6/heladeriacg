@@ -54,57 +54,15 @@ $stats = $stmt_stats->fetch(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Ventas - Concelato Gelateria</title>
     <link rel="stylesheet" href="/heladeriacg/css/admin/estilos_admin.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/navbar.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/ventas.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Header con navegación -->
-    <header class="admin-header">
-        <div>
-            <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <i class="fas fa-ice-cream"></i>
-                <span>Concelato Admin</span>
-            </div>
-            <nav id="admin-nav">
-                <a href="index.php">
-                    <i class="fas fa-chart-line"></i> <span>Dashboard</span>
-                </a>
-                <a href="productos.php">
-                    <i class="fas fa-box"></i> <span>Productos</span>
-                </a>
-                <a href="ventas.php" class="active">
-                    <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
-                </a>
-                <a href="empleados.php">
-                    <i class="fas fa-users"></i> <span>Empleados</span>
-                </a>
-                <a href="clientes.php">
-                    <i class="fas fa-user-friends"></i> <span>Clientes</span>
-                </a>
-                <a href="proveedores.php">
-                    <i class="fas fa-truck"></i> <span>Proveedores</span>
-                </a>
-                <a href="usuarios.php">
-                    <i class="fas fa-user-cog"></i> <span>Usuarios</span>
-                </a>
-                <a href="promociones.php">
-                    <i class="fas fa-tag"></i> <span>Promociones</span>
-                </a>
-                <a href="sucursales.php">
-                    <i class="fas fa-store"></i> <span>Sucursales</span>
-                </a>
-                <a href="configuracion.php">
-                    <i class="fas fa-cog"></i> <span>Configuración</span>
-                </a>
-                <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
-                </a>
-            </nav>
-        </div>
-    </header>
+    <!-- Header con navegación -->
+    <?php include 'includes/navbar.php'; ?>
 
     <!-- Main content -->
     <main class="admin-container">
@@ -188,10 +146,8 @@ $stats = $stmt_stats->fetch(PDO::FETCH_ASSOC);
         </div>
 
         <!-- Table Card -->
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="tablaVentas" class="tabla-admin" role="table">
+        <div class="table-container">
+            <table id="tablaVentas" class="ventas-table" role="table">
                         <thead>
                             <tr role="row">
                                 <th role="columnheader" aria-sort="none" onclick="TableSorter.sortTable(this)">
@@ -229,15 +185,13 @@ $stats = $stmt_stats->fetch(PDO::FETCH_ASSOC);
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
-                    </table>
-                    <?php if (empty($ventas)): ?>
-                    <div class="empty-state">
-                        <p>No hay ventas registradas<?php echo $filtro_estado ? ' con el filtro seleccionado' : ''; ?>.</p>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
+            </table>
         </div>
+        <?php if (empty($ventas)): ?>
+        <div style="text-align: center; padding: 20px; background: white; margin-bottom: 24px;">
+            <p><i class="fas fa-inbox"></i> No hay ventas registradas<?php echo $filtro_estado ? ' con el filtro seleccionado' : ''; ?>.</p>
+        </div>
+        <?php endif; ?>
     </main>
 
     <!-- Modal: Ver Detalle de Venta -->
@@ -273,138 +227,246 @@ $stats = $stmt_stats->fetch(PDO::FETCH_ASSOC);
         }
 
         function verDetalleVenta(idVenta) {
-            fetch(`funcionalidades/obtener_detalle_venta.php?id=${idVenta}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const detalle = data.detalle;
-                        let html = `
-                            <div class="detalle-venta">
-                                <div class="info-row">
-                                    <label>ID Venta:</label>
-                                    <strong>#${detalle.id_venta}</strong>
-                                </div>
-                                <div class="info-row">
-                                    <label>Cliente:</label>
-                                    <strong>${detalle.cliente_nombre || 'Cliente Anónimo'}</strong>
-                                </div>
-                                <div class="info-row">
-                                    <label>Fecha:</label>
-                                    <strong>${new Date(detalle.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</strong>
-                                </div>
-                                <div class="info-row">
-                                    <label>Estado:</label>
-                                    <strong>${detalle.estado}</strong>
-                                </div>
-                                <div class="info-row">
-                                    <label>Total:</label>
-                                    <strong class="text-success">S/ ${parseFloat(detalle.total).toFixed(2)}</strong>
-                                </div>
-                        `;
-
-                        if (detalle.items && detalle.items.length > 0) {
-                            html += '<hr><h4>Artículos:</h4><ul>';
-                            detalle.items.forEach(item => {
-                                html += `<li>${item.nombre_producto} x${item.cantidad} = S/ ${parseFloat(item.subtotal).toFixed(2)}</li>`;
-                            });
-                            html += '</ul>';
-                        }
-
-                        html += '</div>';
-
-                        document.getElementById('modalDetalleBody').innerHTML = html;
-                        document.getElementById('modalDetalleTitle').textContent = `Detalle de Venta #${detalle.id_venta}`;
-                        openModal('modalDetalleVenta');
-                    } else {
-                        showNotification('Error al obtener detalle', 'error');
+            // URL relativa correcta - estamos en paginas/admin/ventas.php
+            const url = `funcionalidades/obtener_detalle_venta.php?id=${idVenta}`;
+            
+            console.log('Fetching:', url, 'for id:', idVenta);
+            
+            fetch(url)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    
+                    if (!data || typeof data !== 'object') {
+                        throw new Error('Respuesta inválida del servidor');
+                    }
+                    
+                    if (data.success === false) {
+                        showNotification(data.message || 'Error al obtener detalle', 'error');
+                        return;
+                    }
+                    
+                    if (!data.detalle) {
+                        throw new Error('No hay datos de detalle en la respuesta');
+                    }
+
+                    const detalle = data.detalle;
+                    const fechaFormato = new Date(detalle.fecha).toLocaleDateString('es-ES', { 
+                        year: 'numeric', 
+                        month: '2-digit', 
+                        day: '2-digit', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    
+                    let html = `
+                        <div class="detalle-venta">
+                            <div class="info-row">
+                                <label>📋 ID Venta:</label>
+                                <strong>#${detalle.id_venta}</strong>
+                            </div>
+                            <div class="info-row">
+                                <label>👤 Cliente:</label>
+                                <strong>${detalle.cliente_nombre || 'Cliente Anónimo'}</strong>
+                            </div>
+                            <div class="info-row">
+                                <label>📅 Fecha:</label>
+                                <strong>${fechaFormato}</strong>
+                            </div>
+                            <div class="info-row">
+                                <label>🔔 Estado:</label>
+                                <strong><span class="badge badge-${detalle.estado.toLowerCase().replace(/\s+/g, '')}">${detalle.estado}</span></strong>
+                            </div>
+                            <div class="info-row">
+                                <label>💵 Total:</label>
+                                <strong class="text-success">S/ ${parseFloat(detalle.total).toFixed(2)}</strong>
+                            </div>
+                    `;
+
+                    if (detalle.items && Array.isArray(detalle.items) && detalle.items.length > 0) {
+                        html += `
+                            <div class="detalle-productos">
+                                <h3 class="detalle-productos-titulo">🛍️ Artículos de la Venta (${detalle.items.length})</h3>
+                        `;
+                        detalle.items.forEach((item, index) => {
+                            const cantidad = parseInt(item.cantidad) || 1;
+                            const subtotal = parseFloat(item.subtotal) || 0;
+                            const precioUnitario = (cantidad > 0) ? (subtotal / cantidad).toFixed(2) : '0.00';
+                            
+                            html += `
+                                <div class="detalle-producto-item">
+                                    <div style="flex: 1;">
+                                        <div class="detalle-producto-nombre">${item.nombre_producto || 'Producto'}</div>
+                                        <small style="color: #6b7280;">Precio unitario: S/ ${precioUnitario}</small>
+                                    </div>
+                                    <div class="detalle-producto-cantidad">x${cantidad}</div>
+                                    <div class="detalle-producto-precio">S/ ${subtotal.toFixed(2)}</div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                    } else {
+                        html += `
+                            <div class="detalle-productos">
+                                <p style="color: #6b7280; text-align: center; padding: 20px;">
+                                    No hay artículos en esta venta
+                                </p>
+                            </div>
+                        `;
+                    }
+
+                    html += '</div>';
+
+                    document.getElementById('modalDetalleBody').innerHTML = html;
+                    document.getElementById('modalDetalleTitle').textContent = `Detalle de Venta #${detalle.id_venta}`;
+                    openModal('modalDetalleVenta');
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error de conexión', 'error');
+                    console.error('Error completo:', error);
+                    console.error('Stack:', error.stack);
+                    showNotification('Error al obtener detalle: ' + error.message, 'error');
                 });
         }
     </script>
 
     <style>
-        .detalle-venta {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .info-row label {
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .info-row strong {
-            color: #0891b2;
-        }
-
         .text-success {
             color: #059669;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
         }
 
-        .badge-completado {
-            background: #d1fae5;
-            color: #065f46;
+        .modal.active {
+            display: flex;
         }
 
-        .badge-pendiente {
-            background: #fef3c7;
-            color: #78350f;
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
         }
 
-        .badge-cancelado {
-            background: #fee2e2;
-            color: #991b1b;
+        .modal-header {
+            padding: 20px;
+            border-bottom: 2px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-radius: 12px 12px 0 0;
         }
 
-        .filter-select {
-            padding: 0.8rem 1rem;
+        .modal-header h2 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: white;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
-            font-size: 0.95rem;
-            background: white;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: #0891b2;
-            box-shadow: 0 0 0 3px rgba(6, 182, 202, 0.1);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
             color: #6b7280;
         }
 
-        .empty-state a {
-            color: #0891b2;
-            text-decoration: none;
+        .modal-close:hover {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+            transform: rotate(90deg);
         }
 
-        .empty-state a:hover {
-            text-decoration: underline;
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: white;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 40px;
+        }
+
+        .btn.cancel {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn.cancel:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
+    <script src="/heladeriacg/js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
+        });
+    </script>
 </body>
 </html>

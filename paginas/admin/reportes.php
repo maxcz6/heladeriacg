@@ -99,57 +99,14 @@ if (!$generar_reporte) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes - Concelato Gelateria</title>
     <link rel="stylesheet" href="/heladeriacg/css/admin/estilos_admin.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/navbar.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/reportes.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <?php include 'includes/navbar.php'; ?>
     <div class="admin-container">
-        <header class="admin-header">
-            <div>
-                <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="logo">
-                    <i class="fas fa-ice-cream"></i>
-                    <span>Concelato Admin</span>
-                </div>
-                <nav id="admin-nav">
-                    <a href="index.php">
-                        <i class="fas fa-chart-line"></i> <span>Dashboard</span>
-                    </a>
-                    <a href="productos.php">
-                        <i class="fas fa-box"></i> <span>Productos</span>
-                    </a>
-                    <a href="ventas.php">
-                        <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
-                    </a>
-                    <a href="empleados.php">
-                        <i class="fas fa-users"></i> <span>Empleados</span>
-                    </a>
-                    <a href="clientes.php">
-                        <i class="fas fa-user-friends"></i> <span>Clientes</span>
-                    </a>
-                    <a href="proveedores.php">
-                        <i class="fas fa-truck"></i> <span>Proveedores</span>
-                    </a>
-                    <a href="usuarios.php">
-                        <i class="fas fa-user-cog"></i> <span>Usuarios</span>
-                    </a>
-                    <a href="promociones.php">
-                        <i class="fas fa-tag"></i> <span>Promociones</span>
-                    </a>
-                    <a href="sucursales.php">
-                        <i class="fas fa-store"></i> <span>Sucursales</span>
-                    </a>
-                    <a href="configuracion.php">
-                        <i class="fas fa-cog"></i> <span>Configuración</span>
-                    </a>
-                    <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
-                    </a>
-                </nav>
-            </div>
-        </header>
 
         <main class="admin-main">
             <div class="welcome-section">
@@ -161,32 +118,52 @@ if (!$generar_reporte) {
             <!-- Formulario de reportes -->
             <div class="reports-form">
                 <h2>Generar Reportes Personalizados</h2>
-                <form method="POST" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="tipo_reporte">Tipo de Reporte:</label>
-                        <select id="tipo_reporte" name="tipo_reporte" onchange="toggleFechaGrupo()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em;">
-                            <option value="">Seleccionar tipo de reporte</option>
-                            <option value="ventas_detalles">Reporte de Ventas Detallado</option>
-                            <option value="productos_vendidos">Productos Más Vendidos</option>
-                            <option value="ventas_cliente">Ventas por Cliente</option>
-                            <option value="inventario">Reporte de Inventario</option>
-                        </select>
+                <form method="POST">
+                    <div class="form-group">
+                        <label class="form-label">Selecciona el Tipo de Reporte:</label>
+                        <input type="hidden" id="tipo_reporte" name="tipo_reporte" value="">
+                        
+                        <div class="report-types-grid">
+                            <div class="report-type-card" onclick="selectReportType('ventas_detalles')">
+                                <div class="report-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                                <h3>Ventas Detalladas</h3>
+                                <p>Reporte completo de ingresos y transacciones por periodo.</p>
+                            </div>
+                            
+                            <div class="report-type-card" onclick="selectReportType('productos_vendidos')">
+                                <div class="report-icon"><i class="fas fa-ice-cream"></i></div>
+                                <h3>Productos Top</h3>
+                                <p>Ranking de los productos más vendidos y sus ingresos.</p>
+                            </div>
+                            
+                            <div class="report-type-card" onclick="selectReportType('ventas_cliente')">
+                                <div class="report-icon"><i class="fas fa-users"></i></div>
+                                <h3>Por Cliente</h3>
+                                <p>Análisis de compras y comportamiento de clientes.</p>
+                            </div>
+                            
+                            <div class="report-type-card" onclick="selectReportType('inventario')">
+                                <div class="report-icon"><i class="fas fa-boxes"></i></div>
+                                <h3>Inventario</h3>
+                                <p>Estado actual del stock y valoración de productos.</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div id="fecha_grupo" style="display:none; display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div id="fecha_grupo" style="display:none; gap: 15px; flex-wrap: wrap;">
                         <div class="form-group" style="flex: 1; min-width: 200px;">
                             <label for="fecha_inicio">Fecha Inicio:</label>
-                            <input type="date" id="fecha_inicio" name="fecha_inicio" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em;">
+                            <input type="date" id="fecha_inicio" name="fecha_inicio">
                         </div>
 
                         <div class="form-group" style="flex: 1; min-width: 200px;">
                             <label for="fecha_fin">Fecha Fin:</label>
-                            <input type="date" id="fecha_fin" name="fecha_fin" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em;">
+                            <input type="date" id="fecha_fin" name="fecha_fin">
                         </div>
 
                         <div class="form-group" id="tipo_fecha_grupo" style="display:none; flex: 1; min-width: 200px;">
                             <label for="tipo_fecha">Agrupar por:</label>
-                            <select id="tipo_fecha" name="tipo_fecha" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em;">
+                            <select id="tipo_fecha" name="tipo_fecha">
                                 <option value="diario">Diario</option>
                                 <option value="semanal">Semanal</option>
                                 <option value="mensual">Mensual</option>
@@ -194,7 +171,7 @@ if (!$generar_reporte) {
                         </div>
                     </div>
 
-                    <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap;">
+                    <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                         <button type="submit" class="action-btn primary">
                             <i class="fas fa-chart-bar"></i> Generar Reporte
                         </button>
@@ -497,15 +474,26 @@ if (!$generar_reporte) {
             }
         }
 
-        function toggleFechaGrupo() {
-            const tipoReporte = document.getElementById('tipo_reporte').value;
+        function selectReportType(tipo) {
+            // Actualizar input oculto
+            document.getElementById('tipo_reporte').value = tipo;
+            
+            // Actualizar visualmente las tarjetas
+            const cards = document.querySelectorAll('.report-type-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            
+            // Encontrar la tarjeta clickeada y seleccionarla (basado en el onclick)
+            const selectedCard = document.querySelector(`.report-type-card[onclick*="${tipo}"]`);
+            if (selectedCard) selectedCard.classList.add('selected');
+
+            // Mostrar/Ocultar filtros según selección
             const fecha_grupo = document.getElementById('fecha_grupo');
             const tipo_fecha_grupo = document.getElementById('tipo_fecha_grupo');
 
-            if (tipoReporte === 'ventas_detalles' || tipoReporte === 'productos_vendidos' || tipoReporte === 'ventas_cliente') {
+            if (tipo === 'ventas_detalles' || tipo === 'productos_vendidos' || tipo === 'ventas_cliente') {
                 fecha_grupo.style.display = 'flex';
 
-                if (tipoReporte === 'ventas_detalles') {
+                if (tipo === 'ventas_detalles') {
                     tipo_fecha_grupo.style.display = 'block';
                 } else {
                     tipo_fecha_grupo.style.display = 'none';
@@ -517,5 +505,11 @@ if (!$generar_reporte) {
         }
     </script>
     <script src="/heladeriacg/js/admin/script.js"></script>
+    <script src="/heladeriacg/js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
+        });
+    </script>
 </body>
 </html>

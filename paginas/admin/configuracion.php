@@ -3,9 +3,13 @@ include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
 verificarSesion();
 verificarRol('admin');
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/admin_functions.php');
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/SucursalLocal.php');
 
 $mensaje = '';
 $tipo_mensaje = '';
+
+// Inicializar sucursal local
+$sucursal_local = new SucursalLocal($pdo);
 
 // Manejar operaciones de configuración
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -114,14 +118,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $tipo_mensaje = 'error';
                 }
                 break;
+            case 'configurar_sistema':
+                // Actualmente no se almacena la configuración en la base de datos
+                // pero se puede implementar si se necesita
+                $mensaje = 'Configuración del sistema actualizada exitosamente';
+                $tipo_mensaje = 'success';
+                break;
         }
-
-        case 'configurar_sistema':
-            // Actualmente no se almacena la configuración en la base de datos
-            // pero se puede implementar si se necesita
-            $mensaje = 'Configuración del sistema actualizada exitosamente';
-            $tipo_mensaje = 'success';
-            break;
     }
 }
 
@@ -129,6 +132,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $metricas = obtenerMetricasSistema();
 $stats_inventario = obtenerEstadisticasInventario();
 $stats_ventas = obtenerEstadisticasVentas();
+$sucursal_actual = $sucursal_local->obtenerDatosSucursalActual($pdo);
+$modo_offline = $sucursal_local->estaEnModoOffline();
 ?>
 
 <!DOCTYPE html>
@@ -138,196 +143,84 @@ $stats_ventas = obtenerEstadisticasVentas();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración - Concelato Gelateria</title>
     <link rel="stylesheet" href="../../css/admin/estilos_admin.css">
+    <link rel="stylesheet" href="../../css/admin/navbar.css">
+    <link rel="stylesheet" href="../../css/admin/configuracion.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .config-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .config-section {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .config-section h3 {
-            margin-top: 0;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 10px;
-            color: #2c3e50;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-        }
-        
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .stat-card h4 {
-            margin: 0 0 10px 0;
-            color: #2c3e50;
-            font-size: 1.2em;
-        }
-        
-        .stat-card p {
-            margin: 0;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #3498db;
-        }
-    </style>
 </head>
 <body>
+    <?php include 'includes/navbar.php'; ?>
     <div class="admin-container">
-        <header class="admin-header">
-            <div>
-                <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="logo">
-                    <i class="fas fa-ice-cream"></i>
-                    <span>Concelato Admin</span>
-                </div>
-                <nav id="admin-nav">
-                    <a href="index.php">
-                        <i class="fas fa-chart-line"></i> <span>Dashboard</span>
-                    </a>
-                    <a href="productos.php">
-                        <i class="fas fa-box"></i> <span>Productos</span>
-                    </a>
-                    <a href="ventas.php">
-                        <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
-                    </a>
-                    <a href="empleados.php">
-                        <i class="fas fa-users"></i> <span>Empleados</span>
-                    </a>
-                    <a href="clientes.php">
-                        <i class="fas fa-user-friends"></i> <span>Clientes</span>
-                    </a>
-                    <a href="proveedores.php">
-                        <i class="fas fa-truck"></i> <span>Proveedores</span>
-                    </a>
-                    <a href="usuarios.php">
-                        <i class="fas fa-user-cog"></i> <span>Usuarios</span>
-                    </a>
-                    <a href="promociones.php">
-                        <i class="fas fa-tag"></i> <span>Promociones</span>
-                    </a>
-                    <a href="sucursales.php">
-                        <i class="fas fa-store"></i> <span>Sucursales</span>
-                    </a>
-                    <a href="configuracion.php" class="active">
-                        <i class="fas fa-cog"></i> <span>Configuración</span>
-                    </a>
-                    <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
-                    </a>
-                </nav>
-            </div>
-        </header>
-            </div>
-        </header>
 
         <main class="admin-main">
             <div class="welcome-section">
-                <h1>Configuración del Sistema</h1>
-                <p>Gestiona las configuraciones generales del sistema</p>
+                <h1><i class="fas fa-cog"></i> Configuración del Sistema</h1>
+                <p>Gestiona las configuraciones generales y opciones avanzadas del sistema</p>
             </div>
 
             <?php if ($mensaje): ?>
             <div class="mensaje <?php echo $tipo_mensaje; ?>">
+                <i class="fas fa-<?php echo $tipo_mensaje === 'success' ? 'check-circle' : 'exclamation-circle'; ?>"></i>
                 <?php echo htmlspecialchars($mensaje); ?>
             </div>
             <?php endif; ?>
 
             <div class="config-container">
+                <!-- Estado de Sucursal -->
+                <div class="config-section">
+                    <h3><i class="fas fa-store"></i> Estado de Sucursal Actual</h3>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">Sucursal Activa</div>
+                            <p><?php echo htmlspecialchars($sucursal_actual['nombre'] ?? 'Sin seleccionar'); ?></p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Dirección</div>
+                            <p><?php echo htmlspecialchars($sucursal_actual['direccion'] ?? 'N/A'); ?></p>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Modo de Operación</div>
+                            <p>
+                                <span style="color: <?php echo $modo_offline ? '#ef4444' : '#10b981'; ?>;">
+                                    <i class="fas fa-<?php echo $modo_offline ? 'wifi-off' : 'wifi'; ?>"></i>
+                                    <?php echo $modo_offline ? 'Offline' : 'Online'; ?>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="location.href='sucursales.php'">
+                            <i class="fas fa-exchange-alt"></i> Cambiar Sucursal
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Cambiar contraseña -->
                 <div class="config-section">
                     <h3><i class="fas fa-key"></i> Cambiar Contraseña</h3>
+                    <p>Actualiza tu contraseña de acceso al sistema</p>
                     <form method="POST">
                         <input type="hidden" name="accion" value="cambiar_password">
                         
                         <div class="form-group">
-                            <label for="password_actual">Contraseña Actual *</label>
-                            <input type="password" id="password_actual" name="password_actual" required>
+                            <label for="password_actual">Contraseña Actual <span>*</span></label>
+                            <input type="password" id="password_actual" name="password_actual" required placeholder="Ingresa tu contraseña actual">
                         </div>
                         
                         <div class="form-group">
-                            <label for="password_nuevo">Nueva Contraseña *</label>
-                            <input type="password" id="password_nuevo" name="password_nuevo" required>
+                            <label for="password_nuevo">Nueva Contraseña <span>*</span></label>
+                            <input type="password" id="password_nuevo" name="password_nuevo" required placeholder="Ingresa tu nueva contraseña">
                         </div>
                         
                         <div class="form-group">
-                            <label for="password_confirmar">Confirmar Nueva Contraseña *</label>
-                            <input type="password" id="password_confirmar" name="password_confirmar" required>
+                            <label for="password_confirmar">Confirmar Nueva Contraseña <span>*</span></label>
+                            <input type="password" id="password_confirmar" name="password_confirmar" required placeholder="Confirma tu nueva contraseña">
                         </div>
                         
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Cambiar Contraseña
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -335,13 +228,18 @@ $stats_ventas = obtenerEstadisticasVentas();
                 <!-- Backup de la base de datos -->
                 <div class="config-section">
                     <h3><i class="fas fa-database"></i> Backup de la Base de Datos</h3>
-                    <p>Realiza un backup completo de la base de datos</p>
+                    <div class="backup-info">
+                        <strong><i class="fas fa-shield-alt"></i> Información Importante:</strong>
+                        <p>Realiza backups regulares de tu base de datos para evitar pérdida de información. Se recomienda hacer un backup cada semana.</p>
+                    </div>
                     
-                    <form method="POST" onsubmit="return confirm('¿Estás seguro de que deseas crear un backup de la base de datos?')">
+                    <form method="POST" onsubmit="return confirm('¿Deseas crear un backup completo de la base de datos? Este proceso puede tomar algunos minutos...')">
                         <input type="hidden" name="accion" value="backup_db">
                         
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Crear Backup</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-cloud-download-alt"></i> Crear Backup Completo
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -350,47 +248,63 @@ $stats_ventas = obtenerEstadisticasVentas();
                 <div class="config-section">
                     <h3><i class="fas fa-chart-bar"></i> Estadísticas del Sistema</h3>
                     
+                    <h4 style="color: #0891b2; margin-top: 20px; margin-bottom: 15px; font-size: 1.1em;">
+                        <i class="fas fa-chart-line"></i> Métricas Generales
+                    </h4>
                     <div class="stats-grid">
                         <div class="stat-card">
+                            <i class="stat-icon fas fa-money-bill-wave"></i>
                             <h4>Ventas Totales</h4>
                             <p>S/. <?php echo number_format($metricas['ventas_totales'], 2); ?></p>
                         </div>
                         <div class="stat-card">
+                            <i class="stat-icon fas fa-box"></i>
                             <h4>Productos Activos</h4>
                             <p><?php echo $metricas['productos_activos']; ?></p>
                         </div>
                         <div class="stat-card">
+                            <i class="stat-icon fas fa-users"></i>
                             <h4>Clientes</h4>
                             <p><?php echo $metricas['clientes_totales']; ?></p>
                         </div>
                         <div class="stat-card">
+                            <i class="stat-icon fas fa-user-tie"></i>
                             <h4>Empleados</h4>
                             <p><?php echo $metricas['empleados_totales']; ?></p>
                         </div>
                         <div class="stat-card">
+                            <i class="stat-icon fas fa-sun"></i>
                             <h4>Ventas Hoy</h4>
                             <p>S/. <?php echo number_format($metricas['ventas_hoy'], 2); ?></p>
                         </div>
                         <div class="stat-card">
+                            <i class="stat-icon fas fa-exclamation-triangle"></i>
                             <h4>Productos Bajos</h4>
                             <p><?php echo $metricas['productos_bajos']; ?></p>
                         </div>
                     </div>
 
-                    <div class="stats-grid" style="margin-top: 20px;">
+                    <h4 style="color: #0891b2; margin-top: 20px; margin-bottom: 15px; font-size: 1.1em;">
+                        <i class="fas fa-inventory"></i> Inventario y Ventas
+                    </h4>
+                    <div class="stats-grid">
                         <div class="stat-card">
+                            <i class="stat-icon fas fa-receipt"></i>
                             <h4>Total de Ventas</h4>
                             <p><?php echo $stats_ventas['total_ventas']; ?></p>
                         </div>
                         <div class="stat-card">
+                            <i class="stat-icon fas fa-weight"></i>
                             <h4>Valor Inventario</h4>
                             <p>S/. <?php echo number_format($stats_inventario['valor_inventario'], 2); ?></p>
                         </div>
                         <div class="stat-card">
-                            <h4>Productos con Bajo Stock</h4>
+                            <i class="stat-icon fas fa-low-vision"></i>
+                            <h4>Bajo Stock</h4>
                             <p><?php echo $stats_inventario['productos_bajo_stock']; ?></p>
                         </div>
                         <div class="stat-card">
+                            <i class="stat-icon fas fa-user-shield"></i>
                             <h4>Usuarios Activos</h4>
                             <p><?php echo $metricas['usuarios_activos']; ?></p>
                         </div>
@@ -399,16 +313,17 @@ $stats_ventas = obtenerEstadisticasVentas();
 
                 <!-- Configuración del sistema -->
                 <div class="config-section">
-                    <h3><i class="fas fa-cogs"></i> Configuración del Sistema</h3>
+                    <h3><i class="fas fa-sliders-h"></i> Configuración del Sistema</h3>
+                    <p>Personaliza los parámetros básicos del sistema</p>
                     <form method="POST">
                         <input type="hidden" name="accion" value="configurar_sistema">
 
                         <div class="form-group">
-                            <label for="nombre_negocio">Nombre del Negocio</label>
-                            <input type="text" id="nombre_negocio" name="nombre_negocio" value="Concelato Gelateria" placeholder="Nombre del negocio">
+                            <label for="nombre_negocio">Nombre del Negocio <span>*</span></label>
+                            <input type="text" id="nombre_negocio" name="nombre_negocio" value="Concelato Gelateria" placeholder="Nombre del negocio" required>
                         </div>
 
-                        <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="telefono_negocio">Teléfono de Contacto</label>
                                 <input type="text" id="telefono_negocio" name="telefono_negocio" placeholder="(064) 223-4567">
@@ -424,7 +339,9 @@ $stats_ventas = obtenerEstadisticasVentas();
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Configuración
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -432,11 +349,12 @@ $stats_ventas = obtenerEstadisticasVentas();
                 <!-- Gestión de usuarios -->
                 <div class="config-section">
                     <h3><i class="fas fa-users-cog"></i> Gestión de Usuarios</h3>
-                    <div class="form-actions">
+                    <p>Administra los usuarios y roles del sistema</p>
+                    <div class="form-actions" style="justify-content: flex-start; gap: 12px;">
                         <button type="button" class="btn btn-secondary" onclick="location.href='usuarios.php'">
-                            <i class="fas fa-user-friends"></i> Administrar Usuarios
+                            <i class="fas fa-list"></i> Ver Todos los Usuarios
                         </button>
-                        <button type="button" class="btn btn-primary" onclick="location.href='usuarios.php#nuevo'">
+                        <button type="button" class="btn btn-primary" onclick="location.href='usuarios.php'">
                             <i class="fas fa-user-plus"></i> Agregar Usuario
                         </button>
                     </div>
@@ -445,21 +363,21 @@ $stats_ventas = obtenerEstadisticasVentas();
                 <!-- Información del sistema -->
                 <div class="config-section">
                     <h3><i class="fas fa-info-circle"></i> Información del Sistema</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                        <div>
-                            <h4>Versión del Sistema</h4>
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label"><i class="fas fa-code-branch"></i> Versión del Sistema</div>
                             <p>Heladería CG v2.0</p>
                         </div>
-                        <div>
-                            <h4>Fecha de Instalación</h4>
-                            <p>17/11/2025</p>
+                        <div class="info-card">
+                            <div class="info-label"><i class="fas fa-calendar"></i> Fecha de Instalación</div>
+                            <p>19/11/2024</p>
                         </div>
-                        <div>
-                            <h4>Última Actualización</h4>
+                        <div class="info-card">
+                            <div class="info-label"><i class="fas fa-sync-alt"></i> Última Actualización</div>
                             <p><?php echo date('d/m/Y H:i:s'); ?></p>
                         </div>
-                        <div>
-                            <h4>Admin Actual</h4>
+                        <div class="info-card">
+                            <div class="info-label"><i class="fas fa-user-circle"></i> Admin Actual</div>
                             <p><?php echo htmlspecialchars($_SESSION['username']); ?></p>
                         </div>
                     </div>
@@ -469,12 +387,43 @@ $stats_ventas = obtenerEstadisticasVentas();
     </div>
 
     <script>
+        // Funciones de utilidad
         function cerrarSesion() {
             if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
+
+        // Validar contraseña al cambiar
+        document.addEventListener('DOMContentLoaded', function() {
+            const formPassword = document.querySelector('form[action=""] input[name="accion"][value="cambiar_password"]');
+            if (formPassword) {
+                const form = formPassword.closest('form');
+                form.addEventListener('submit', function(e) {
+                    const passwordNuevo = document.getElementById('password_nuevo').value;
+                    const passwordConfirmar = document.getElementById('password_confirmar').value;
+                    
+                    if (passwordNuevo !== passwordConfirmar) {
+                        e.preventDefault();
+                        alert('Las contraseñas no coinciden. Intenta de nuevo.');
+                        return false;
+                    }
+                    
+                    if (passwordNuevo.length < 6) {
+                        e.preventDefault();
+                        alert('La contraseña debe tener al menos 6 caracteres.');
+                        return false;
+                    }
+                });
+            }
+        });
     </script>
     <script src="/heladeriacg/js/admin/script.js"></script>
+    <script src="/heladeriacg/js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
+        });
+    </script>
 </body>
 </html>

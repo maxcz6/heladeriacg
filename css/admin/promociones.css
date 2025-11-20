@@ -2,6 +2,24 @@
    ESTILOS RESPONSIVOS Y MINIMALISTAS - PROMOCIONES
    ============================================ */
 
+:root {
+    --primary-color: #0891b2;
+    --primary-dark: #0e7490;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
+    --bg-light: #f9fafb;
+    --bg-lighter: #f3f4f6;
+    --text-dark: #1f2937;
+    --text-gray: #6b7280;
+    --text-light: #9ca3af;
+    --border-color: #e5e7eb;
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
 /* Modal contenedor */
 .promocion-modal-overlay {
     position: fixed;
@@ -9,38 +27,55 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     display: none;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     padding: var(--spacing-md);
-    backdrop-filter: blur(4px);
-    animation: fadeIn var(--transition-normal);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: fadeInOverlay var(--transition-normal);
 }
 
 .promocion-modal-overlay.active {
     display: flex;
 }
 
-@keyframes fadeIn {
+@keyframes fadeInOverlay {
     from {
         opacity: 0;
+        backdrop-filter: blur(0px);
+        -webkit-backdrop-filter: blur(0px);
     }
     to {
         opacity: 1;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 
 .promocion-modal-content {
     background: white;
-    border-radius: var(--border-radius-lg);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
     width: 100%;
-    max-width: 600px;
+    max-width: 650px;
     max-height: 90vh;
     overflow-y: auto;
-    animation: slideUp var(--transition-normal);
+    animation: slideUpAndFadeIn var(--transition-normal);
+    overflow-x: hidden;
 }
 
 @keyframes slideUp {
@@ -54,81 +89,103 @@
     }
 }
 
+@keyframes slideUpAndFadeIn {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 /* Header del modal */
 .promocion-modal-header {
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid #e5e7eb;
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
-    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+    border-radius: 16px 16px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .promocion-modal-header h2 {
-    font-size: var(--font-size-xl);
-    color: #1f2937;
+    font-size: 1.5rem;
+    color: var(--text-dark);
     margin: 0;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 .promocion-modal-close {
     background: none;
     border: none;
-    font-size: var(--font-size-lg);
-    color: #6b7280;
+    font-size: 1.5rem;
+    color: var(--text-gray);
     cursor: pointer;
-    padding: var(--spacing-sm);
+    padding: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--border-radius-md);
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
     transition: all var(--transition-fast);
+    min-width: 44px;
+    min-height: 44px;
 }
 
 .promocion-modal-close:hover {
     background: #f3f4f6;
-    color: #1f2937;
+    color: var(--text-dark);
+    transform: rotate(90deg);
 }
 
 .promocion-modal-close:focus {
-    outline: 2px solid #0891b2;
+    outline: 2px solid var(--primary-color);
     outline-offset: 2px;
 }
 
 /* Body del modal */
 .promocion-modal-body {
-    padding: var(--spacing-lg);
+    padding: 24px;
 }
 
 /* Form estilos minimalistas */
 .promocion-form {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
+    gap: 24px;
 }
 
 .form-section {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-light);
+    border-radius: 12px;
+    border-left: 4px solid var(--primary-color);
 }
 
 .form-section-title {
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: #6b7280;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-gray);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: var(--spacing-sm);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
 }
 
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
+    gap: 16px;
 }
 
 .form-row.full {
@@ -138,48 +195,59 @@
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 8px;
 }
 
 .form-group label {
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .form-group label .required {
-    color: #ef4444;
-    margin-left: 2px;
+    color: var(--danger-color);
+    font-weight: 700;
 }
 
 /* Inputs y selects */
 .form-group input,
 .form-group select,
 .form-group textarea {
-    padding: var(--spacing-md);
-    border: 2px solid #e5e7eb;
-    border-radius: var(--border-radius-md);
-    font-size: var(--font-size-base);
+    padding: 12px 14px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
     font-family: inherit;
     transition: all var(--transition-fast);
     background: white;
+    color: var(--text-dark);
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+    border-color: var(--primary-color);
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #0891b2;
-    box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.15);
+    background: #fafbfc;
 }
 
 .form-group input::placeholder {
-    color: #9ca3af;
+    color: var(--text-light);
 }
 
 .form-group textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 100px;
     font-family: inherit;
 }
 
@@ -187,16 +255,17 @@
 .promotion-type-group {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
+    gap: 16px;
 }
 
 .promotion-type-option {
-    padding: var(--spacing-md);
-    border: 2px solid #e5e7eb;
-    border-radius: var(--border-radius-md);
+    padding: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
     cursor: pointer;
     transition: all var(--transition-fast);
     background: white;
+    position: relative;
 }
 
 .promotion-type-option input[type="radio"] {
@@ -204,103 +273,121 @@
 }
 
 .promotion-type-option.selected {
-    border-color: #0891b2;
-    background: rgba(8, 145, 178, 0.05);
+    border-color: var(--primary-color);
+    background: rgba(8, 145, 178, 0.08);
+    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.15);
 }
 
 .promotion-type-option:hover {
-    border-color: #06b6d4;
-    background: rgba(6, 182, 212, 0.02);
+    border-color: var(--primary-color);
+    background: rgba(8, 145, 178, 0.04);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.1);
 }
 
 .promotion-type-label {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    font-weight: 500;
-    color: #1f2937;
-    margin-bottom: var(--spacing-sm);
+    gap: 10px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
 }
 
 .promotion-type-icon {
-    font-size: var(--font-size-lg);
-    width: 24px;
+    font-size: 1.25rem;
+    width: 28px;
     text-align: center;
 }
 
 .promotion-type-desc {
-    font-size: var(--font-size-xs);
-    color: #6b7280;
-    margin-top: var(--spacing-xs);
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    margin-top: 8px;
+    line-height: 1.4;
 }
 
 /* Checkbox personalizado */
 .checkbox-group {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--bg-light);
 }
 
 .checkbox-group input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     cursor: pointer;
-    accent-color: #0891b2;
+    accent-color: var(--primary-color);
+    border-radius: 4px;
 }
 
 .checkbox-group label {
     margin: 0;
     cursor: pointer;
-    font-size: var(--font-size-sm);
+    font-size: 0.95rem;
+    font-weight: 500;
 }
 
 /* Footer del modal */
 .promocion-modal-footer {
-    padding: var(--spacing-lg);
-    border-top: 1px solid #e5e7eb;
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: flex-end;
-    gap: var(--spacing-md);
-    background: #f9fafb;
-    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+    gap: 12px;
+    background: var(--bg-light);
+    border-radius: 0 0 16px 16px;
+    position: sticky;
+    bottom: 0;
 }
 
 /* Botones */
 .btn {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: 12px 24px;
     border: none;
-    border-radius: var(--border-radius-md);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
     min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-sm);
+    gap: 8px;
     font-family: inherit;
+    white-space: nowrap;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     color: white;
     flex: 1;
+    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.2);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+    box-shadow: 0 8px 20px rgba(8, 145, 178, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(8, 145, 178, 0.2);
 }
 
 .btn-primary:focus {
-    outline: 2px solid #0891b2;
+    outline: 2px solid var(--primary-color);
     outline-offset: 2px;
 }
 
 .btn-secondary {
-    background: #e5e7eb;
-    color: #374151;
+    background: var(--border-color);
+    color: var(--text-dark);
     flex: 1;
 }
 
@@ -309,30 +396,230 @@
     transform: translateY(-2px);
 }
 
+.btn-secondary:active {
+    transform: translateY(0);
+}
+
 .btn-secondary:focus {
-    outline: 2px solid #6b7280;
+    outline: 2px solid var(--text-gray);
     outline-offset: 2px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
 }
 
 /* Campos de validación */
 .form-group.error input,
 .form-group.error select,
 .form-group.error textarea {
-    border-color: #ef4444;
+    border-color: var(--danger-color);
     background: rgba(239, 68, 68, 0.02);
 }
 
 .error-message {
-    font-size: var(--font-size-xs);
-    color: #ef4444;
-    margin-top: var(--spacing-xs);
+    font-size: 0.8rem;
+    color: var(--danger-color);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-/* Responsive */
+/* ============================================
+   ESTILOS PARA TABS DE PROMOCIONES Y CUPONES
+   ============================================ */
+
+.promo-tabs-container {
+    display: flex;
+    gap: 0;
+    margin: 20px 0;
+    border-bottom: 2px solid var(--border-color);
+    background: var(--bg-light);
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.promo-tab-btn {
+    flex: 1;
+    padding: 16px 20px;
+    border: none;
+    background: transparent;
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    border-bottom: 3px solid transparent;
+}
+
+.promo-tab-btn:hover {
+    background: rgba(8, 145, 178, 0.05);
+    color: var(--primary-color);
+}
+
+.promo-tab-btn.active {
+    color: var(--primary-color);
+    background: white;
+    border-bottom-color: var(--primary-color);
+}
+
+.promo-section {
+    animation: fadeIn var(--transition-normal);
+}
+
+.promo-section.active {
+    display: block;
+}
+
+.promo-section.inactive {
+    display: none;
+}
+
+/* Estilos para tabla de cupones */
+.cupones-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.cupones-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cupones-search {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all var(--transition-fast);
+}
+
+.cupones-search:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.15);
+}
+
+.cupones-table {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cupones-table thead {
+    background: linear-gradient(135deg, var(--bg-lighter) 0%, #ffffff 100%);
+}
+
+.cupones-table th {
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--text-dark);
+    border-bottom: 2px solid var(--border-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cupones-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+.cupones-table tbody tr {
+    transition: all var(--transition-fast);
+}
+
+.cupones-table tbody tr:hover {
+    background: var(--bg-light);
+    box-shadow: inset 0 0 0 1px var(--border-color);
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success-color);
+}
+
+.status-badge.inactive {
+    background: rgba(107, 114, 128, 0.15);
+    color: var(--text-gray);
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    min-height: 36px;
+}
+
+.action-btn:hover {
+    transform: scale(1.15);
+    color: var(--primary-color);
+}
+
+.action-btn.delete:hover {
+    color: var(--danger-color);
+}
+
+/* Responsive para tabs */
 @media (max-width: 768px) {
-    .promocion-modal-content {
-        max-width: 95%;
-        border-radius: var(--border-radius-lg);
+    .promo-tabs-container {
+        gap: 0;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .promo-tab-btn {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+
+    .promo-tab-btn i {
+        display: none;
+    }
+
+    .cupones-table {
+        font-size: 0.85rem;
+    }
+
+    .cupones-table th,
+    .cupones-table td {
+        padding: 12px;
     }
 
     .form-row {
@@ -342,28 +629,96 @@
     .promotion-type-group {
         grid-template-columns: 1fr;
     }
+}
+
+@media (max-width: 480px) {
+    .promo-tabs-container {
+        margin: 16px 0;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .promo-tab-btn {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+
+    .cupones-table {
+        font-size: 0.8rem;
+    }
+
+    .cupones-table th,
+    .cupones-table td {
+        padding: 8px 10px;
+    }
+
+    .action-btn {
+        padding: 6px;
+    }
+}
+
+@media (max-width: 768px) {
+    .promocion-modal-content {
+        max-width: 95%;
+        border-radius: 16px;
+    }
+
+    .form-section {
+        padding: 12px;
+        border-left: 3px solid var(--primary-color);
+    }
 
     .promocion-modal-header,
     .promocion-modal-body,
     .promocion-modal-footer {
-        padding: var(--spacing-md);
+        padding: 20px;
     }
 
     .promocion-modal-footer {
         flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
     }
 
     .btn-primary,
     .btn-secondary {
-        width: 100%;
+        flex: 1 1 100%;
     }
 }
+
+/* Botones principales (Agregar Promoción / Agregar Cupón) */
+.promociones-actions .action-btn.primary,
+.cupones-header .action-btn.primary,
+.promo-section .action-btn.primary {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: #ffffff;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 6px 18px rgba(8,145,178,0.18);
+}
+
+.promociones-actions .action-btn.primary i,
+.cupones-header .action-btn.primary i { font-size: 1rem; }
+
+.promociones-actions .action-btn.primary:hover,
+.cupones-header .action-btn.primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(8,145,178,0.22);
+}
+
 
 @media (max-width: 480px) {
     .promocion-modal-content {
         max-width: 100%;
         max-height: 100vh;
-        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        border-radius: 16px 16px 0 0;
         overflow-y: auto;
     }
 
@@ -374,6 +729,191 @@
     }
 
     .promocion-modal-header h2 {
-        font-size: var(--font-size-lg);
+        font-size: 1.25rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-section {
+        gap: 12px;
+    }
+
+    .promotion-type-group {
+        grid-template-columns: 1fr;
     }
 }
+
+/* Animaciones suaves */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.cupones-table tbody tr {
+    animation: slideInLeft var(--transition-normal);
+}
+
+/* Scrollbar personalizada */
+.promocion-modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.promocion-modal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.promocion-modal-content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.promocion-modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-gray);
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: -100px;
+    right: 20px;
+    background: white;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    z-index: 2000;
+    transition: bottom var(--transition-normal) ease;
+    font-weight: 500;
+}
+
+.toast.show {
+    bottom: 20px;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.toast-success {
+    border-left: 4px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.toast-error {
+    border-left: 4px solid var(--danger-color);
+    color: var(--danger-color);
+}
+
+.toast-info {
+    border-left: 4px solid var(--info-color);
+    color: var(--info-color);
+}
+
+.toast-warning {
+    border-left: 4px solid var(--warning-color);
+    color: var(--warning-color);
+}
+
+.toast i {
+    font-size: 1.25rem;
+    min-width: 20px;
+}
+
+/* Loading spinner */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Print styles */
+@media print {
+    .promocion-modal-overlay {
+        display: none !important;
+    }
+    
+    .promo-tabs-container .btn {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   FIX: Tabla de Promociones (alineación de columnas)
+   - Forzar table-layout para que encabezados y celdas coincidan
+   - Truncar texto en columnas críticas y permitir wrap en descripción
+   - Definir anchos relativos por columna
+   ============================================ */
+.promociones-table {
+    width: 100%;
+    table-layout: fixed; /* importante para alinear columnas entre thead/tbody */
+    border-collapse: collapse;
+    word-break: break-word;
+}
+
+.promociones-table th,
+.promociones-table td {
+    padding: 12px 14px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap; /* evita que el contenido desplace columnas */
+    vertical-align: middle;
+}
+
+/* Permitir que la columna de descripción haga wrap y muestre varias líneas */
+.promociones-table td:nth-child(4) {
+    white-space: normal;
+}
+
+/* Anchos relativos por columna (suma ~100%) */
+.promociones-table th:nth-child(1), .promociones-table td:nth-child(1) { width: 28%; }
+.promociones-table th:nth-child(2), .promociones-table td:nth-child(2) { width: 12%; }
+.promociones-table th:nth-child(3), .promociones-table td:nth-child(3) { width: 18%; }
+.promociones-table th:nth-child(4), .promociones-table td:nth-child(4) { width: 30%; }
+.promociones-table th:nth-child(5), .promociones-table td:nth-child(5) { width: 6%; }
+.promociones-table th:nth-child(6), .promociones-table td:nth-child(6) { width: 6%; }
+
+/* Ajustes en pantallas pequeñas: permitir scroll horizontal antes que romper layout */
+@media (max-width: 768px) {
+    .promociones-table th,
+    .promociones-table td {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
+
+    /* Mantener la tabla en una sola línea y permitir scroll en contenedor */
+    .table-container {
+        overflow-x: auto;
+    }
+}
+

@@ -1,0 +1,582 @@
+/* ============================================
+   ESTILOS AVANZADOS PARA PÁGINA DE VENTAS
+   ============================================ */
+
+:root {
+    --primary: #0891b2;
+    --primary-dark: #0e7490;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --light: #f9fafb;
+    --light-2: #f3f4f6;
+    --dark: #1f2937;
+    --gray: #6b7280;
+    --gray-light: #9ca3af;
+    --border: #e5e7eb;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+    --transition: 0.3s ease;
+}
+
+/* ============================================
+   ESTADÍSTICAS - DASHBOARD CARDS
+   ============================================ */
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    animation: slideInDown 0.5s ease;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition);
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    background: var(--light);
+    color: var(--primary);
+    flex-shrink: 0;
+    transition: all var(--transition);
+}
+
+.stat-card:hover .stat-icon {
+    background: var(--primary);
+    color: white;
+    transform: rotate(10deg);
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.2;
+}
+
+.stat-info p {
+    margin: 4px 0 0 0;
+    color: var(--gray);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* ============================================
+   TABLA DE VENTAS - USA ESTILOS GLOBALES
+   ============================================ */
+
+.ventas-table {
+    width: 100%;
+}
+
+/* IDs de venta con estilo */
+.venta-id {
+    background: var(--light);
+    color: var(--primary);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-family: 'Monaco', 'Courier New', monospace;
+}
+
+/* Fechas con iconos */
+.venta-fecha {
+    color: var(--gray);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.venta-fecha::before {
+    content: '📅';
+    opacity: 0.7;
+}
+
+/* Totales con enfoque */
+.venta-total {
+    color: var(--primary);
+    font-size: 1.1rem;
+    display: inline-block;
+    padding: 6px 12px;
+    background: rgba(8, 145, 178, 0.08);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary);
+}
+
+/* Badges de estado mejorados */
+.badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all var(--transition);
+}
+
+.badge-procesada {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-procesada::before {
+    content: '✓ ';
+}
+
+.badge-pendiente {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-pendiente::before {
+    content: '⏳ ';
+}
+
+.badge-anulada {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-anulada::before {
+    content: '✗ ';
+}
+
+/* ============================================
+   ACCIONES Y BOTONES
+   ============================================ */
+
+.ventas-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.search-filter {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+    min-width: 300px;
+}
+
+.search-input,
+.filter-select {
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all var(--transition);
+    background: white;
+}
+
+.search-input {
+    flex: 1;
+}
+
+.search-input::placeholder {
+    color: var(--gray-light);
+}
+
+.search-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
+}
+
+.filter-select {
+    min-width: 200px;
+    cursor: pointer;
+}
+
+.action-btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    min-width: 40px;
+    justify-content: center;
+}
+
+.action-btn.export {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.action-btn.export:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.action-btn:not(.export) {
+    background: var(--light);
+    color: var(--gray);
+    border: 1px solid var(--border);
+}
+
+.action-btn:not(.export):hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: scale(1.08);
+}
+
+/* ============================================
+   MODAL DE DETALLE
+   ============================================ */
+
+.detalle-venta {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px;
+    background: var(--light);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+    transition: all var(--transition);
+}
+
+.info-row:hover {
+    background: rgba(8, 145, 178, 0.05);
+    transform: translateX(4px);
+}
+
+.info-row label {
+    font-weight: 600;
+    color: var(--gray);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-row strong {
+    color: var(--dark);
+    font-size: 1.05rem;
+}
+
+.detalle-productos {
+    margin-top: 20px;
+}
+
+.detalle-productos-titulo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+}
+
+.detalle-producto-item {
+    padding: 12px;
+    background: var(--light);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all var(--transition);
+}
+
+.detalle-producto-item:hover {
+    background: rgba(8, 145, 178, 0.08);
+    transform: translateX(4px);
+}
+
+.detalle-producto-nombre {
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.detalle-producto-cantidad {
+    background: var(--primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.detalle-producto-precio {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+/* ============================================
+   ESTADOS VACÍOS
+   ============================================ */
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--gray);
+    font-size: 1.1rem;
+}
+
+.empty-state::before {
+    content: '📭';
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.7;
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+
+    .tabla-admin th,
+    .tabla-admin td {
+        padding: 12px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .ventas-actions {
+        flex-direction: column;
+    }
+
+    .search-filter {
+        flex-direction: column;
+        min-width: 100%;
+    }
+
+    .search-input,
+    .filter-select {
+        width: 100%;
+    }
+
+    .action-btn.export {
+        width: 100%;
+    }
+
+    .dashboard-stats {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-info h3 {
+        font-size: 1.4rem;
+    }
+
+    .tabla-admin th,
+    .tabla-admin td {
+        padding: 10px;
+        font-size: 0.8rem;
+    }
+
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .tabla-admin {
+        font-size: 0.75rem;
+    }
+
+    .tabla-admin th,
+    .tabla-admin td {
+        padding: 8px;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
+
+    .stat-info h3 {
+        font-size: 1.2rem;
+    }
+
+    .action-btn {
+        padding: 8px 12px;
+        min-height: 36px;
+        font-size: 0.85rem;
+    }
+
+    .venta-total {
+        font-size: 0.9rem;
+    }
+}
+
+/* ============================================
+   TRANSICIONES Y EFECTOS
+   ============================================ */
+
+/* Efecto hover en filas */
+.tabla-admin tbody tr {
+    position: relative;
+}
+
+.tabla-admin tbody tr::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary);
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform var(--transition);
+}
+
+.tabla-admin tbody tr:hover::before {
+    transform: scaleY(1);
+}
+
+/* Efectos de carga */
+.tabla-admin tbody tr:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.tabla-admin tbody tr:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.tabla-admin tbody tr:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.tabla-admin tbody tr:nth-child(n+4) {
+    animation-delay: 0.2s;
+}

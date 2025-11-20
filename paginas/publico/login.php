@@ -122,17 +122,6 @@ if (isset($_SESSION['logueado']) && $_SESSION['logueado'] === true) {
                     >
                 </div>
 
-                <div class="input-group">
-                    <label for="reg-email">Email</label>
-                    <input 
-                        type="email" 
-                        id="reg-email" 
-                        name="email" 
-                        required 
-                        placeholder="Ingresa tu email"
-                        autocomplete="email"
-                    >
-                </div>
 
                 <div class="input-group">
                     <label for="reg-password">Contraseña</label>

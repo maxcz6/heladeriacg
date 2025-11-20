@@ -87,57 +87,14 @@ $clientes = $stmt_clientes->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Clientes - Concelato Gelateria</title>
     <link rel="stylesheet" href="/heladeriacg/css/admin/estilos_admin.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/navbar.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/clientes.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Header con navegación mejorada y responsiva -->
-    <header class="admin-header">
-        <div>
-            <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <i class="fas fa-ice-cream"></i>
-                <span>Concelato Admin</span>
-            </div>
-            <nav id="admin-nav">
-                <a href="index.php">
-                    <i class="fas fa-chart-line"></i> <span>Dashboard</span>
-                </a>
-                <a href="productos.php">
-                    <i class="fas fa-box"></i> <span>Productos</span>
-                </a>
-                <a href="ventas.php">
-                    <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
-                </a>
-                <a href="empleados.php">
-                    <i class="fas fa-users"></i> <span>Empleados</span>
-                </a>
-                <a href="clientes.php" class="active">
-                    <i class="fas fa-user-friends"></i> <span>Clientes</span>
-                </a>
-                <a href="proveedores.php">
-                    <i class="fas fa-truck"></i> <span>Proveedores</span>
-                </a>
-                <a href="usuarios.php">
-                    <i class="fas fa-user-cog"></i> <span>Usuarios</span>
-                </a>
-                <a href="promociones.php">
-                    <i class="fas fa-tag"></i> <span>Promociones</span>
-                </a>
-                <a href="sucursales.php">
-                    <i class="fas fa-store"></i> <span>Sucursales</span>
-                </a>
-                <a href="configuracion.php">
-                    <i class="fas fa-cog"></i> <span>Configuración</span>
-                </a>
-                <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
-                </a>
-            </nav>
-        </div>
-    </header>
+    <?php include 'includes/navbar.php'; ?>
 
     <!-- Main content -->
     <main class="admin-container">
@@ -176,10 +133,8 @@ $clientes = $stmt_clientes->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <!-- Table Card -->
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="tablaClientes" class="tabla-admin" role="table">
+        <div class="table-container">
+            <table id="tablaClientes" class="clientes-table" role="table">
                         <thead>
                             <tr role="row">
                                 <th role="columnheader" aria-sort="none" onclick="TableSorter.sortTable(this)">
@@ -195,12 +150,12 @@ $clientes = $stmt_clientes->fetchAll(PDO::FETCH_ASSOC);
                         <tbody>
                             <?php foreach ($clientes as $cliente): ?>
                             <tr role="row" tabindex="0">
-                                <td><strong><?php echo htmlspecialchars($cliente['nombre']); ?></strong></td>
-                                <td><?php echo htmlspecialchars($cliente['correo'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($cliente['telefono'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($cliente['direccion'] ?? 'N/A'); ?></td>
-                                <td><span class="date"><?php echo isset($cliente['fecha_registro']) ? date('d/m/Y', strtotime($cliente['fecha_registro'])) : 'N/A'; ?></span></td>
-                                <td>
+                                <td data-label="Nombre"><strong><?php echo htmlspecialchars($cliente['nombre']); ?></strong></td>
+                                <td data-label="Email"><?php echo htmlspecialchars($cliente['correo'] ?? 'N/A'); ?></td>
+                                <td data-label="Teléfono"><?php echo htmlspecialchars($cliente['telefono'] ?? 'N/A'); ?></td>
+                                <td data-label="Dirección"><?php echo htmlspecialchars($cliente['direccion'] ?? 'N/A'); ?></td>
+                                <td data-label="Fecha Registro"><span class="date"><?php echo isset($cliente['fecha_registro']) ? date('d/m/Y', strtotime($cliente['fecha_registro'])) : 'N/A'; ?></span></td>
+                                <td data-label="Acciones">
                                     <button 
                                         class="action-btn edit" 
                                         onclick="editarCliente(<?php echo $cliente['id_cliente']; ?>)"
@@ -217,15 +172,13 @@ $clientes = $stmt_clientes->fetchAll(PDO::FETCH_ASSOC);
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
-                    </table>
-                    <?php if (empty($clientes)): ?>
-                    <div class="empty-state">
-                        <p>No hay clientes registrados. <a href="#" onclick="openModal('modalCliente')">Crear uno</a></p>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
+            </table>
         </div>
+        <?php if (empty($clientes)): ?>
+        <div style="text-align: center; padding: 20px; background: white; margin-bottom: 24px;">
+            <p><i class="fas fa-inbox"></i> No hay clientes registrados. <a href="#" onclick="openModal('modalCliente')">Crear uno</a></p>
+        </div>
+        <?php endif; ?>
     </main>
 
     <!-- Modal: Crear/Editar Cliente -->
@@ -368,6 +321,18 @@ $clientes = $stmt_clientes->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('formCliente').addEventListener('submit', function(e) {
             e.preventDefault();
             this.submit();
+        });
+    </script>
+    <script src="/heladeriacg/js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
+        });
+    </script>
+    <script src="../../js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
         });
     </script>
 </body>

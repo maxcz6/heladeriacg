@@ -1,1 +1,0 @@
-aqui ira el js de cada componete , como navvar y  body crearas mas archivos css separando contenidos como   navvar  / secction / div / foter / main , y todo sera responsivo

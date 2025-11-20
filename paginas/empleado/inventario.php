@@ -1,48 +1,67 @@
 <?php
 include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sesion.php');
+include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/conexion.php');
 verificarSesion();
 verificarRol('empleado');
-include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/clientes_db.php');
-include_once($_SERVER['DOCUMENT_ROOT'] . '/heladeriacg/conexion/sucursales_db.php');
 
-// Obtener el ID del empleado y sucursal
-$stmt_empleado = $pdo->prepare("SELECT id_vendedor, id_sucursal FROM usuarios WHERE id_usuario = :id_usuario");
-$stmt_empleado->bindParam(':id_usuario', $_SESSION['id_usuario']);
-$stmt_empleado->execute();
-$usuario_empleado = $stmt_empleado->fetch(PDO::FETCH_ASSOC);
-
-if (!$usuario_empleado || !$usuario_empleado['id_sucursal']) {
-    header('Location: ../publico/login.php');
-    exit();
+// Obtener productos con estado de stock
+try {
+    $stmt = $pdo->prepare("
+        SELECT p.*, 
+               pr.empresa as proveedor_nombre,
+               CASE 
+                   WHEN p.stock < 10 THEN 'bajo'
+                   WHEN p.stock <= 30 THEN 'medio'
+                   ELSE 'normal'
+               END AS estado_stock
+        FROM productos p
+        LEFT JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
+        WHERE p.activo = 1
+        ORDER BY p.nombre
+    ");
+    $stmt->execute();
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch(PDOException $e) {
+    $productos = [];
+    error_log("Error al obtener productos para inventario: " . $e->getMessage());
 }
 
-$id_vendedor = $usuario_empleado['id_vendedor'];
-$id_sucursal = $usuario_empleado['id_sucursal'];
-
-// Obtener inventario de la sucursal
-$stmt_inventario = $pdo->prepare("
-    SELECT p.id_producto, p.nombre, p.sabor, p.descripcion, p.precio, i.stock_sucursal as stock
-    FROM productos p
-    JOIN inventario_sucursal i ON p.id_producto = i.id_producto
-    WHERE i.id_sucursal = :id_sucursal
-    ORDER BY p.nombre
-");
-$stmt_inventario->bindParam(':id_sucursal', $id_sucursal);
-$stmt_inventario->execute();
-$inventario = $stmt_inventario->fetchAll(PDO::FETCH_ASSOC);
-
-// Si se está actualizando el stock
+// Procesar actualización de stock
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'actualizar_stock') {
     $id_producto = $_POST['id_producto'];
-    $nueva_cantidad = $_POST['nueva_cantidad'];
-    
-    if (actualizarStockSucursal($id_producto, $id_sucursal, $nueva_cantidad)) {
-        $mensaje = "Stock actualizado exitosamente";
-        $tipo_mensaje = "success";
-    } else {
-        $mensaje = "Error al actualizar el stock";
-        $tipo_mensaje = "error";
+    $nuevo_stock = $_POST['nuevo_stock'];
+
+    try {
+        $stmt_update = $pdo->prepare("UPDATE productos SET stock = :stock WHERE id_producto = :id_producto");
+        $stmt_update->bindParam(':stock', $nuevo_stock);
+        $stmt_update->bindParam(':id_producto', $id_producto);
+
+        if ($stmt_update->execute()) {
+            $_SESSION['mensaje_exito'] = 'Stock actualizado exitosamente';
+        } else {
+            $_SESSION['mensaje_error'] = 'Error al actualizar stock';
+        }
+    } catch(PDOException $e) {
+        $_SESSION['mensaje_error'] = 'Error al actualizar stock: ' . $e->getMessage();
+        error_log("Error al actualizar stock: " . $e->getMessage());
     }
+    
+    // Recargar productos
+    $stmt = $pdo->prepare("
+        SELECT p.*, 
+               pr.empresa as proveedor_nombre,
+               CASE 
+                   WHEN p.stock < 10 THEN 'bajo'
+                   WHEN p.stock <= 30 THEN 'medio'
+                   ELSE 'normal'
+               END AS estado_stock
+        FROM productos p
+        LEFT JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
+        WHERE p.activo = 1
+        ORDER BY p.nombre
+    ");
+    $stmt->execute();
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
 
@@ -51,199 +70,250 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario - <?php echo htmlspecialchars(obtenerSucursalPorId($id_sucursal)['nombre']); ?></title>
+    <title>Heladería Concelato - Empleado - Inventario</title>
     <link rel="stylesheet" href="/heladeriacg/css/empleado/estilos_empleado.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .inventario-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .inventario-table th, .inventario-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .inventario-table th {
-            background-color: #f1f5f9;
-            font-weight: 600;
-        }
-        
-        .stock-status {
+        .stock-badge {
+            display: inline-block;
             padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-        
-        .stock-alto {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        
-        .stock-medio {
-            background-color: #fef3c7;
-            color: #92400e;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .stock-bajo {
-            background-color: #fee2e2;
-            color: #b91c1c;
+            background: #fee2e2;
+            color: #dc2626;
         }
         
-        .stock-input {
-            width: 80px;
-            padding: 5px;
-            border: 1px solid #ccc;
+        .stock-medio {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .stock-normal {
+            background: #d1fadf;
+            color: #16a34a;
+        }
+        
+        .modal-stock {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content-stock {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+        }
+        
+        .form-group-stock {
+            margin-bottom: 15px;
+        }
+        
+        .form-group-stock label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-group-stock input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
             border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <div class="employee-container">
-        <header class="employee-header">
-            <div class="header-content">
-                <div class="logo">
+    <div class="empleado-container">
+        <!-- Header con navegación -->
+        <header class="empleado-header">
+            <div class="header-content-empleado">
+                <button class="menu-toggle-empleado" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="empleado-nav">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo-empleado">
                     <i class="fas fa-ice-cream"></i>
-                    <?php echo htmlspecialchars(obtenerSucursalPorId($id_sucursal)['nombre']); ?> - Inventario
+                    <span>Concelato Empleado</span>
                 </div>
-                <nav>
+                <nav id="empleado-nav" class="empleado-nav">
                     <ul>
-                        <li><a href="index.php"><i class="fas fa-home"></i> Inicio</a></li>
-                        <li><a href="ventas.php"><i class="fas fa-shopping-cart"></i> Ventas</a></li>
-                        <li><a href="pedidos_recibidos.php"><i class="fas fa-list"></i> Pedidos</a></li>
+                        <li><a href="index.php">
+                            <i class="fas fa-chart-line"></i> <span>Dashboard</span>
+                        </a></li>
+                        <li><a href="ventas.php">
+                            <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
+                        </a></li>
+                        <li><a href="inventario.php" class="active">
+                            <i class="fas fa-boxes"></i> <span>Inventario</span>
+                        </a></li>
+                        <li><a href="pedidos_recibidos.php">
+                            <i class="fas fa-list"></i> <span>Pedidos</span>
+                        </a></li>
+                        <li><a href="../admin/productos.php">
+                            <i class="fas fa-box"></i> <span>Productos</span>
+                        </a></li>
+                        <li><a href="../admin/clientes.php">
+                            <i class="fas fa-user-friends"></i> <span>Clientes</span>
+                        </a></li>
                     </ul>
                 </nav>
-                <button class="logout-btn" onclick="cerrarSesion()">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                <button class="logout-btn-empleado" onclick="cerrarSesion()">
+                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
                 </button>
             </div>
         </header>
 
-        <main class="employee-main">
-            <div class="welcome-section">
+        <main class="empleado-main">
+            <div class="welcome-section-empleado">
                 <h1>Control de Inventario</h1>
-                <p>Administración del inventario en <?php echo htmlspecialchars(obtenerSucursalPorId($id_sucursal)['nombre']); ?></p>
+                <p>Administra los productos y niveles de stock</p>
             </div>
 
-            <?php if (isset($mensaje)): ?>
-            <div class="mensaje <?php echo $tipo_mensaje; ?>">
-                <?php echo htmlspecialchars($mensaje); ?>
-            </div>
+            <!-- Mensajes -->
+            <?php if (isset($_SESSION['mensaje_exito'])): ?>
+                <div class="alert alert-success" role="status" aria-live="polite">
+                    <i class="fas fa-check-circle"></i>
+                    <span><?php echo $_SESSION['mensaje_exito']; ?></span>
+                </div>
+                <?php unset($_SESSION['mensaje_exito']); ?>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['mensaje_error'])): ?>
+                <div class="alert alert-error" role="status" aria-live="polite">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span><?php echo $_SESSION['mensaje_error']; ?></span>
+                </div>
+                <?php unset($_SESSION['mensaje_error']); ?>
             <?php endif; ?>
 
-            <div class="inventario-actions">
-                <div class="search-filter">
-                    <input type="text" id="searchInventario" placeholder="Buscar producto..." onkeyup="searchInventario()">
-                    <select id="filterStock" onchange="filterInventario()">
-                        <option value="">Todos los productos</option>
-                        <option value="bajo">Stock bajo (< 10)</option>
-                        <option value="medio">Stock medio (10-20)</option>
-                        <option value="alto">Stock alto (> 20)</option>
-                    </select>
+            <div class="card-empleado">
+                <h2>Productos en Inventario</h2>
+                <div class="table-container-empleado">
+                    <table class="empleado-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Sabor</th>
+                                <th>Precio</th>
+                                <th>Stock Actual</th>
+                                <th>Proveedor</th>
+                                <th>Estado Stock</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($productos)): ?>
+                                <?php foreach ($productos as $producto): ?>
+                                <tr>
+                                    <td><?php echo $producto['id_producto']; ?></td>
+                                    <td><strong><?php echo htmlspecialchars($producto['nombre']); ?></strong></td>
+                                    <td><?php echo htmlspecialchars($producto['sabor']); ?></td>
+                                    <td>S/. <?php echo number_format($producto['precio'], 2); ?></td>
+                                    <td><?php echo $producto['stock']; ?>L</td>
+                                    <td><?php echo htmlspecialchars($producto['proveedor_nombre'] ?: 'N/A'); ?></td>
+                                    <td>
+                                        <span class="stock-badge stock-<?php echo $producto['estado_stock']; ?>">
+                                            <?php echo $producto['estado_stock'] === 'bajo' ? 'Bajo' : ($producto['estado_stock'] === 'medio' ? 'Medio' : 'Normal'); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn-empleado btn-primary-empleado" onclick="abrirModalStock(<?php echo $producto['id_producto']; ?>, '<?php echo addslashes(htmlspecialchars($producto['nombre'])); ?>', <?php echo $producto['stock']; ?>)">
+                                            <i class="fas fa-boxes"></i> Actualizar Stock
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="8" style="text-align: center;">No hay productos registrados</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-
-            <div class="table-container">
-                <table class="inventario-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Producto</th>
-                            <th>Sabor</th>
-                            <th>Precio</th>
-                            <th>Stock Actual</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventarioTable">
-                        <?php foreach ($inventario as $producto): ?>
-                        <tr data-stock="<?php echo $producto['stock']; ?>">
-                            <td><?php echo $producto['id_producto']; ?></td>
-                            <td><?php echo htmlspecialchars($producto['nombre']); ?></td>
-                            <td><?php echo htmlspecialchars($producto['sabor']); ?></td>
-                            <td>S/. <?php echo number_format($producto['precio'], 2); ?></td>
-                            <td><?php echo $producto['stock']; ?></td>
-                            <td>
-                                <span class="stock-status
-                                    <?php 
-                                    if ($producto['stock'] < 10) echo 'stock-bajo';
-                                    elseif ($producto['stock'] < 20) echo 'stock-medio';
-                                    else echo 'stock-alto';
-                                    ?>">
-                                    <?php 
-                                    if ($producto['stock'] < 10) echo 'Bajo';
-                                    elseif ($producto['stock'] < 20) echo 'Medio';
-                                    else echo 'Alto';
-                                    ?>
-                                </span>
-                            </td>
-                            <td>
-                                <form method="POST" style="display: inline;" onsubmit="return confirm('¿Actualizar stock de este producto?');">
-                                    <input type="hidden" name="accion" value="actualizar_stock">
-                                    <input type="hidden" name="id_producto" value="<?php echo $producto['id_producto']; ?>">
-                                    <input type="number" name="nueva_cantidad" class="stock-input" placeholder="Cantidad" min="0" required>
-                                    <button type="submit" class="action-btn update">Actualizar</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
         </main>
+
+        <!-- Modal para actualizar stock -->
+        <div id="modalStock" class="modal-stock">
+            <div class="modal-content-stock">
+                <h3>Actualizar Stock</h3>
+                <form method="POST">
+                    <input type="hidden" name="accion" value="actualizar_stock">
+                    <input type="hidden" name="id_producto" id="id_producto_modal">
+                    
+                    <div class="form-group-stock">
+                        <label for="producto_nombre">Producto</label>
+                        <input type="text" id="producto_nombre" readonly>
+                    </div>
+                    
+                    <div class="form-group-stock">
+                        <label for="stock_actual">Stock Actual</label>
+                        <input type="number" id="stock_actual" readonly>
+                    </div>
+                    
+                    <div class="form-group-stock">
+                        <label for="nuevo_stock">Nuevo Stock (Litros)</label>
+                        <input type="number" id="nuevo_stock" name="nuevo_stock" min="0" required>
+                    </div>
+                    
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button type="button" class="btn-empleado btn-secondary-empleado" onclick="cerrarModalStock()">Cancelar</button>
+                        <button type="submit" class="btn-empleado btn-primary-empleado">Actualizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
-        function searchInventario() {
-            const input = document.getElementById('searchInventario');
-            const filter = input.value.toLowerCase();
-            const rows = document.querySelectorAll('#inventarioTable tr');
-
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                const nombreCell = row.cells[1].textContent.toLowerCase(); // Nombre
-                const saborCell = row.cells[2].textContent.toLowerCase(); // Sabor
-
-                if (nombreCell.includes(filter) || saborCell.includes(filter)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        }
-
-        function filterInventario() {
-            const filter = document.getElementById('filterStock').value;
-            const rows = document.querySelectorAll('#inventarioTable tr');
-
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                const stock = parseInt(row.getAttribute('data-stock'));
-
-                let showRow = false;
-                if (filter === '') {
-                    showRow = true;
-                } else if (filter === 'bajo' && stock < 10) {
-                    showRow = true;
-                } else if (filter === 'medio' && stock >= 10 && stock <= 20) {
-                    showRow = true;
-                } else if (filter === 'alto' && stock > 20) {
-                    showRow = true;
-                }
-
-                row.style.display = showRow ? '' : 'none';
-            }
-        }
-
         function cerrarSesion() {
             if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
                 window.location.href = '../../conexion/cerrar_sesion.php';
             }
         }
+        
+        function abrirModalStock(id, nombre, stock) {
+            document.getElementById('id_producto_modal').value = id;
+            document.getElementById('producto_nombre').value = nombre;
+            document.getElementById('stock_actual').value = stock;
+            document.getElementById('nuevo_stock').value = stock;
+            document.getElementById('modalStock').style.display = 'block';
+        }
+        
+        function cerrarModalStock() {
+            document.getElementById('modalStock').style.display = 'none';
+        }
+        
+        // Cerrar modal si se hace clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalStock');
+            if (event.target === modal) {
+                cerrarModalStock();
+            }
+        }
+        
+        // Toggle mobile menu
+        document.querySelector('.menu-toggle-empleado').addEventListener('click', function() {
+            const nav = document.querySelector('.empleado-nav ul');
+            nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+        });
     </script>
 </body>
 </html>

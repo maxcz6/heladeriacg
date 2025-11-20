@@ -664,3 +664,575 @@ COMMIT;
 -- ============================================
 -- FIN DEL SCRIPT
 -- ============================================
+-- ============================================
+-- SISTEMA COMPLETO DE CUPONES
+-- ============================================
+
+USE `heladeriacgbd`;
+
+-- ============================================
+-- 1. TABLA DE CUPONES
+-- ============================================
+
+CREATE TABLE `cupones` (
+  `id_cupon` INT(11) NOT NULL AUTO_INCREMENT,
+  `codigo` VARCHAR(50) NOT NULL,
+  `descripcion` VARCHAR(255) DEFAULT NULL,
+  `tipo_descuento` ENUM('porcentaje','monto_fijo') NOT NULL DEFAULT 'porcentaje',
+  `valor_descuento` DECIMAL(10,2) NOT NULL CHECK (`valor_descuento` > 0),
+  `monto_minimo` DECIMAL(10,2) DEFAULT 0.00,
+  `fecha_inicio` DATE NOT NULL,
+  `fecha_fin` DATE NOT NULL,
+  `usos_maximos` INT(11) DEFAULT NULL COMMENT 'NULL = ilimitado',
+  `usos_por_cliente` INT(11) DEFAULT 1,
+  `usos_actuales` INT(11) DEFAULT 0,
+  `activo` TINYINT(1) NOT NULL DEFAULT 1,
+  `id_promocion` INT(11) DEFAULT NULL COMMENT 'Vinculado a promoción específica',
+  `aplica_productos` TEXT DEFAULT NULL COMMENT 'JSON con IDs de productos específicos',
+  `aplica_categorias` TEXT DEFAULT NULL COMMENT 'JSON con categorías/sabores',
+  `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `creado_por` INT(11) DEFAULT NULL,
+  PRIMARY KEY (`id_cupon`),
+  UNIQUE KEY `codigo` (`codigo`),
+  KEY `idx_codigo_activo` (`codigo`, `activo`),
+  KEY `idx_fecha_fin` (`fecha_fin`),
+  KEY `id_promocion` (`id_promocion`),
+  KEY `creado_por` (`creado_por`),
+  CONSTRAINT `cupones_ibfk_promocion` FOREIGN KEY (`id_promocion`) REFERENCES `promociones` (`id_promocion`) ON DELETE SET NULL,
+  CONSTRAINT `cupones_ibfk_usuario` FOREIGN KEY (`creado_por`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ============================================
+-- 2. TABLA DE HISTORIAL DE USO DE CUPONES
+-- ============================================
+
+CREATE TABLE `cupones_uso` (
+  `id_uso` INT(11) NOT NULL AUTO_INCREMENT,
+  `id_cupon` INT(11) NOT NULL,
+  `id_venta` INT(11) NOT NULL,
+  `id_cliente` INT(11) DEFAULT NULL,
+  `monto_descuento` DECIMAL(10,2) NOT NULL,
+  `monto_original` DECIMAL(10,2) NOT NULL,
+  `monto_final` DECIMAL(10,2) NOT NULL,
+  `fecha_uso` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_sucursal` INT(11) DEFAULT NULL,
+  PRIMARY KEY (`id_uso`),
+  KEY `idx_id_cupon` (`id_cupon`),
+  KEY `idx_id_venta` (`id_venta`),
+  KEY `idx_id_cliente` (`id_cliente`),
+  KEY `idx_fecha_uso` (`fecha_uso`),
+  CONSTRAINT `cupones_uso_ibfk_1` FOREIGN KEY (`id_cupon`) REFERENCES `cupones` (`id_cupon`) ON DELETE CASCADE,
+  CONSTRAINT `cupones_uso_ibfk_2` FOREIGN KEY (`id_venta`) REFERENCES `ventas` (`id_venta`) ON DELETE CASCADE,
+  CONSTRAINT `cupones_uso_ibfk_3` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`) ON DELETE SET NULL,
+  CONSTRAINT `cupones_uso_ibfk_4` FOREIGN KEY (`id_sucursal`) REFERENCES `sucursales` (`id_sucursal`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ============================================
+-- 3. AGREGAR CAMPOS A VENTAS PARA CUPONES
+-- ============================================
+
+ALTER TABLE `ventas` 
+ADD COLUMN `id_cupon` INT(11) DEFAULT NULL AFTER `id_sucursal`,
+ADD COLUMN `descuento_cupon` DECIMAL(10,2) DEFAULT 0.00 AFTER `id_cupon`,
+ADD KEY `idx_id_cupon` (`id_cupon`),
+ADD CONSTRAINT `ventas_ibfk_cupon` FOREIGN KEY (`id_cupon`) REFERENCES `cupones` (`id_cupon`) ON DELETE SET NULL;
+
+-- ============================================
+-- 4. TRIGGERS PARA CUPONES
+-- ============================================
+
+DELIMITER $$
+
+-- Trigger: Actualizar usos_actuales después de usar cupón
+CREATE TRIGGER `trg_cupon_incrementar_uso` AFTER INSERT ON `cupones_uso` FOR EACH ROW
+BEGIN
+    UPDATE cupones
+    SET usos_actuales = usos_actuales + 1
+    WHERE id_cupon = NEW.id_cupon;
+END$$
+
+-- Trigger: Desactivar cupón si alcanza usos máximos
+CREATE TRIGGER `trg_cupon_desactivar_por_usos` AFTER UPDATE ON `cupones` FOR EACH ROW
+BEGIN
+    IF NEW.usos_maximos IS NOT NULL AND NEW.usos_actuales >= NEW.usos_maximos THEN
+        UPDATE cupones
+        SET activo = 0
+        WHERE id_cupon = NEW.id_cupon AND activo = 1;
+    END IF;
+END$$
+
+-- Trigger: Auditar creación de cupones
+CREATE TRIGGER `trg_audit_cupones_insert` AFTER INSERT ON `cupones` FOR EACH ROW
+BEGIN
+    INSERT INTO audit_logs (tabla, operacion, referencia_id, detalles)
+    VALUES (
+        'cupones',
+        'INSERT',
+        NEW.id_cupon,
+        JSON_OBJECT(
+            'codigo', NEW.codigo,
+            'tipo_descuento', NEW.tipo_descuento,
+            'valor_descuento', NEW.valor_descuento,
+            'fecha_inicio', NEW.fecha_inicio,
+            'fecha_fin', NEW.fecha_fin
+        )
+    );
+END$$
+
+DELIMITER ;
+
+-- ============================================
+-- 5. FUNCIÓN: GENERAR CÓDIGO ALEATORIO
+-- ============================================
+
+DELIMITER $$
+
+CREATE FUNCTION `fn_generar_codigo_cupon`(
+    `p_prefijo` VARCHAR(10),
+    `p_longitud` INT
+) RETURNS VARCHAR(50) CHARSET utf8mb4
+DETERMINISTIC
+BEGIN
+    DECLARE v_codigo VARCHAR(50);
+    DECLARE v_caracteres VARCHAR(36) DEFAULT 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    DECLARE v_i INT DEFAULT 0;
+    DECLARE v_existe INT DEFAULT 1;
+    
+    WHILE v_existe > 0 DO
+        SET v_codigo = UPPER(p_prefijo);
+        SET v_i = 0;
+        
+        WHILE v_i < p_longitud DO
+            SET v_codigo = CONCAT(v_codigo, 
+                SUBSTRING(v_caracteres, FLOOR(1 + RAND() * 34), 1)
+            );
+            SET v_i = v_i + 1;
+        END WHILE;
+        
+        SELECT COUNT(*) INTO v_existe
+        FROM cupones
+        WHERE codigo = v_codigo;
+    END WHILE;
+    
+    RETURN v_codigo;
+END$$
+
+DELIMITER ;
+
+-- ============================================
+-- 6. FUNCIÓN: VALIDAR CUPÓN
+-- ============================================
+
+DELIMITER $$
+
+CREATE FUNCTION `fn_validar_cupon`(
+    `p_codigo` VARCHAR(50),
+    `p_id_cliente` INT,
+    `p_monto_compra` DECIMAL(10,2)
+) RETURNS VARCHAR(255) CHARSET utf8mb4
+READS SQL DATA
+BEGIN
+    DECLARE v_id_cupon INT;
+    DECLARE v_activo TINYINT;
+    DECLARE v_fecha_inicio DATE;
+    DECLARE v_fecha_fin DATE;
+    DECLARE v_monto_minimo DECIMAL(10,2);
+    DECLARE v_usos_maximos INT;
+    DECLARE v_usos_actuales INT;
+    DECLARE v_usos_por_cliente INT;
+    DECLARE v_usos_cliente INT;
+    
+    -- Obtener datos del cupón
+    SELECT id_cupon, activo, fecha_inicio, fecha_fin, monto_minimo,
+           usos_maximos, usos_actuales, usos_por_cliente
+    INTO v_id_cupon, v_activo, v_fecha_inicio, v_fecha_fin, v_monto_minimo,
+         v_usos_maximos, v_usos_actuales, v_usos_por_cliente
+    FROM cupones
+    WHERE codigo = p_codigo;
+    
+    -- Validaciones
+    IF v_id_cupon IS NULL THEN
+        RETURN 'ERROR: Cupón no existe';
+    END IF;
+    
+    IF v_activo = 0 THEN
+        RETURN 'ERROR: Cupón inactivo';
+    END IF;
+    
+    IF CURDATE() < v_fecha_inicio THEN
+        RETURN 'ERROR: Cupón aún no válido';
+    END IF;
+    
+    IF CURDATE() > v_fecha_fin THEN
+        RETURN 'ERROR: Cupón vencido';
+    END IF;
+    
+    IF p_monto_compra < v_monto_minimo THEN
+        RETURN CONCAT('ERROR: Compra mínima S/ ', v_monto_minimo);
+    END IF;
+    
+    IF v_usos_maximos IS NOT NULL AND v_usos_actuales >= v_usos_maximos THEN
+        RETURN 'ERROR: Cupón agotado';
+    END IF;
+    
+    -- Verificar usos por cliente
+    IF p_id_cliente IS NOT NULL THEN
+        SELECT COUNT(*) INTO v_usos_cliente
+        FROM cupones_uso
+        WHERE id_cupon = v_id_cupon AND id_cliente = p_id_cliente;
+        
+        IF v_usos_cliente >= v_usos_por_cliente THEN
+            RETURN 'ERROR: Ya usaste este cupón';
+        END IF;
+    END IF;
+    
+    RETURN 'VALIDO';
+END$$
+
+DELIMITER ;
+
+-- ============================================
+-- 7. FUNCIÓN: CALCULAR DESCUENTO DE CUPÓN
+-- ============================================
+
+DELIMITER $$
+
+CREATE FUNCTION `fn_calcular_descuento_cupon`(
+    `p_codigo` VARCHAR(50),
+    `p_monto_compra` DECIMAL(10,2)
+) RETURNS DECIMAL(10,2)
+READS SQL DATA
+BEGIN
+    DECLARE v_tipo_descuento VARCHAR(20);
+    DECLARE v_valor_descuento DECIMAL(10,2);
+    DECLARE v_descuento DECIMAL(10,2);
+    
+    SELECT tipo_descuento, valor_descuento
+    INTO v_tipo_descuento, v_valor_descuento
+    FROM cupones
+    WHERE codigo = p_codigo AND activo = 1;
+    
+    IF v_tipo_descuento IS NULL THEN
+        RETURN 0.00;
+    END IF;
+    
+    IF v_tipo_descuento = 'porcentaje' THEN
+        SET v_descuento = p_monto_compra * (v_valor_descuento / 100);
+    ELSE
+        SET v_descuento = v_valor_descuento;
+    END IF;
+    
+    -- No puede ser mayor al monto de compra
+    IF v_descuento > p_monto_compra THEN
+        SET v_descuento = p_monto_compra;
+    END IF;
+    
+    RETURN v_descuento;
+END$$
+
+DELIMITER ;
+
+-- ============================================
+-- 8. PROCEDIMIENTO: APLICAR CUPÓN A VENTA
+-- ============================================
+
+DELIMITER $$
+
+CREATE PROCEDURE `sp_aplicar_cupon_venta`(
+    IN `p_id_venta` INT,
+    IN `p_codigo_cupon` VARCHAR(50),
+    OUT `p_resultado` VARCHAR(255),
+    OUT `p_descuento` DECIMAL(10,2)
+)
+BEGIN
+    DECLARE v_id_cupon INT;
+    DECLARE v_id_cliente INT;
+    DECLARE v_id_sucursal INT;
+    DECLARE v_total_original DECIMAL(10,2);
+    DECLARE v_validacion VARCHAR(255);
+    DECLARE v_error BOOLEAN DEFAULT FALSE;
+    
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET v_error = TRUE;
+        ROLLBACK;
+        SET p_resultado = 'ERROR: Error en la transacción';
+    END;
+    
+    START TRANSACTION;
+    
+    -- Obtener datos de la venta
+    SELECT id_cliente, id_sucursal, total
+    INTO v_id_cliente, v_id_sucursal, v_total_original
+    FROM ventas
+    WHERE id_venta = p_id_venta;
+    
+    IF v_total_original IS NULL THEN
+        SET p_resultado = 'ERROR: Venta no encontrada';
+        ROLLBACK;
+    ELSE
+        -- Validar cupón
+        SET v_validacion = fn_validar_cupon(p_codigo_cupon, v_id_cliente, v_total_original);
+        
+        IF v_validacion != 'VALIDO' THEN
+            SET p_resultado = v_validacion;
+            ROLLBACK;
+        ELSE
+            -- Obtener ID del cupón
+            SELECT id_cupon INTO v_id_cupon
+            FROM cupones
+            WHERE codigo = p_codigo_cupon;
+            
+            -- Calcular descuento
+            SET p_descuento = fn_calcular_descuento_cupon(p_codigo_cupon, v_total_original);
+            
+            -- Actualizar venta
+            UPDATE ventas
+            SET id_cupon = v_id_cupon,
+                descuento_cupon = p_descuento,
+                total = v_total_original - p_descuento
+            WHERE id_venta = p_id_venta;
+            
+            -- Registrar uso
+            INSERT INTO cupones_uso (
+                id_cupon, id_venta, id_cliente, monto_descuento,
+                monto_original, monto_final, id_sucursal
+            ) VALUES (
+                v_id_cupon, p_id_venta, v_id_cliente, p_descuento,
+                v_total_original, v_total_original - p_descuento, v_id_sucursal
+            );
+            
+            IF NOT v_error THEN
+                COMMIT;
+                SET p_resultado = 'OK: Cupón aplicado correctamente';
+            END IF;
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ============================================
+-- 9. PROCEDIMIENTO: CREAR CUPÓN
+-- ============================================
+
+DELIMITER $$
+
+CREATE PROCEDURE `sp_crear_cupon`(
+    IN `p_prefijo` VARCHAR(10),
+    IN `p_descripcion` VARCHAR(255),
+    IN `p_tipo_descuento` VARCHAR(20),
+    IN `p_valor_descuento` DECIMAL(10,2),
+    IN `p_monto_minimo` DECIMAL(10,2),
+    IN `p_fecha_inicio` DATE,
+    IN `p_fecha_fin` DATE,
+    IN `p_usos_maximos` INT,
+    IN `p_usos_por_cliente` INT,
+    IN `p_id_usuario` INT,
+    OUT `p_codigo` VARCHAR(50),
+    OUT `p_mensaje` VARCHAR(255)
+)
+BEGIN
+    DECLARE v_error BOOLEAN DEFAULT FALSE;
+    
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET v_error = TRUE;
+        ROLLBACK;
+        SET p_mensaje = 'ERROR: No se pudo crear el cupón';
+    END;
+    
+    START TRANSACTION;
+    
+    -- Generar código único
+    SET p_codigo = fn_generar_codigo_cupon(p_prefijo, 6);
+    
+    -- Insertar cupón
+    INSERT INTO cupones (
+        codigo, descripcion, tipo_descuento, valor_descuento,
+        monto_minimo, fecha_inicio, fecha_fin, usos_maximos,
+        usos_por_cliente, creado_por
+    ) VALUES (
+        p_codigo, p_descripcion, p_tipo_descuento, p_valor_descuento,
+        p_monto_minimo, p_fecha_inicio, p_fecha_fin, p_usos_maximos,
+        p_usos_por_cliente, p_id_usuario
+    );
+    
+    IF NOT v_error THEN
+        COMMIT;
+        SET p_mensaje = CONCAT('OK: Cupón creado con código ', p_codigo);
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ============================================
+-- 10. PROCEDIMIENTO: REPORTE DE CUPONES
+-- ============================================
+
+DELIMITER $$
+
+CREATE PROCEDURE `sp_reporte_cupones`(
+    IN `p_fecha_inicio` DATE,
+    IN `p_fecha_fin` DATE,
+    IN `p_id_sucursal` INT
+)
+BEGIN
+    SELECT 
+        c.codigo,
+        c.descripcion,
+        c.tipo_descuento,
+        c.valor_descuento,
+        c.usos_actuales,
+        c.usos_maximos,
+        COUNT(cu.id_uso) as total_usos,
+        SUM(cu.monto_descuento) as total_descuentos,
+        SUM(cu.monto_original) as ventas_brutas,
+        SUM(cu.monto_final) as ventas_netas,
+        AVG(cu.monto_descuento) as descuento_promedio,
+        MIN(cu.fecha_uso) as primer_uso,
+        MAX(cu.fecha_uso) as ultimo_uso
+    FROM cupones c
+    LEFT JOIN cupones_uso cu ON c.id_cupon = cu.id_cupon
+        AND cu.fecha_uso BETWEEN p_fecha_inicio AND p_fecha_fin
+        AND (p_id_sucursal IS NULL OR cu.id_sucursal = p_id_sucursal)
+    WHERE c.fecha_creacion BETWEEN p_fecha_inicio AND p_fecha_fin
+    GROUP BY c.id_cupon, c.codigo, c.descripcion, c.tipo_descuento, 
+             c.valor_descuento, c.usos_actuales, c.usos_maximos
+    ORDER BY total_descuentos DESC;
+END$$
+
+DELIMITER ;
+
+-- ============================================
+-- 11. VISTA: CUPONES ACTIVOS
+-- ============================================
+
+CREATE VIEW `vw_cupones_activos` AS
+SELECT 
+    c.id_cupon,
+    c.codigo,
+    c.descripcion,
+    c.tipo_descuento,
+    c.valor_descuento,
+    c.monto_minimo,
+    c.fecha_inicio,
+    c.fecha_fin,
+    c.usos_actuales,
+    c.usos_maximos,
+    CASE 
+        WHEN c.usos_maximos IS NULL THEN 'Ilimitado'
+        ELSE CONCAT(c.usos_actuales, '/', c.usos_maximos)
+    END as uso_estado,
+    CASE
+        WHEN CURDATE() < c.fecha_inicio THEN 'Próximo'
+        WHEN CURDATE() > c.fecha_fin THEN 'Vencido'
+        WHEN c.usos_maximos IS NOT NULL AND c.usos_actuales >= c.usos_maximos THEN 'Agotado'
+        ELSE 'Activo'
+    END as estado
+FROM cupones c
+WHERE c.activo = 1
+ORDER BY c.fecha_fin ASC;
+
+-- ============================================
+-- 12. VISTA: ESTADÍSTICAS DE USO DE CUPONES
+-- ============================================
+
+CREATE VIEW `vw_cupones_estadisticas` AS
+SELECT 
+    c.codigo,
+    c.descripcion,
+    c.tipo_descuento,
+    c.valor_descuento,
+    COUNT(cu.id_uso) as total_usos,
+    COUNT(DISTINCT cu.id_cliente) as clientes_unicos,
+    SUM(cu.monto_descuento) as total_descuentos,
+    AVG(cu.monto_descuento) as descuento_promedio,
+    MIN(cu.fecha_uso) as primer_uso,
+    MAX(cu.fecha_uso) as ultimo_uso,
+    DATEDIFF(c.fecha_fin, c.fecha_inicio) as dias_vigencia
+FROM cupones c
+LEFT JOIN cupones_uso cu ON c.id_cupon = cu.id_cupon
+GROUP BY c.id_cupon, c.codigo, c.descripcion, c.tipo_descuento, 
+         c.valor_descuento, c.fecha_inicio, c.fecha_fin;
+
+-- ============================================
+-- 13. EVENTO: DESACTIVAR CUPONES VENCIDOS
+-- ============================================
+
+DELIMITER $$
+
+CREATE EVENT `evt_desactivar_cupones_vencidos`
+ON SCHEDULE EVERY 1 HOUR
+STARTS CURRENT_TIMESTAMP
+ON COMPLETION PRESERVE
+ENABLE
+DO BEGIN
+    UPDATE cupones
+    SET activo = 0
+    WHERE fecha_fin < CURDATE()
+    AND activo = 1;
+END$$
+
+DELIMITER ;
+
+-- ============================================
+-- 14. DATOS DE EJEMPLO (OPCIONAL - COMENTADOS)
+-- ============================================
+
+/*
+-- Cupón de bienvenida
+CALL sp_crear_cupon(
+    'BIEN', 
+    'Cupón de bienvenida 10% descuento',
+    'porcentaje',
+    10.00,
+    10.00,
+    CURDATE(),
+    DATE_ADD(CURDATE(), INTERVAL 30 DAY),
+    100,
+    1,
+    1,
+    @codigo,
+    @mensaje
+);
+SELECT @codigo as codigo, @mensaje as mensaje;
+
+-- Cupón de temporada
+CALL sp_crear_cupon(
+    'VERANO', 
+    'Especial verano 15% descuento',
+    'porcentaje',
+    15.00,
+    20.00,
+    CURDATE(),
+    DATE_ADD(CURDATE(), INTERVAL 60 DAY),
+    NULL,
+    2,
+    1,
+    @codigo,
+    @mensaje
+);
+SELECT @codigo as codigo, @mensaje as mensaje;
+
+-- Cupón de descuento fijo
+CALL sp_crear_cupon(
+    'PROMO', 
+    'S/ 5 de descuento',
+    'monto_fijo',
+    5.00,
+    15.00,
+    CURDATE(),
+    DATE_ADD(CURDATE(), INTERVAL 15 DAY),
+    50,
+    1,
+    1,
+    @codigo,
+    @mensaje
+);
+SELECT @codigo as codigo, @mensaje as mensaje;
+*/
+
+-- ============================================
+-- FIN DEL SISTEMA DE CUPONES
+-- ============================================

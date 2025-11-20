@@ -989,10 +989,31 @@ function desactivarProductosPorLote($ids) {
         $stmt->execute($ids);
         
         $pdo->commit();
-        return ['success' => true, 'message' => count($stmt->rowCount()) . ' productos desactivados'];
+        return ['success' => true, 'message' => $stmt->rowCount() . ' productos desactivados'];
     } catch(PDOException $e) {
         $pdo->rollback();
         error_log("Error al desactivar productos por lote: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+    }
+}
+
+function activarProductosPorLote($ids) {
+    global $pdo;
+    
+    try {
+        $pdo->beginTransaction();
+        
+        $placeholders = str_repeat('?,', count($ids) - 1) . '?';
+        $sql = "UPDATE productos SET activo = 1 WHERE id_producto IN ($placeholders)";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($ids);
+        
+        $pdo->commit();
+        return ['success' => true, 'message' => $stmt->rowCount() . ' productos activados'];
+    } catch(PDOException $e) {
+        $pdo->rollback();
+        error_log("Error al activar productos por lote: " . $e->getMessage());
         return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
     }
 }

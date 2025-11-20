@@ -163,57 +163,15 @@ $roles = $stmt_roles->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios - Concelato Gelateria</title>
     <link rel="stylesheet" href="/heladeriacg/css/admin/estilos_admin.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/navbar.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/usuarios.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Header con navegación -->
-    <header class="admin-header">
-        <div>
-            <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <i class="fas fa-ice-cream"></i>
-                <span>Concelato Admin</span>
-            </div>
-            <nav id="admin-nav">
-                <a href="index.php">
-                    <i class="fas fa-chart-line"></i> <span>Dashboard</span>
-                </a>
-                <a href="productos.php">
-                    <i class="fas fa-box"></i> <span>Productos</span>
-                </a>
-                <a href="ventas.php">
-                    <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
-                </a>
-                <a href="empleados.php">
-                    <i class="fas fa-users"></i> <span>Empleados</span>
-                </a>
-                <a href="clientes.php">
-                    <i class="fas fa-user-friends"></i> <span>Clientes</span>
-                </a>
-                <a href="proveedores.php">
-                    <i class="fas fa-truck"></i> <span>Proveedores</span>
-                </a>
-                <a href="usuarios.php" class="active">
-                    <i class="fas fa-user-cog"></i> <span>Usuarios</span>
-                </a>
-                <a href="promociones.php">
-                    <i class="fas fa-tag"></i> <span>Promociones</span>
-                </a>
-                <a href="sucursales.php">
-                    <i class="fas fa-store"></i> <span>Sucursales</span>
-                </a>
-                <a href="configuracion.php">
-                    <i class="fas fa-cog"></i> <span>Configuración</span>
-                </a>
-                <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
-                </a>
-            </nav>
-        </div>
-    </header>
+    <!-- Header con navegación -->
+    <?php include 'includes/navbar.php'; ?>
 
     <!-- Main content -->
     <main class="admin-container">
@@ -252,51 +210,58 @@ $roles = $stmt_roles->fetchAll(PDO::FETCH_ASSOC);
         </div>
 
         <!-- Table Card -->
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="tablaUsuarios" class="tabla-admin" role="table">
-                        <thead>
-                            <tr role="row">
-                                <th role="columnheader" aria-sort="none" onclick="TableSorter.sortTable(this)">
-                                    <i class="fas fa-arrows-alt-v"></i> Usuario
-                                </th>
-                                <th role="columnheader" aria-sort="none">Email</th>
-                                <th role="columnheader" aria-sort="none">Rol</th>
-                                <th role="columnheader" aria-label="Acciones">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($usuarios as $usuario): ?>
-                            <tr role="row" tabindex="0">
-                                <td><strong><?php echo htmlspecialchars($usuario['username']); ?></strong></td>
-                                <td><?php echo htmlspecialchars($usuario['correo'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($usuario['id_role'] ?? 'N/A'); ?></td>
-                                <td>
-                                    <button 
-                                        class="action-btn edit" 
-                                        onclick="editarUsuario(<?php echo $usuario['id_usuario']; ?>)"
-                                        aria-label="Editar usuario <?php echo htmlspecialchars($usuario['username']); ?>">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button 
-                                        class="action-btn delete" 
-                                        onclick="deleteItem(<?php echo $usuario['id_usuario']; ?>, 'usuario', '<?php echo htmlspecialchars($usuario['username']); ?>')"
-                                        aria-label="Eliminar usuario <?php echo htmlspecialchars($usuario['username']); ?>">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <?php if (empty($usuarios)): ?>
-                    <div class="empty-state">
-                        <p>No hay usuarios registrados. <a href="#" onclick="openModal('modalUsuario')">Crear uno</a></p>
-                    </div>
+        <div class="table-container">
+            <table id="tablaUsuarios" class="usuarios-table" role="table">
+                <thead>
+                    <tr role="row">
+                        <th role="columnheader" aria-sort="none">
+                            <i class="fas fa-user"></i> Usuario
+                        </th>
+                        <th role="columnheader" aria-sort="none">
+                            <i class="fas fa-envelope"></i> Email
+                        </th>
+                        <th role="columnheader" aria-sort="none">
+                            <i class="fas fa-shield-alt"></i> Rol
+                        </th>
+                        <th role="columnheader" aria-label="Acciones">
+                            <i class="fas fa-cogs"></i> Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($usuarios)): ?>
+                        <?php foreach ($usuarios as $usuario): ?>
+                        <tr role="row" tabindex="0">
+                            <td data-label="Usuario"><strong><?php echo htmlspecialchars($usuario['username']); ?></strong></td>
+                            <td data-label="Email"><?php echo htmlspecialchars($usuario['correo'] ?? 'N/A'); ?></td>
+                            <td data-label="Rol"><span style="display: inline-block; padding: 4px 10px; border-radius: 6px; background: rgba(8, 145, 178, 0.1); color: var(--primary-dark); font-size: 0.85rem; font-weight: 600;"><?php echo htmlspecialchars($usuario['rol_nombre'] ?? 'N/A'); ?></span></td>
+                            <td data-label="Acciones">
+                                <button 
+                                    class="action-btn edit" 
+                                    onclick="editarUsuario(<?php echo $usuario['id_usuario']; ?>)"
+                                    title="Editar usuario"
+                                    aria-label="Editar usuario <?php echo htmlspecialchars($usuario['username']); ?>">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button 
+                                    class="action-btn delete" 
+                                    onclick="deleteItem(<?php echo $usuario['id_usuario']; ?>, 'usuario', '<?php echo htmlspecialchars($usuario['username']); ?>')"
+                                    title="Eliminar usuario"
+                                    aria-label="Eliminar usuario <?php echo htmlspecialchars($usuario['username']); ?>">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px;">
+                            <i class="fas fa-inbox"></i> No hay usuarios registrados. <a href="#" onclick="openModal('modalUsuario')">Crear uno</a>
+                        </td>
+                    </tr>
                     <?php endif; ?>
-                </div>
-            </div>
+                </tbody>
+            </table>
         </div>
     </main>
 
@@ -304,7 +269,7 @@ $roles = $stmt_roles->fetchAll(PDO::FETCH_ASSOC);
     <div id="modalUsuario" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalUsuarioTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalUsuarioTitle">Nuevo Usuario</h2>
+                <h2 id="modalUsuarioTitle"><i class="fas fa-user-plus"></i> Nuevo Usuario</h2>
                 <button class="modal-close" aria-label="Cerrar diálogo" onclick="closeModal('modalUsuario')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -376,7 +341,7 @@ $roles = $stmt_roles->fetchAll(PDO::FETCH_ASSOC);
     <div id="modalDeleteUsuario" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalDeleteTitle">
         <div class="modal-content modal-sm">
             <div class="modal-header">
-                <h2 id="modalDeleteTitle">Confirmar Eliminación</h2>
+                <h2 id="modalDeleteTitle"><i class="fas fa-trash-alt"></i> Confirmar Eliminación</h2>
                 <button class="modal-close" aria-label="Cerrar diálogo" onclick="closeModal('modalDeleteUsuario')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -414,7 +379,7 @@ $roles = $stmt_roles->fetchAll(PDO::FETCH_ASSOC);
                         document.getElementById('password').value = '';
                         document.getElementById('password').required = false;
                         document.getElementById('rol').value = usr.id_role || '';
-                        document.getElementById('modalUsuarioTitle').textContent = 'Editar Usuario';
+                        document.getElementById('modalUsuarioTitle').innerHTML = '<i class="fas fa-user-edit"></i> Editar Usuario';
                         openModal('modalUsuario');
                     } else {
                         showNotification('Error al obtener usuario', 'error');
@@ -439,7 +404,7 @@ $roles = $stmt_roles->fetchAll(PDO::FETCH_ASSOC);
                 if (document.getElementById('accionForm').value === 'crear') {
                     document.getElementById('formUsuario').reset();
                     document.getElementById('password').required = true;
-                    document.getElementById('modalUsuarioTitle').textContent = 'Nuevo Usuario';
+                    document.getElementById('modalUsuarioTitle').innerHTML = '<i class="fas fa-user-plus"></i> Nuevo Usuario';
                 }
             }
         });
@@ -448,6 +413,55 @@ $roles = $stmt_roles->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('formUsuario').addEventListener('submit', function(e) {
             e.preventDefault();
             this.submit();
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('searchUsuario');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const searchValue = this.value.toLowerCase().trim();
+                const rows = document.querySelectorAll('#tablaUsuarios tbody tr');
+                let visibleCount = 0;
+                
+                rows.forEach(row => {
+                    const usuario = row.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+                    const email = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+                    const rol = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+                    
+                    const matches = usuario.includes(searchValue) || 
+                                  email.includes(searchValue) || 
+                                  rol.includes(searchValue);
+                    
+                    row.style.display = matches ? '' : 'none';
+                    if (matches) visibleCount++;
+                });
+                
+                // Show/hide empty state
+                const tableBody = document.querySelector('#tablaUsuarios tbody');
+                const emptyState = document.querySelector('.empty-state');
+                if (emptyState) {
+                    if (visibleCount === 0 && searchValue) {
+                        emptyState.style.display = 'block';
+                        emptyState.innerHTML = '<p><i class="fas fa-search"></i> No se encontraron usuarios que coincidan con "' + this.value + '"</p>';
+                    } else if (rows.length === 0) {
+                        emptyState.style.display = 'block';
+                    } else {
+                        emptyState.style.display = 'none';
+                    }
+                }
+            });
+        }
+    </script>
+    <script src="/heladeriacg/js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
+        });
+    </script>
+    <script src="../../js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
         });
     </script>
 </body>

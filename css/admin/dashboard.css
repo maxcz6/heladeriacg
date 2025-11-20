@@ -1,0 +1,624 @@
+/* ============================================
+   ESTILOS AVANZADOS PARA DASHBOARD ADMIN
+   ============================================ */
+
+:root {
+    --primary: #0891b2;
+    --primary-dark: #0e7490;
+    --primary-light: #06b6d4;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --light: #f9fafb;
+    --light-2: #f3f4f6;
+    --light-3: #e5e7eb;
+    --dark: #1f2937;
+    --gray: #6b7280;
+    --gray-light: #9ca3af;
+    --border: #e5e7eb;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+    --transition: 0.3s ease;
+}
+
+/* ============================================
+   PAGE HEADER
+   ============================================ */
+
+.page-header {
+    margin-bottom: 32px;
+    padding: 24px 0;
+    border-bottom: 2px solid var(--border);
+    animation: slideInDown 0.4s ease;
+}
+
+.page-header h1 {
+    margin: 0 0 8px 0;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--dark);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-header .subtitle {
+    margin: 0;
+    color: var(--gray);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* ============================================
+   STATS GRID - TARJETAS PRINCIPALES
+   ============================================ */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+}
+
+/* Línea superior animada */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition);
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-6px);
+    border-color: var(--primary);
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    background: linear-gradient(135deg, rgba(8, 145, 178, 0.12) 0%, rgba(8, 145, 178, 0.06) 100%);
+    color: var(--primary);
+    flex-shrink: 0;
+    transition: all var(--transition);
+}
+
+.stat-card:hover .stat-icon {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    transform: rotate(-10deg) scale(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-content h3 {
+    margin: 0 0 6px 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1;
+}
+
+.stat-content p {
+    margin: 0 0 10px 0;
+    color: var(--gray);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.stat-link {
+    display: inline-block;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all var(--transition);
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(8, 145, 178, 0.05);
+}
+
+.stat-link:hover {
+    background: rgba(8, 145, 178, 0.15);
+    transform: translateX(4px);
+}
+
+/* ============================================
+   DASHBOARD GRID - TARJETAS DE CONTENIDO
+   ============================================ */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 24px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: all var(--transition);
+    animation: slideInUp 0.4s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+}
+
+.card-header {
+    padding: 20px;
+    background: linear-gradient(135deg, var(--light-2) 0%, var(--light) 100%);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-header i {
+    color: var(--primary);
+    font-size: 1.4rem;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* ============================================
+   LISTA DE ITEMS
+   ============================================ */
+
+.product-list,
+.sales-list,
+.stock-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.list-item {
+    padding: 14px;
+    background: var(--light);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+    transition: all var(--transition);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.list-item:hover {
+    background: rgba(8, 145, 178, 0.05);
+    border-left-color: var(--primary-light);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-sm);
+}
+
+.list-item.alert-item {
+    border-left-color: var(--warning);
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.list-item.alert-item:hover {
+    background: rgba(245, 158, 11, 0.08);
+    border-left-color: var(--warning);
+}
+
+.item-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item-name {
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 0.95rem;
+}
+
+.item-secondary {
+    color: var(--gray);
+    font-size: 0.85rem;
+}
+
+.item-badge {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.item-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.item-date {
+    color: var(--gray-light);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.item-amount {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.stock-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.stock-badge.warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* ============================================
+   ACCIONES RÁPIDAS
+   ============================================ */
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(8, 145, 178, 0.1) 0%, rgba(8, 145, 178, 0.05) 100%);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--dark);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all var(--transition);
+    min-height: 110px;
+}
+
+.action-btn i {
+    font-size: 1.8rem;
+    color: var(--primary);
+    transition: all var(--transition);
+}
+
+.action-btn:hover {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.action-btn:hover i {
+    color: white;
+    transform: scale(1.2);
+}
+
+/* ============================================
+   EMPTY STATES
+   ============================================ */
+
+.empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--gray);
+    font-size: 0.95rem;
+}
+
+.empty-state::before {
+    content: '📭';
+    display: block;
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.6;
+}
+
+/* ============================================
+   ANIMACIONES
+   ============================================ */
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Animación de tarjetas en cascada */
+.stats-grid .stat-card {
+    animation: slideInUp 0.4s ease;
+}
+
+.stats-grid .stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stats-grid .stat-card:nth-child(2) { animation-delay: 0.15s; }
+.stats-grid .stat-card:nth-child(3) { animation-delay: 0.2s; }
+.stats-grid .stat-card:nth-child(4) { animation-delay: 0.25s; }
+
+.dashboard-grid .card {
+    animation: slideInUp 0.5s ease;
+}
+
+.dashboard-grid .card:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-grid .card:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-grid .card:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-grid .card:nth-child(4) { animation-delay: 0.4s; }
+
+.list-item {
+    animation: slideInUp 0.3s ease;
+}
+
+.list-item:nth-child(1) { animation-delay: 0.05s; }
+.list-item:nth-child(2) { animation-delay: 0.1s; }
+.list-item:nth-child(3) { animation-delay: 0.15s; }
+.list-item:nth-child(n+4) { animation-delay: 0.2s; }
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        padding: 20px 0;
+        margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+    }
+
+    .stat-content h3 {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-grid {
+        gap: 16px;
+    }
+
+    .card {
+        border-radius: 10px;
+    }
+
+    .card-header {
+        padding: 16px;
+    }
+
+    .card-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .card-body {
+        padding: 16px;
+    }
+
+    .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .action-btn {
+        min-height: 90px;
+        padding: 12px;
+        font-size: 0.8rem;
+    }
+
+    .action-btn i {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .stats-grid {
+        gap: 12px;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px;
+    }
+
+    .stat-content {
+        width: 100%;
+    }
+
+    .stat-content h3 {
+        font-size: 1.3rem;
+    }
+
+    .item-meta {
+        align-items: flex-start;
+    }
+
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .list-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .card-header h2 {
+        font-size: 1rem;
+    }
+
+    .card-body {
+        padding: 12px;
+    }
+}
+
+/* ============================================
+   EFECTOS Y TRANSICIONES ADICIONALES
+   ============================================ */
+
+.stat-card,
+.card,
+.list-item,
+.action-btn {
+    position: relative;
+}
+
+/* Efecto de brillo al hover */
+.stat-card::after,
+.card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.stat-card:hover::after,
+.card:hover::after {
+    left: 100%;
+}
+
+/* Scrollbar personalizado para listas */
+.product-list::-webkit-scrollbar,
+.sales-list::-webkit-scrollbar,
+.stock-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.product-list::-webkit-scrollbar-track,
+.sales-list::-webkit-scrollbar-track,
+.stock-list::-webkit-scrollbar-track {
+    background: var(--light);
+}
+
+.product-list::-webkit-scrollbar-thumb,
+.sales-list::-webkit-scrollbar-thumb,
+.stock-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.product-list::-webkit-scrollbar-thumb:hover,
+.sales-list::-webkit-scrollbar-thumb:hover,
+.stock-list::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-light);
+}

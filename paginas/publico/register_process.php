@@ -10,14 +10,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Verificar que las contraseñas coincidan
     if ($password !== $confirm_password) {
         $_SESSION['register_error'] = 'Las contraseñas no coinciden';
-        header('Location: registro.php');
+        header('Location: login.php?tab=register');
         exit();
     }
 
     // Verificar longitud mínima de la contraseña (ahora solo 3 caracteres)
     if (strlen($password) < 3) {
         $_SESSION['register_error'] = 'La contraseña debe tener al menos 3 caracteres';
-        header('Location: registro.php');
+        header('Location: login.php?tab=register');
         exit();
     }
 
@@ -35,11 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: login.php');
     } else {
         $_SESSION['register_error'] = $resultado['message'];
-        header('Location: registro.php');
+        header('Location: login.php?tab=register');
     }
     exit();
 } else {
-    header('Location: registro.php');
+    header('Location: login.php?tab=register');
     exit();
 }
+?>
 ?>

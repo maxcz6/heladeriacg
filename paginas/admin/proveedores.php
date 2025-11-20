@@ -88,57 +88,15 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Proveedores - Concelato Gelateria</title>
     <link rel="stylesheet" href="/heladeriacg/css/admin/estilos_admin.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/navbar.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/proveedores.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Header con navegación -->
-    <header class="admin-header">
-        <div>
-            <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <i class="fas fa-ice-cream"></i>
-                <span>Concelato Admin</span>
-            </div>
-            <nav id="admin-nav">
-                <a href="index.php">
-                    <i class="fas fa-chart-line"></i> <span>Dashboard</span>
-                </a>
-                <a href="productos.php">
-                    <i class="fas fa-box"></i> <span>Productos</span>
-                </a>
-                <a href="ventas.php">
-                    <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
-                </a>
-                <a href="empleados.php">
-                    <i class="fas fa-users"></i> <span>Empleados</span>
-                </a>
-                <a href="clientes.php">
-                    <i class="fas fa-user-friends"></i> <span>Clientes</span>
-                </a>
-                <a href="proveedores.php" class="active">
-                    <i class="fas fa-truck"></i> <span>Proveedores</span>
-                </a>
-                <a href="usuarios.php">
-                    <i class="fas fa-user-cog"></i> <span>Usuarios</span>
-                </a>
-                <a href="promociones.php">
-                    <i class="fas fa-tag"></i> <span>Promociones</span>
-                </a>
-                <a href="sucursales.php">
-                    <i class="fas fa-store"></i> <span>Sucursales</span>
-                </a>
-                <a href="configuracion.php">
-                    <i class="fas fa-cog"></i> <span>Configuración</span>
-                </a>
-                <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
-                </a>
-            </nav>
-        </div>
-    </header>
+    <!-- Header con navegación -->
+    <?php include 'includes/navbar.php'; ?>
 
     <!-- Main content -->
     <main class="admin-container">
@@ -159,7 +117,7 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
         <!-- Search and Actions Card -->
         <div class="card">
             <div class="card-body">
-                <div class="empleados-actions">
+                <div class="proveedores-actions">
                     <button class="action-btn primary" data-action="create" onclick="openModal('modalProveedor')">
                         <i class="fas fa-plus"></i> Nuevo Proveedor
                     </button>
@@ -179,38 +137,50 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
         <!-- Table Card -->
         <div class="card">
             <div class="card-body">
-                <div class="table-responsive">
-                    <table id="tablaProveedores" class="tabla-admin" role="table">
+                <div class="table-container">
+                    <table id="tablaProveedores" class="proveedores-table" role="table">
                         <thead>
                             <tr role="row">
-                                <th role="columnheader" aria-sort="none" onclick="TableSorter.sortTable(this)">
-                                    <i class="fas fa-arrows-alt-v"></i> Empresa
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-building"></i> Empresa
                                 </th>
-                                <th role="columnheader" aria-sort="none">Contacto</th>
-                                <th role="columnheader" aria-sort="none">Email</th>
-                                <th role="columnheader" aria-sort="none">Teléfono</th>
-                                <th role="columnheader" aria-sort="none">Dirección</th>
-                                <th role="columnheader" aria-label="Acciones">Acciones</th>
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-user"></i> Contacto
+                                </th>
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-envelope"></i> Email
+                                </th>
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-phone"></i> Teléfono
+                                </th>
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-map-marker-alt"></i> Dirección
+                                </th>
+                                <th role="columnheader" aria-label="Acciones">
+                                    <i class="fas fa-cogs"></i> Acciones
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($proveedores as $proveedor): ?>
                             <tr role="row" tabindex="0">
-                                <td><strong><?php echo htmlspecialchars($proveedor['empresa']); ?></strong></td>
-                                <td><?php echo htmlspecialchars($proveedor['contacto'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($proveedor['correo'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($proveedor['telefono'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($proveedor['direccion'] ?? 'N/A'); ?></td>
-                                <td>
+                                <td data-label="Empresa"><strong><?php echo htmlspecialchars($proveedor['empresa']); ?></strong></td>
+                                <td data-label="Contacto"><?php echo htmlspecialchars($proveedor['contacto'] ?? 'N/A'); ?></td>
+                                <td data-label="Email"><?php echo htmlspecialchars($proveedor['correo'] ?? 'N/A'); ?></td>
+                                <td data-label="Teléfono"><?php echo htmlspecialchars($proveedor['telefono'] ?? 'N/A'); ?></td>
+                                <td data-label="Dirección"><?php echo htmlspecialchars($proveedor['direccion'] ?? 'N/A'); ?></td>
+                                <td data-label="Acciones">
                                     <button 
                                         class="action-btn edit" 
                                         onclick="editarProveedor(<?php echo $proveedor['id_proveedor']; ?>)"
+                                        title="Editar proveedor"
                                         aria-label="Editar proveedor <?php echo htmlspecialchars($proveedor['empresa']); ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button 
                                         class="action-btn delete" 
                                         onclick="deleteItem(<?php echo $proveedor['id_proveedor']; ?>, 'proveedor', '<?php echo htmlspecialchars($proveedor['empresa']); ?>')"
+                                        title="Eliminar proveedor"
                                         aria-label="Eliminar proveedor <?php echo htmlspecialchars($proveedor['empresa']); ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -221,7 +191,7 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
                     </table>
                     <?php if (empty($proveedores)): ?>
                     <div class="empty-state">
-                        <p>No hay proveedores registrados. <a href="#" onclick="openModal('modalProveedor')">Crear uno</a></p>
+                        <p><i class="fas fa-inbox" style="font-size: 2rem; color: var(--gray); margin-bottom: 10px; display: block;"></i> No hay proveedores registrados. <a href="#" onclick="openModal('modalProveedor')">Crear uno</a></p>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -233,7 +203,7 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
     <div id="modalProveedor" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalProveedorTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalProveedorTitle">Nuevo Proveedor</h2>
+                <h2 id="modalProveedorTitle"><i class="fas fa-building"></i> Nuevo Proveedor</h2>
                 <button class="modal-close" aria-label="Cerrar diálogo" onclick="closeModal('modalProveedor')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -312,7 +282,7 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
     <div id="modalDeleteProveedor" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalDeleteTitle">
         <div class="modal-content modal-sm">
             <div class="modal-header">
-                <h2 id="modalDeleteTitle">Confirmar Eliminación</h2>
+                <h2 id="modalDeleteTitle"><i class="fas fa-trash-alt"></i> Confirmar Eliminación</h2>
                 <button class="modal-close" aria-label="Cerrar diálogo" onclick="closeModal('modalDeleteProveedor')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -350,7 +320,7 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
                         document.getElementById('email').value = prov.correo || '';
                         document.getElementById('telefono').value = prov.telefono || '';
                         document.getElementById('direccion').value = prov.direccion || '';
-                        document.getElementById('modalProveedorTitle').textContent = 'Editar Proveedor';
+                        document.getElementById('modalProveedorTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Proveedor';
                         openModal('modalProveedor');
                     } else {
                         showNotification('Error al obtener proveedor', 'error');
@@ -374,7 +344,7 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
             if (e.target === this || (e.target.closest('.modal-close'))) {
                 if (document.getElementById('accionForm').value === 'crear') {
                     document.getElementById('formProveedor').reset();
-                    document.getElementById('modalProveedorTitle').textContent = 'Nuevo Proveedor';
+                    document.getElementById('modalProveedorTitle').innerHTML = '<i class="fas fa-building"></i> Nuevo Proveedor';
                 }
             }
         });
@@ -383,6 +353,12 @@ $proveedores = $stmt_proveedores->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('formProveedor').addEventListener('submit', function(e) {
             e.preventDefault();
             this.submit();
+        });
+    </script>
+    <script src="/heladeriacg/js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
         });
     </script>
 </body>

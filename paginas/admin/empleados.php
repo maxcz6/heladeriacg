@@ -101,57 +101,14 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Empleados - Concelato Gelateria</title>
     <link rel="stylesheet" href="/heladeriacg/css/admin/estilos_admin.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/navbar.css">
+    <link rel="stylesheet" href="/heladeriacg/css/admin/empleados.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Header con navegación mejorada y responsiva -->
-    <header class="admin-header">
-        <div>
-            <button class="menu-toggle" aria-label="Alternar menú de navegación" aria-expanded="false" aria-controls="admin-nav">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <i class="fas fa-ice-cream"></i>
-                <span>Concelato Admin</span>
-            </div>
-            <nav id="admin-nav">
-                <a href="index.php">
-                    <i class="fas fa-chart-line"></i> <span>Dashboard</span>
-                </a>
-                <a href="productos.php">
-                    <i class="fas fa-box"></i> <span>Productos</span>
-                </a>
-                <a href="ventas.php">
-                    <i class="fas fa-shopping-cart"></i> <span>Ventas</span>
-                </a>
-                <a href="empleados.php" class="active">
-                    <i class="fas fa-users"></i> <span>Empleados</span>
-                </a>
-                <a href="clientes.php">
-                    <i class="fas fa-user-friends"></i> <span>Clientes</span>
-                </a>
-                <a href="proveedores.php">
-                    <i class="fas fa-truck"></i> <span>Proveedores</span>
-                </a>
-                <a href="usuarios.php">
-                    <i class="fas fa-user-cog"></i> <span>Usuarios</span>
-                </a>
-                <a href="promociones.php">
-                    <i class="fas fa-tag"></i> <span>Promociones</span>
-                </a>
-                <a href="sucursales.php">
-                    <i class="fas fa-store"></i> <span>Sucursales</span>
-                </a>
-                <a href="configuracion.php">
-                    <i class="fas fa-cog"></i> <span>Configuración</span>
-                </a>
-                <a href="../../conexion/cerrar_sesion.php" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
-                </a>
-            </nav>
-        </div>
-    </header>
+    <?php include 'includes/navbar.php'; ?>
 
     <!-- Main content -->
     <main class="admin-container">
@@ -177,33 +134,43 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
                         <i class="fas fa-plus"></i> Nuevo Empleado
                     </button>
                     <div class="search-filter">
+                        <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--gray-light); pointer-events: none;"></i>
                         <input 
                             type="search" 
                             id="searchEmpleado"
                             class="search-input"
-                            placeholder="Buscar por nombre o email..."
+                            placeholder="Buscar por nombre, email o turno..."
                             aria-label="Buscar empleados"
-                            data-filter-table="tablaEmpleados">
+                            data-filter-table="tablaEmpleados"
+                            style="padding-left: 36px;">
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Table Card -->
-        <div class="card">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="tablaEmpleados" class="tabla-admin" role="table">
+        <div class="table-container">
+            <table id="tablaEmpleados" class="empleados-table" role="table">
                         <thead>
                             <tr role="row">
-                                <th role="columnheader" aria-sort="none" onclick="TableSorter.sortTable(this)">
-                                    <i class="fas fa-arrows-alt-v"></i> Nombre
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-user"></i> Nombre
                                 </th>
-                                <th role="columnheader" aria-sort="none">Email</th>
-                                <th role="columnheader" aria-sort="none">Teléfono</th>
-                                <th role="columnheader" aria-sort="none">Rol</th>
-                                <th role="columnheader" aria-sort="none">Sucursal</th>
-                                <th role="columnheader" aria-label="Acciones">Acciones</th>
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-envelope"></i> Email
+                                </th>
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-phone"></i> Teléfono
+                                </th>
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-clock"></i> Turno
+                                </th>
+                                <th role="columnheader" aria-sort="none">
+                                    <i class="fas fa-store"></i> Sucursal
+                                </th>
+                                <th role="columnheader" aria-label="Acciones">
+                                    <i class="fas fa-cogs"></i> Acciones
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -218,12 +185,14 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
                                     <button 
                                         class="action-btn edit" 
                                         onclick="editarEmpleado(<?php echo $empleado['id_vendedor']; ?>)"
+                                        title="Editar empleado"
                                         aria-label="Editar empleado <?php echo htmlspecialchars($empleado['nombre']); ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button 
                                         class="action-btn delete" 
                                         onclick="deleteItem(<?php echo $empleado['id_vendedor']; ?>, 'empleado', '<?php echo htmlspecialchars($empleado['nombre']); ?>')"
+                                        title="Eliminar empleado"
                                         aria-label="Eliminar empleado <?php echo htmlspecialchars($empleado['nombre']); ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -231,22 +200,20 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
-                    </table>
-                    <?php if (empty($empleados)): ?>
-                    <div class="empty-state">
-                        <p>No hay empleados registrados. <a href="#" onclick="openModal('modalEmpleado')">Crear uno</a></p>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
+            </table>
         </div>
+        <?php if (empty($empleados)): ?>
+        <div style="text-align: center; padding: 20px; background: white; margin-bottom: 24px;">
+            <p><i class="fas fa-inbox"></i> No hay empleados registrados. <a href="#" onclick="openModal('modalEmpleado')">Crear uno</a></p>
+        </div>
+        <?php endif; ?>
     </main>
 
     <!-- Modal: Crear/Editar Empleado -->
     <div id="modalEmpleado" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalEmpleadoTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalEmpleadoTitle">Nuevo Empleado</h2>
+                <h2 id="modalEmpleadoTitle"><i class="fas fa-user-plus"></i> Nuevo Empleado</h2>
                 <button class="modal-close" aria-label="Cerrar diálogo" onclick="closeModal('modalEmpleado')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -288,9 +255,9 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <div class="form-group">
-                        <label for="rol">Rol <span aria-label="requerido">*</span></label>
+                        <label for="rol">Rol / Turno <span aria-label="requerido">*</span></label>
                         <select id="rol" name="rol" required aria-required="true">
-                            <option value="">Seleccionar rol</option>
+                            <option value="">Seleccionar turno</option>
                             <option value="Mañana">Turno Mañana</option>
                             <option value="Tarde">Turno Tarde</option>
                             <option value="Noche">Turno Noche</option>
@@ -325,7 +292,7 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
     <div id="modalDeleteEmpleado" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalDeleteTitle">
         <div class="modal-content modal-sm">
             <div class="modal-header">
-                <h2 id="modalDeleteTitle">Confirmar Eliminación</h2>
+                <h2 id="modalDeleteTitle"><i class="fas fa-trash-alt"></i> Confirmar Eliminación</h2>
                 <button class="modal-close" aria-label="Cerrar diálogo" onclick="closeModal('modalDeleteEmpleado')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -350,6 +317,7 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
 
     <script src="/heladeriacg/js/admin/script.js"></script>
     <script>
+        // Editar empleado
         function editarEmpleado(id) {
             fetch(`funcionalidades/obtener_empleado.php?id=${id}`)
                 .then(response => response.json())
@@ -363,7 +331,7 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
                         document.getElementById('telefono').value = emp.telefono || '';
                         document.getElementById('rol').value = emp.turno || '';
                         document.getElementById('id_sucursal').value = emp.id_sucursal || '';
-                        document.getElementById('modalEmpleadoTitle').textContent = 'Editar Empleado';
+                        document.getElementById('modalEmpleadoTitle').innerHTML = '<i class="fas fa-user-edit"></i> Editar Empleado';
                         openModal('modalEmpleado');
                     } else {
                         showNotification('Error al obtener empleado', 'error');
@@ -375,6 +343,7 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
                 });
         }
 
+        // Eliminar empleado
         function deleteItem(id, type, name) {
             document.getElementById('deleteEmpleadoId').value = id;
             document.getElementById('deleteMessage').textContent = 
@@ -382,20 +351,44 @@ $empleados = $stmt_empleados->fetchAll(PDO::FETCH_ASSOC);
             openModal('modalDeleteEmpleado');
         }
 
-        // Reset form on modal open
+        // Reset form cuando se cierra el modal
         document.getElementById('modalEmpleado').addEventListener('click', function(e) {
             if (e.target === this || (e.target.closest('.modal-close'))) {
                 if (document.getElementById('accionForm').value === 'crear') {
                     document.getElementById('formEmpleado').reset();
-                    document.getElementById('modalEmpleadoTitle').textContent = 'Nuevo Empleado';
+                    document.getElementById('modalEmpleadoTitle').innerHTML = '<i class="fas fa-user-plus"></i> Nuevo Empleado';
                 }
             }
         });
 
-        // Form submission
+        // Envío del formulario
         document.getElementById('formEmpleado').addEventListener('submit', function(e) {
             e.preventDefault();
             this.submit();
+        });
+
+        // Búsqueda en tiempo real
+        document.getElementById('searchEmpleado').addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#tablaEmpleados tbody tr');
+            
+            rows.forEach(row => {
+                const nombre = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const turno = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                
+                if (nombre.includes(searchValue) || email.includes(searchValue) || turno.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    <script src="/heladeriacg/js/admin/navbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            NavbarController.init();
         });
     </script>
 </body>

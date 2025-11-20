@@ -2,6 +2,251 @@
    ESTILOS RESPONSIVOS Y MINIMALISTAS - SUCURSALES
    ============================================ */
 
+/* Selector de sucursal (Banner superior) */
+.sucursal-selector-banner {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    color: white;
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.2);
+}
+
+.sucursal-selector-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.sucursal-info {
+    flex: 1;
+    min-width: 250px;
+}
+
+.sucursal-info h3 {
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.sucursal-info p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    opacity: 0.9;
+}
+
+.sucursal-status {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: rgba(255, 255, 255, 0.2);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.status-badge.online {
+    background: rgba(34, 197, 94, 0.3);
+    border: 1px solid rgba(34, 197, 94, 0.5);
+}
+
+.status-badge.offline {
+    background: rgba(239, 68, 68, 0.3);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-indicator.online {
+    background: #22c55e;
+    animation: pulse 2s infinite;
+}
+
+.status-indicator.offline {
+    background: #ef4444;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.sucursal-actions-top {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.btn-selector {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.btn-selector:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Modal de selección de sucursal */
+.sucursal-selector-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    padding: var(--spacing-md);
+    backdrop-filter: blur(4px);
+}
+
+.sucursal-selector-modal.active {
+    display: flex;
+}
+
+.sucursal-selector-modal-content {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp var(--transition-normal);
+}
+
+.sucursal-selector-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    color: white;
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.sucursal-selector-header h2 {
+    margin: 0;
+    font-size: var(--font-size-xl);
+}
+
+.sucursal-selector-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: var(--font-size-lg);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-fast);
+}
+
+.sucursal-selector-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.sucursal-selector-body {
+    padding: var(--spacing-lg);
+}
+
+.sucursal-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+}
+
+.sucursal-item {
+    padding: var(--spacing-lg);
+    border: 2px solid #e5e7eb;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background: white;
+}
+
+.sucursal-item:hover {
+    border-color: #0891b2;
+    background: rgba(8, 145, 178, 0.02);
+    transform: translateX(4px);
+}
+
+.sucursal-item.selected {
+    border-color: #0891b2;
+    background: rgba(8, 145, 178, 0.1);
+    box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+}
+
+.sucursal-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.sucursal-item-name {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.sucursal-item-badge {
+    background: #0891b2;
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.sucursal-item-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: #6b7280;
+}
+
+.sucursal-item-detail {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.sucursal-item-detail strong {
+    color: #1f2937;
+}
+
 /* Modal contenedor */
 .sucursal-modal-overlay {
     position: fixed;
@@ -273,7 +518,21 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-    .sucursal-modal-content {
+    .sucursal-selector-content {
+        flex-direction: column;
+    }
+
+    .sucursal-actions-top {
+        width: 100%;
+    }
+
+    .btn-selector {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .sucursal-modal-content,
+    .sucursal-selector-modal-content {
         max-width: 95%;
         border-radius: var(--border-radius-lg);
     }
@@ -314,5 +573,17 @@
 
     .sucursal-modal-header h2 {
         font-size: var(--font-size-lg);
+    }
+
+    .sucursal-selector-content {
+        padding: var(--spacing-md);
+    }
+
+    .sucursal-info h3 {
+        font-size: var(--font-size-base);
+    }
+
+    .sucursal-item-details {
+        grid-template-columns: 1fr;
     }
 }
