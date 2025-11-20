@@ -32,7 +32,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Heladería Concelato - <?php echo $logueado ? 'Cliente' : 'Invitado'; ?></title>
-    <link rel="stylesheet" href="/heladeriacg/css/cliente/estilos_cliente.css">
+    <link rel="stylesheet" href="/heladeriacg/css/cliente/modernos_estilos_cliente.css">
     <link rel="stylesheet" href="/heladeriacg/css/cliente/navbar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -53,58 +53,41 @@ try {
 
             <div class="card-cliente">
                 <h2>Nuestros Productos</h2>
-                <div class="table-container-cliente">
-                    <table class="cliente-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Sabor</th>
-                                <th>Descripción</th>
-                                <th>Precio</th>
-                                <th>Stock</th>
-                                <th>Proveedor</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($productos)): ?>
-                                <?php foreach ($productos as $producto): ?>
-                                <tr>
-                                    <td><?php echo $producto['id_producto']; ?></td>
-                                    <td><strong><?php echo htmlspecialchars($producto['nombre']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($producto['sabor']); ?></td>
-                                    <td><?php echo htmlspecialchars(substr($producto['descripcion'], 0, 50)) . (strlen($producto['descripcion']) > 50 ? '...' : ''); ?></td>
-                                    <td>S/. <?php echo number_format($producto['precio'], 2); ?></td>
-                                    <td><?php echo $producto['stock']; ?>L</td>
-                                    <td><?php echo htmlspecialchars($producto['proveedor_nombre'] ?: 'N/A'); ?></td>
-                                    <td>
-                                        <span class="status-badge <?php echo $producto['activo'] ? 'active' : 'inactive'; ?>">
-                                            <?php echo $producto['activo'] ? 'Activo' : 'Inactivo'; ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <?php if ($logueado): ?>
-                                        <button class="btn-cliente btn-primary-cliente" onclick="realizarPedido(<?php echo $producto['id_producto']; ?>)">
-                                            <i class="fas fa-shopping-cart"></i> Pedir
-                                        </button>
-                                        <?php else: ?>
-                                        <button class="btn-cliente btn-outline-cliente" onclick="showLoginPrompt()">
-                                            <i class="fas fa-lock"></i> Pedir
-                                        </button>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
+                
+                <?php if (empty($productos)): ?>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>No hay productos disponibles en este momento.</span>
+                    </div>
+                <?php else: ?>
+                    <div class="products-grid">
+                        <?php foreach ($productos as $producto): ?>
+                        <div class="product-card">
+                            <div class="product-icon">
+                                <i class="fas fa-ice-cream"></i>
+                            </div>
+                            <h3><?php echo htmlspecialchars($producto['nombre']); ?></h3>
+                            <p class="description">
+                                <?php echo htmlspecialchars(substr($producto['descripcion'], 0, 80)) . (strlen($producto['descripcion']) > 80 ? '...' : ''); ?>
+                            </p>
+                            <div class="price">S/. <?php echo number_format($producto['precio'], 2); ?></div>
+                            <div class="stock">
+                                <i class="fas fa-box"></i> Stock: <?php echo $producto['stock']; ?>
+                            </div>
+                            
+                            <?php if ($logueado): ?>
+                            <button class="order-btn" onclick="realizarPedido(<?php echo $producto['id_producto']; ?>)">
+                                <i class="fas fa-shopping-cart"></i> Pedir Ahora
+                            </button>
                             <?php else: ?>
-                                <tr>
-                                    <td colspan="9" style="text-align: center;">No hay productos disponibles</td>
-                                </tr>
+                            <button class="order-btn" onclick="showLoginPrompt()">
+                                <i class="fas fa-lock"></i> Iniciar Sesión para Pedir
+                            </button>
                             <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </main>
     </div>
