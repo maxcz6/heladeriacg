@@ -25,7 +25,15 @@ $stmt_stats = $pdo->prepare("SELECT COUNT(*) as total FROM ventas WHERE estado =
 $stmt_stats->execute();
 $pedidos_pendientes = $stmt_stats->fetch(PDO::FETCH_ASSOC)['total'];
 
-$stmt_stats = $pdo->prepare("SELECT COUNT(*) as total FROM productos WHERE stock < 10");
+$stmt_stats = $pdo->prepare(
+    "SELECT COUNT(*) as total FROM (
+         SELECT p.id_producto, IFNULL(SUM(inv.stock_sucursal), p.stock) as stock_total
+         FROM productos p
+         LEFT JOIN inventario_sucursal inv ON p.id_producto = inv.id_producto
+         WHERE p.activo = 1
+         GROUP BY p.id_producto
+     ) AS sub WHERE stock_total < 10"
+);
 $stmt_stats->execute();
 $productos_bajos = $stmt_stats->fetch(PDO::FETCH_ASSOC)['total'];
 ?>
@@ -64,7 +72,7 @@ $productos_bajos = $stmt_stats->fetch(PDO::FETCH_ASSOC)['total'];
                     <i class="fas fa-box"></i>
                 </div>
                 <div class="stat-content">
-                    <h3><?php echo $productos_count; ?></h3>
+                    <h3><?php echo (int)$productos_count; ?></h3>
                     <p>Productos Activos</p>
                     <a href="productos.php" class="stat-link">Ver detalles →</a>
                 </div>
@@ -75,7 +83,7 @@ $productos_bajos = $stmt_stats->fetch(PDO::FETCH_ASSOC)['total'];
                     <i class="fas fa-user-friends"></i>
                 </div>
                 <div class="stat-content">
-                    <h3><?php echo $clientes_count; ?></h3>
+                    <h3><?php echo (int)$clientes_count; ?></h3>
                     <p>Clientes Registrados</p>
                     <a href="clientes.php" class="stat-link">Ver detalles →</a>
                 </div>
@@ -86,7 +94,7 @@ $productos_bajos = $stmt_stats->fetch(PDO::FETCH_ASSOC)['total'];
                     <i class="fas fa-users"></i>
                 </div>
                 <div class="stat-content">
-                    <h3><?php echo $empleados_count; ?></h3>
+                    <h3><?php echo (int)$empleados_count; ?></h3>
                     <p>Empleados Activos</p>
                     <a href="empleados.php" class="stat-link">Ver detalles →</a>
                 </div>
@@ -204,13 +212,16 @@ $productos_bajos = $stmt_stats->fetch(PDO::FETCH_ASSOC)['total'];
                 </div>
                 <div class="card-body">
                     <?php
-                    $stmt_bajos = $pdo->prepare("
-                        SELECT nombre, stock
-                        FROM productos
-                        WHERE stock < 10 AND activo = 1
-                        ORDER BY stock ASC
-                        LIMIT 5
-                    ");
+                    $stmt_bajos = $pdo->prepare(
+                        "SELECT p.nombre, IFNULL(SUM(inv.stock_sucursal), p.stock) AS stock_total\n" .
+                        "FROM productos p\n" .
+                        "LEFT JOIN inventario_sucursal inv ON p.id_producto = inv.id_producto\n" .
+                        "WHERE p.activo = 1\n" .
+                        "GROUP BY p.id_producto, p.nombre, p.stock\n" .
+                        "HAVING stock_total < 10\n" .
+                        "ORDER BY stock_total ASC\n" .
+                        "LIMIT 5"
+                    );
                     $stmt_bajos->execute();
                     $bajos = $stmt_bajos->fetchAll(PDO::FETCH_ASSOC);
                     
@@ -223,7 +234,7 @@ $productos_bajos = $stmt_stats->fetch(PDO::FETCH_ASSOC)['total'];
                                 <span class="item-name"><?php echo htmlspecialchars($producto['nombre']); ?></span>
                             </div>
                             <span class="stock-badge warning">
-                                <?php echo $producto['stock']; ?> unidades
+                                <?php echo isset($producto['stock_total']) ? htmlspecialchars($producto['stock_total']) : htmlspecialchars($producto['stock']); ?> unidades
                             </span>
                         </div>
                         <?php endforeach; ?>
